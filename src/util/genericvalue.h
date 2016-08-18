@@ -9,9 +9,9 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include "../../lib/rapidjson/document.h"
-#include "../../lib/rapidjson/writer.h"
-#include "../../lib/rapidjson/prettywriter.h"
+#include "../../lib/rapidjson/include/rapidjson/document.h"
+#include "../../lib/rapidjson/include/rapidjson/writer.h"
+#include "../../lib/rapidjson/include/rapidjson/prettywriter.h"
 #include "exception.h"
 
 #define THROW_NOT_SUPPORTED() { throw NotSupportedException(); }

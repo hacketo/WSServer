@@ -8,8 +8,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "../lib/rapidjson/rapidjson.h"
-#include "../lib/rapidjson/document.h"
+#include "../lib/rapidjson/include/rapidjson/rapidjson.h"
+#include "../lib/rapidjson/include/rapidjson/document.h"
 #include "util/genericvalue.h"
 
 namespace debug {
