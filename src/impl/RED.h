@@ -13,13 +13,13 @@ using namespace protocol::packet;
 
 class ListFilesAction : public Action {
 public:
-	ListFilesAction(State *state);
+	ListFilesAction(MainState *state);
 	void handle(Client* client, GenericValue* packet);
 };
 
 class GetFileContentAction : public Action {
 public:
-	GetFileContentAction(State *state);
+	GetFileContentAction(MainState *state);
 	void handle(Client* client, GenericValue* packet);
 };
 
@@ -37,7 +37,7 @@ public:
 
 class LoginAction : public Action {
 public:
-	LoginAction(State *state);
+	LoginAction(VoidState *state);
 	void handle(Client * client, GenericValue* packet);
 };
 

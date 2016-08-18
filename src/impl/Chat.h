@@ -14,8 +14,6 @@ class Chat : public Manager {
 public:
 	Chat(ModulesManager *modulesManager);
 
-	virtual bool onEnter(Client *client) override;
-
 	virtual bool onReady(Client *client) override;
 
 	virtual void onReceive(Client *client, protocol::packet::Packet *packet) override;

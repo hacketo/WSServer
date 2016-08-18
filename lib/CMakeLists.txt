@@ -1,5 +1,6 @@
 project(lib)
 
+
 add_library(rapidjson STATIC
         rapidjson/include/rapidjson/allocators.h
         rapidjson/include/rapidjson/document.h

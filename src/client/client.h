@@ -1,10 +1,9 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-
-#include <boost/asio.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include "boost/asio.hpp"
+#include "boost/thread/thread.hpp"
+#include "boost/enable_shared_from_this.hpp"
 #include "../util/synchronizedpool.h"
 #include "../protocol/http.h"
 #include "../protocol/frame.h"

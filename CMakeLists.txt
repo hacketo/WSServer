@@ -27,12 +27,31 @@ endif()
 
 
 # Search Boost
+if (NOT DEFINED     BOOST_ROOT        AND
+        NOT DEFINED ENV{BOOST_ROOT}       AND
+        NOT DEFINED     BOOST_INCLUDEDIR  AND
+        NOT DEFINED ENV{BOOST_INCLUDEDIR} AND
+        NOT DEFINED     BOOST_LIBRARYDIR  AND
+        NOT DEFINED ENV{BOOST_LIBRARYDIR})
+    if (APPLE)
+        set(BOOST_ROOT "../../../boost/boost_1_54_0/mac")
+    elseif (WIN32)
+        set(BOOST_INCLUDEDIR "C:/local/boost_1_55_0")
+        set(BOOST_LIBRARYDIR "C:/local/boost_1_55_0/lib32-msvc-10.0")
+    endif()
+endif()
+if (APPLE OR WIN32)
+    set(Boost_USE_STATIC_LIBS TRUE)
+endif()
+
 find_package(Boost 1.54.0 COMPONENTS thread date_time filesystem system REQUIRED)
 if(Boost_FOUND)
     message(WARNING "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
     message(WARNING "Boost_LIBRARIES: ${Boost_LIBRARIES}")
     message(WARNING "Boost_VERSION: ${Boost_VERSION}")
     include_directories(${Boost_INCLUDE_DIRS})
+else()
+
 endif()
 
 find_package(Curses REQUIRED)
