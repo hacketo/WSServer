@@ -14,11 +14,11 @@
 class StateBasedManager;
 class State;
 
-template <class T>
+
 class Action{
 
 public:
-	Action(std::string name, T *state);
+	Action(std::string name, State *state);
 
 	std::string name;
 
@@ -31,7 +31,7 @@ public:
 
 protected:
 	void updateClientState(Client *client, u_int32_t id, bool send = false);
-	T *state;
+	State *state;
 };
 
 

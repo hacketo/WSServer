@@ -113,8 +113,8 @@ StateBasedManager* State::getManager(){
 	return manager;
 }
 
-template <class T>
-Action::Action(std::string name, T *state) : name(name), state(state){}
+
+Action::Action(std::string name, State *state) : name(name), state(state){}
 void Action::handle(Client* client, GenericValue* packet) {}
 void Action::updateClientState(Client *client, u_int32_t id, bool send ){
 	state->getManager()->updateClientState(client, id, send);

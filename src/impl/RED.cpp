@@ -6,7 +6,7 @@
 
 
 
-ListFilesAction::ListFilesAction(MainState *state) : Action<MainState>("dir", state){}
+ListFilesAction::ListFilesAction(State *state) : Action("dir", state){}
 void ListFilesAction::handle(Client* client, GenericValue* packet){
 	ObjectValue* objectValue = new ObjectValue();
 	objectValue->set("dirs", new ArrayValue({new StringValue("files1"),new StringValue("files2")}));
@@ -15,13 +15,13 @@ void ListFilesAction::handle(Client* client, GenericValue* packet){
 }
 
 
-GetFileContentAction::GetFileContentAction(MainState *state) : Action<MainState>("file", state){}
+GetFileContentAction::GetFileContentAction(State *state) : Action("file", state){}
 void GetFileContentAction::handle(Client* client, GenericValue* packet){
 	ObjectValue* objectValue = new ObjectValue();
 	objectValue->set("content", new StringValue("file content"));
 	Packet::u_ptr p = Packet::u_ptr(new Packet("file", objectValue));
 	client->send(p.get());
-	state->pubsub->publish(p.get());
+	((MainState*)state)->pubsub->publish(p.get());
 }
 
 
@@ -45,7 +45,7 @@ void MainState::init_actions(){
 
 
 
-LoginAction::LoginAction(VoidState *state) : Action<VoidState>("login", state){}
+LoginAction::LoginAction(State *state) : Action("login", state){}
 void LoginAction::handle(Client * client, GenericValue* packet){
 	std::string pseudo = (*packet)["pseudo"]->getString();
 	std::string password = (*packet)["password"]->getString();
