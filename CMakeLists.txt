@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.2)
 project(Server)
 
+#set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+#include(ExternalProject)
+#include(External_boost)
+
 message(WARNING "start running cmake...")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(SOURCE_FILES src/main.cpp)
-
 
 message(WARNING "sources files : ${SOURCE_FILES}")
 
@@ -21,26 +25,10 @@ endif()
 
 
 # Search Boost
+
 set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
-
-if (NOT DEFINED     BOOST_ROOT        AND
-        NOT DEFINED ENV{BOOST_ROOT}       AND
-        NOT DEFINED     BOOST_INCLUDEDIR  AND
-        NOT DEFINED ENV{BOOST_INCLUDEDIR} AND
-        NOT DEFINED     BOOST_LIBRARYDIR  AND
-        NOT DEFINED ENV{BOOST_LIBRARYDIR})
-    if (APPLE)
-        set(BOOST_ROOT "../../../boost/boost_1_54_0/mac")
-    elseif (WIN32)
-        set(BOOST_INCLUDEDIR "C:/local/boost_1_55_0")
-        set(BOOST_LIBRARYDIR "C:/local/boost_1_55_0/lib32-msvc-10.0")
-    endif()
-endif()
-if (APPLE OR WIN32)
-    set(Boost_USE_STATIC_LIBS TRUE)
-endif()
 
 find_package(Boost 1.54.0 COMPONENTS thread date_time filesystem system REQUIRED)
 if(Boost_FOUND)
@@ -49,9 +37,10 @@ if(Boost_FOUND)
     message(WARNING "Boost_VERSION: ${Boost_VERSION}")
     include_directories(${Boost_INCLUDE_DIRS})
 else()
-
 endif()
 
+
+# Search Curses
 find_package(Curses QUIET)
 if(CURSES_FOUND)
     message(WARNING "CURSES_INCLUDE_DIR: ${CURSES_INCLUDE_DIR}")
@@ -71,6 +60,12 @@ add_subdirectory(tests)
 
 add_executable(Server_run ${SOURCE_FILES} )
 add_executable(Server_run2 src/main_state.cpp )
+
+
+target_include_directories(Server_src PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib/rapidjson/include/>
+    $<INSTALL_INTERFACE:lib/rapidjson/include/>  # <prefix>lib/rapidjson/include/
+)
 
 target_link_libraries(Server_run Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson )
 target_link_libraries(Server_run2 Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson )

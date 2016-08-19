@@ -96,7 +96,7 @@ public:
 
 	virtual bool onEnter(Client *client) override;
 
-	virtual bool onReady(Client *client) override;
+	virtual bool onReady(Client *client, protocol::http::http_header& map) override;
 
 	/**
 	 * Récupère une frame, transforme les donnée en packets

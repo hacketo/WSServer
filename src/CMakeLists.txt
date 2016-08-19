@@ -23,6 +23,12 @@ set(HEADER_FILES
         server/errors.h
         util/worker.h
         protocol/constant.h
+        modules/client_timer.h
+        modules/pub_sub.h
+        modules/base_module.h
+        util/algo.h
+        impl/Chat.h
+        modules/sessionmanager.h
         )
 
 set(SOURCE_FILES
@@ -39,7 +45,14 @@ set(SOURCE_FILES
         impl/RED.cpp
         protocol/opcode.cpp
         server/config.cpp
-        protocol/frame.cpp modules/client_timer.cpp modules/client_timer.h modules/pub_sub.cpp modules/pub_sub.h modules/base_module.cpp modules/base_module.h util/algo.cpp util/algo.h server/errors.cpp impl/Chat.cpp impl/Chat.h)
+        protocol/frame.cpp
+        modules/client_timer.cpp
+        modules/pub_sub.cpp
+        modules/base_module.cpp
+        util/algo.cpp
+        server/errors.cpp
+        impl/Chat.cpp
+        modules/sessionmanager.cpp db/DatabaseHandler.cpp db/DatabaseHandler.h)
 
 
 add_library(Server_src STATIC ${SOURCE_FILES} ${HEADER_FILES} )

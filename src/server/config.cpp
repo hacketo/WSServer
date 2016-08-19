@@ -20,6 +20,8 @@ namespace config {
 
 	bool USE_SSL = false;
 
+	long SESSION_TIME = 24 * 60 * 60 * 1000;
+
 	unsigned int MAX_CLIENTS = 250;
 
 

@@ -7,8 +7,8 @@
 
 #include <string>
 #include <vector>
-#include "../../../lib/rapidjson/include/rapidjson/document.h"
-#include "../../../lib/rapidjson/include/rapidjson/allocators.h"
+#include "rapidjson/document.h"
+#include "rapidjson/allocators.h"
 #include "../frame.h"
 #include "../../util/genericvalue.h"
 #include "../../server/errors.h"

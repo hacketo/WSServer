@@ -12,7 +12,12 @@
 #include "../modules/base_module.h"
 #include "manager/manager.h"
 #include "../protocol/packet/packet.h"
+#include "../server/config.h"
 
+
+#if USE_SESSIONS
+#include "../modules/sessionmanager.h"
+#endif
 
 class ClientsManager;
 
@@ -65,6 +70,7 @@ class Client : public boost::enable_shared_from_this<Client> {
 	friend class IncomingMessagesWorker;
 	friend class OutgoingMessagesWorker;
 	friend class ClientsManager;
+	friend class SessionManager;
 public:
 
 	virtual ~Client();
@@ -120,6 +126,7 @@ public:
 	 */
 	u_int32_t flag;
 
+
 private:
 	void joinThreads();
 	void closeSocket();
@@ -165,6 +172,9 @@ private:
 
 	ClientsManager* clientManager;
 	ModulesController* modulesController;
+#if USE_SESSIONS
+	Session::u_ptr session;
+#endif
 };
 
 
@@ -208,7 +218,7 @@ public:
 	 * @param client
 	 * @return
 	 */
-	bool on_ready(Client *client);
+	bool on_ready(Client *client, protocol::http::http_header& map);
 
 	/**
 	 * Appelé lorsque l'on recoit un message de la part d'un client
@@ -233,6 +243,11 @@ public:
 
 	ModulesManager* getModulesManager();
 private:
+
+#if USE_SESSIONS
+	SessionManager* sessionManager;
+#endif
+
 	ModulesManager* modulesManager;
 	uint32_t Client_ID;
 	Manager::unique_ptr manager;

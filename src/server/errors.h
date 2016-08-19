@@ -29,11 +29,14 @@ namespace errors{
 
 		JSON_DECODE = 3000,
 
+		DB_CANT_OPEN = 4000,
+
 
 
 
 	};
 
+	error get_error();
 	error get_error(uint16_t code, std::string msg);
 	error get_error(std::string master, uint16_t code, std::string msg);
 }

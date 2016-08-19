@@ -34,8 +34,10 @@ void Client::start() {
 		protocol::http::http_header header;
 
 		if (get_http_header(header)) {
+
+
 			if (send_handshake(header)) {
-				alive = clientManager->on_ready(this);
+				alive = clientManager->on_ready(this, header);
 				if (alive) {
 					incoming_worker = IncomingMessagesWorker::create(clientManager, this);
 					outgoing_worker = OutgoingMessagesWorker::create(this);
@@ -67,9 +69,11 @@ uint32_t Client::get_id() {
 }
 
 void Client::send(std::string message) {
+	//@todo check lock block
 	outgoing_worker->dispatch(protocol::frame::from_string(message));
 }
 void Client::send(protocol::frame::FrameInterface *holder) {
+	//@todo check lock block
 	outgoing_worker->dispatch(holder->getFrame());
 }
 
@@ -89,7 +93,9 @@ bool Client::get_http_header(protocol::http::http_header& header){
 
     std::string header_str(data, bytes);
 	protocol::http::parse_header(header_str, header);
-
+#if USE_SESSIONS
+	session->setHeader(header_str);
+#endif
     return protocol::http::validate_header(header);
 }
 
@@ -266,6 +272,9 @@ ClientsManager::ClientsManager(Manager* m) :
 
 	worker_closingclients = ClosingClientsWorker::create(this);
 	worker_closingclients->init_job_thread();
+#if USE_SESSIONS
+	sessionManager = new SessionManager;
+#endif
 }
 
 Client::s_ptr ClientsManager::new_client(boost::asio::io_service &io_service){
@@ -281,11 +290,14 @@ bool ClientsManager::isAlive() {
 }
 
 bool ClientsManager::on_enter(Client *client) {
+#if USE_SESSIONS
+	sessionManager->start_session(client);
+#endif
 	return manager->onEnter(client);
 }
 
-bool ClientsManager::on_ready(Client *client) {
-	return manager->onReady(client);
+bool ClientsManager::on_ready(Client *client, protocol::http::http_header& map) {
+	return manager->onReady(client, map);
 }
 
 void ClientsManager::on_receive(Client *client, packet::Packet *packet) {
@@ -304,8 +316,12 @@ void ClientsManager::on_receive(Client *client, packet::Packet *packet) {
 
 void ClientsManager::on_close(Client *client) {
 	manager->onClose(client);
+#if USE_SESSIONS
+	sessionManager->close_session(client);
+#endif
 
 	client->modulesController->unregisterAll();
+	//@todo check lock block
 	worker_closingclients->dispatch(client->get_id());
 }
 

@@ -9,6 +9,7 @@
 #include "../../protocol/frame.h"
 #include "../../protocol/packet/packet.h"
 #include "../../modules/base_module.h"
+#include "../../protocol/http.h"
 
 
 class Client;
@@ -36,7 +37,7 @@ public:
 	 * @param client
 	 * @return
 	 */
-	virtual bool onReady(Client *client);
+	virtual bool onReady(Client *client, protocol::http::http_header& map);
 
 	/**
 	 * Appelé lorsque l'on recoit un message de la part d'un client

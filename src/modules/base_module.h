@@ -29,7 +29,7 @@ public:
 	 * @param data
 	 * @return
 	 */
-	virtual void handle(std::string action, GenericValue* data);
+	virtual void handle(Client* client, std::string action, GenericValue* data);
 
 	base_module* module;
 };
@@ -42,8 +42,7 @@ class base_module {
 	friend class ModulesManager;
 public:
 	uint64_t get_id();
-	virtual ModuleClientController* getModuleClientController();
-	virtual bool reg(Client* client);
+	virtual bool reg(Client* client, ModuleClientController** controller);
 	virtual bool unregister(Client* client);
 private:
 	uint64_t id = 0;

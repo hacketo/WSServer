@@ -23,7 +23,7 @@ public:
 	 * @param client
 	 * @return
 	 */
-	bool reg(Client* client) override;
+	bool reg(Client* client, ModuleClientController** controller) override;
 
 	/**
 	 * Appelé pour qu'un client unsubsribe a ce Pub_sub
@@ -40,9 +40,6 @@ public:
 	 */
 	bool publish(protocol::frame::FrameInterface* frameInterface);
 
-	virtual ModuleClientController* getModuleClientController() override;
-
-
 private:
 
 	inline bool is_client_already_subscribed(Client* client){
@@ -57,7 +54,7 @@ private:
 class Pub_subClientController : public ModuleClientController {
 public:
 	Pub_subClientController(base_module* module);
-	virtual void handle(std::string action, GenericValue* data);
+	virtual void handle(Client* client,std::string action, GenericValue* data);
 };
 
 #endif //SERVER_PUB_SUB_H

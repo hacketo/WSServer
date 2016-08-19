@@ -15,7 +15,7 @@ bool Manager::onEnter(Client *client){
 }
 
 
-bool Manager::onReady(Client *client){
+bool Manager::onReady(Client *client, protocol::http::http_header& map){
 	debug::print("Start Listening : ",client->get_id(),"-",client->get_ip());
 	return true;
 }

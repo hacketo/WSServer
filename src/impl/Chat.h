@@ -14,17 +14,11 @@ class Chat : public Manager {
 public:
 	Chat(ModulesManager *modulesManager);
 
-	virtual bool onReady(Client *client) override;
+	virtual bool onReady(Client *client, protocol::http::http_header& map) override;
 
 	virtual void onReceive(Client *client, protocol::packet::Packet *packet) override;
 
 	virtual void onClose(Client *client) override;
-//
-//	virtual void onError(Client *client) override;
-//
-//	virtual void onServerError() override;
-//
-//	virtual void onExit() override;
 
 	Pub_sub* pubsub;
 };

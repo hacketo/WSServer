@@ -4,7 +4,7 @@
 
 #include "packet.h"
 #include "../../debug.h"
-#include "../../../lib/rapidjson/include/rapidjson/error/en.h"
+#include "rapidjson/error/en.h"
 #include "../../server/config.h"
 #include <boost/algorithm/string/predicate.hpp>
 namespace protocol {

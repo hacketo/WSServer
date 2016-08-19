@@ -26,6 +26,11 @@ public:
 // `param_type` represents the "best" way to pass a parameter of type `value_type` to a method.
 	explicit SynchronizedPool(size_type capacity) : m_unread(0), m_container(capacity) {}
 
+	/**
+	 * Méthode d'ajout d'un item dans la liste
+	 * Thread safe, peut bloqué tant que l'action d'ajout n'est pas terminée
+	 * @param item
+	 */
 	void push_front(param_type item) {
 		boost::mutex::scoped_lock lock(m_mutex);
 		m_not_full.wait(lock, boost::bind(&SynchronizedPool<value_type>::is_not_full, this));
@@ -35,6 +40,11 @@ public:
 		m_not_empty.notify_one();
 	}
 
+	/**
+	 * Méthode pop d'un item dans la liste
+	 * Thread safe, peut bloqué tant que l'action d'ajout n'est pas terminée
+	 * @param item
+	 */
 	void pop_back(value_type *pItem) {
 		boost::mutex::scoped_lock lock(m_mutex);
 		m_not_empty.wait(lock, boost::bind(&SynchronizedPool<value_type>::is_not_empty, this));

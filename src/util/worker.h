@@ -5,6 +5,7 @@
 #ifndef SERVER_WORKER_H
 #define SERVER_WORKER_H
 
+#include <boost/thread/thread.hpp>
 #include "synchronizedpool.h"
 
 template <class T>

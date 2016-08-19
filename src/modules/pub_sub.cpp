@@ -6,14 +6,11 @@
 
 
 
-ModuleClientController* Pub_sub::getModuleClientController(){
-	return new Pub_subClientController(this);
-}
 
-
-bool Pub_sub::reg(Client* client){
+bool Pub_sub::reg(Client* client, ModuleClientController** controller){
 	if (!is_client_already_subscribed(client)){
 		clients[client->get_id()] = client;
+		*controller = new Pub_subClientController(this);
 		return true;
 	}
 	return false;
@@ -43,4 +40,4 @@ bool Pub_sub::publish(protocol::frame::FrameInterface* frameInterface){
 Pub_subClientController::Pub_subClientController(base_module* module) :
 		ModuleClientController(module){
 }
-void Pub_subClientController::handle(std::string action, GenericValue* data) {}
+void Pub_subClientController::handle(Client* client,std::string action, GenericValue* data) {}

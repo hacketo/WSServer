@@ -9,7 +9,7 @@ add_executable(runUnitTests
         booldata_test.cpp
         nulldata_test.cpp
         jsonparse_test.cpp
-        modules_test.cpp)
+        modules_test.cpp time_test.cpp)
 
 
 target_link_libraries(runUnitTests gtest gtest_main)

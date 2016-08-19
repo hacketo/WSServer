@@ -10,6 +10,10 @@ errors::error::error(){
 	master = "";
 };
 
+errors::error errors::get_error() {
+	return error();
+};
+
 errors::error errors::get_error(uint16_t code, std::string msg) {
 	error e;
 	e.code = code;

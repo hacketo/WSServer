@@ -9,6 +9,8 @@
 #include <string>
 #include "../protocol/packet/packet.h"
 
+#define USE_SESSIONS 1
+
 namespace config {
 
 	extern std::string SERVER_NAME ;// "ServerName"
@@ -23,6 +25,8 @@ namespace config {
 	extern short SERVER_PORT ;//  9876;
 
 	extern bool USE_SSL ;//  false;
+	//extern bool USE_SESSIONS ;//  false;
+	extern long SESSION_TIME;//  false;
 
 	extern unsigned int MAX_CLIENTS ;//  250;
 

@@ -10,7 +10,7 @@
 //<editor-fold desc="ModuleClientController">
 
 ModuleClientController::ModuleClientController(base_module* module) : module(module){}
-void ModuleClientController::handle(std::string action, GenericValue* data){}
+void ModuleClientController::handle(Client* client,std::string action, GenericValue* data){}
 
 //</editor-fold>
 
@@ -19,9 +19,8 @@ void ModuleClientController::handle(std::string action, GenericValue* data){}
 uint64_t base_module::get_id(){
 	return id;
 }
-ModuleClientController* base_module::getModuleClientController(){}
 
-bool base_module::reg(Client* client){}
+bool base_module::reg(Client* client, ModuleClientController** controller){}
 bool base_module::unregister(Client* client){}
 
 //</editor-fold>
@@ -63,7 +62,7 @@ bool ModulesManager::onReceive(Client* client, protocol::packet::ModulePacketDat
 
 	if (client->hasModuleRegistered(moduleId)){
 		ModuleClientController* controller = client->getModuleController(moduleId);
-		controller->handle(action, packetData->data.get());
+		controller->handle(client, action, packetData->data.get());
 		packetData->consumed = true;
 		return true;
 	}
@@ -90,9 +89,12 @@ bool ModulesController::reg(base_module* module){
 			// Module déjà enregistré dans la liste client
 			return false;
 		}
-		module->reg(client);
-		controllers[module->get_id()] = module->getModuleClientController();
-		return true;
+		ModuleClientController* controller;
+		if (module->reg(client, &controller)) {
+			controllers[module->get_id()] = controller;
+			return true;
+		}
+		if (controller) delete controller;
 	}
 	// Module non enregistré
 	return false;

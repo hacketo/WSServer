@@ -11,7 +11,7 @@ Chat::Chat(ModulesManager *modulesManager) : Manager(modulesManager) {
 	modulesManager->REGISTER(pubsub);
 }
 
-bool Chat::onReady(Client *client) {
+bool Chat::onReady(Client *client, protocol::http::http_header& map) {
 	client->registerModule(pubsub);
 	return true;
 }
