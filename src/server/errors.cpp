@@ -3,6 +3,7 @@
 //
 
 #include "errors.h"
+#include "../util/string.h"
 
 errors::error::error(){
 	code = 0;
@@ -10,14 +11,22 @@ errors::error::error(){
 	master = "";
 };
 
-errors::error errors::get_error() {
-	return error();
+errors::error errors::get_error(uint16_t code) {
+	error e;
+	e.code = code;
+	return e;
 };
 
 errors::error errors::get_error(uint16_t code, std::string msg) {
 	error e;
 	e.code = code;
 	e.msg = msg;
+	return e;
+};
+errors::error errors::get_error(uint16_t code, std::string msg, std::string tokenValue) {
+	error e;
+	e.code = code;
+	e.msg = string::sprintf(msg, tokenValue);
 	return e;
 };
 
@@ -28,3 +37,12 @@ errors::error errors::get_error(std::string master, uint16_t code, std::string m
 	e.master = master;
 	return e;
 };
+
+errors::error errors::get_error(std::string master, uint16_t code, std::string msg , std::string tokenValue) {
+	error e;
+	e.code = code;
+	e.msg = string::sprintf(msg, tokenValue);
+	e.master = master;
+	return e;
+};
+

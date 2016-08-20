@@ -52,7 +52,7 @@ set(SOURCE_FILES
         util/algo.cpp
         server/errors.cpp
         impl/Chat.cpp
-        modules/sessionmanager.cpp db/DatabaseHandler.cpp db/DatabaseHandler.h)
+        modules/sessionmanager.cpp db/dbhandler.cpp db/dbhandler.h db/sessiondb.cpp db/sessiondb.h util/date.cpp util/date.h)
 
 
 add_library(Server_src STATIC ${SOURCE_FILES} ${HEADER_FILES} )

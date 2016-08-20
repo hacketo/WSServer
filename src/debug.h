@@ -11,6 +11,7 @@
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/document.h"
 #include "util/genericvalue.h"
+#include "server/errors.h"
 
 namespace debug {
 
@@ -25,6 +26,8 @@ namespace debug {
 
 		print(args...) ;
 	}
+
+	void print(errors::error &e);
 
     void log_data(std::string name, const unsigned char *data, size_t len);
 

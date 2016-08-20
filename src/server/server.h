@@ -61,7 +61,16 @@ namespace server{
 		data->acceptor = new boost::asio::ip::tcp::acceptor(io_service,
 										boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), data->port));
 		data->clientManager = ClientsManager::u_ptr(new ClientsManager(m));
-		accept_loop(data);
+
+		if (data->clientManager->isAlive()){
+
+			accept_loop(data);
+		}
+
+	}
+
+	void close(ServerData* data){
+		delete(data->acceptor);
 	}
 }
 

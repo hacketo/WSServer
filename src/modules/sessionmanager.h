@@ -9,54 +9,23 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include "base_module.h"
 #include "../util/worker.h"
+#include "../db/dbhandler.h"
+#include "../db/sessiondb.h"
+#include "../protocol/http.h"
 
 class SessionManager;
-class Session;
-
-class InvalidateSessionsWorker : public Worker<u_int32_t>{
-public:
-	typedef std::unique_ptr<InvalidateSessionsWorker> unique_ptr;
-	static unique_ptr create(SessionManager* manager, size_t size = 50){
-		return unique_ptr(new InvalidateSessionsWorker(manager, size));
-	}
-	InvalidateSessionsWorker(SessionManager* manager,size_t size = 50);
-	void init_job_thread();
-private:
-	SessionManager* manager;
-	void job();
-};
-
-
-class SessionManager {
-	friend class InvalidateSessionsWorker;
-public:
-
-	typedef std::map<std::string, Session*>::iterator session_iterator;
-
-	SessionManager();
-
-	bool start_session(Client* client);
-	bool close_session(Client* client);
-
-	bool alive;
-
-private:
-
-	InvalidateSessionsWorker::unique_ptr invalidateSessionWorker;
-
-	std::map<std::string, Session*> sessions;
-
-	boost::uuids::random_generator generator;
-};
-
+class InvalidateSessionsWorker;
 
 class Session {
 	friend class InvalidateSessionsWorker;
 	friend class SessionManager;
+	friend class Client;
 public:
+	typedef boost::shared_ptr<Session> s_ptr;
 	typedef std::unique_ptr<Session> u_ptr;
 
-	Session(SessionManager* manager);
+	Session(SessionManager* manager, Client* client, protocol::http::handshake* handshake);
+	~Session();
 
 	void setInt(std::string key, int value);
 	void setString(std::string key, std::string value);
@@ -65,28 +34,79 @@ public:
 	void setObject(std::string key, ObjectValue* value);
 	void setArray(std::string key, ArrayValue* value);
 
+	std::string getStartTime();
+	std::string getEndTime();
 
 	void setHeader(std::string value);
+	const char * getHeader();
+
+	const char * getSessionID();
+
+	std::string  getIP();
+	std::string getJSONData();
 
 	long elapsed();
 
 private:
 
 	void close();
+	void reopen(protocol::http::handshake* handshake);
 
 	bool ended;
+	bool updateCookie ;
+
 	std::string sessionId;
-	const char *header;
+	ObjectValue::u_ptr data;
+	protocol::http::handshake* handshake;
 
 	boost::posix_time::ptime start_time;
 	boost::posix_time::ptime end_time;
-
-	ObjectValue::u_ptr data;
-
 	SessionManager* manager;
-
-
+	Client* client;
 };
 
+class InvalidateSessionsWorker : public Worker<u_int32_t>{
+public:
+	typedef std::unique_ptr<InvalidateSessionsWorker> u_ptr;
+	static u_ptr create(SessionManager* manager, size_t size = 50){
+		return u_ptr(new InvalidateSessionsWorker(manager, size));
+	}
+	InvalidateSessionsWorker(SessionManager* manager,size_t size = 50);
+	errors::error init_job_thread();
+private:
+
+	SessionDB* sessionDB;
+	SessionManager* manager;
+	void job();
+};
+
+
+class SessionManager {
+	friend class InvalidateSessionsWorker;
+public:
+	typedef std::unique_ptr<SessionManager> u_ptr;
+	typedef std::map<std::string, Session::u_ptr>::iterator session_iterator;
+
+	static const std::string COOKIE_NAME;
+
+	SessionManager();
+
+	void start_session(Client* client, protocol::http::handshake* handshake, errors::error& error);
+	void update_handshake(Client* client, protocol::http::handshake* handshake, errors::error& error);
+
+	bool close_session(Client* client);
+
+	bool alive;
+
+private:
+
+	SessionDB sessionDB;
+
+	InvalidateSessionsWorker::u_ptr invalidateSessionWorker;
+
+	std::map<std::string, Session::u_ptr> sessions;
+
+	boost::uuids::random_generator generator;
+};
 
 #endif //SERVER_SESSIONMANAGER_H

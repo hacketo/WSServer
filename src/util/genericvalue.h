@@ -114,6 +114,15 @@ public:
 
 	typedef rapidjson::Writer<rapidjson::StringBuffer> Writer;
 
+	static std::string toJSON(GenericValue* value) {
+		rapidjson::StringBuffer sb;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+		GenericValue::write(&writer, value);
+		std::string ret = sb.GetString();
+		return ret;
+
+	}
+
 	template<typename Writer>
 	static void write(Writer *writer, GenericValue* value) {
 		if (value->isString()) {

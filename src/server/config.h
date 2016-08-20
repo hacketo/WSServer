@@ -9,13 +9,15 @@
 #include <string>
 #include "../protocol/packet/packet.h"
 
-#define USE_SESSIONS 1
+#define USE_SESSIONS 0
 
 namespace config {
 
 	extern std::string SERVER_NAME ;// "ServerName"
 
 	extern std::string HTTP_ORIGIN ;// "http://red.hacketo.lan/"
+
+	extern ushort WS_VERSION ;// 13
 
 
 	//std::string WS_LOCATION = "ws://127.0.0.1:9876"; computed
@@ -26,7 +28,7 @@ namespace config {
 
 	extern bool USE_SSL ;//  false;
 	//extern bool USE_SESSIONS ;//  false;
-	extern long SESSION_TIME;//  false;
+	extern uint32_t SESSION_TIME;//  false;
 
 	extern unsigned int MAX_CLIENTS ;//  250;
 

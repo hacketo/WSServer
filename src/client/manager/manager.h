@@ -20,7 +20,7 @@ public:
 
 	Manager(ModulesManager* modulesManager);
 
-	typedef std::unique_ptr<Manager> unique_ptr;
+	typedef std::unique_ptr<Manager> u_ptr;
 
 	/**
 	 * Appelé lorsqu'un client se connecte, avant l'envoi du header
@@ -32,12 +32,28 @@ public:
 	virtual bool onEnter(Client *client);
 
 	/**
+	 * Appelé lorsqu'un le handshake à été recu et parsé
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 * @return
+	 */
+	virtual bool onHandshakeRecv(Client *client, protocol::http::handshake* handshake);
+
+	/**
+	 * Appelé le handshake est prêt à etre envoyé
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 * @return
+	 */
+	virtual bool onHandshakeSend(Client *client, protocol::http::handshake* handshake);
+
+	/**
 	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @param client
 	 * @return
 	 */
-	virtual bool onReady(Client *client, protocol::http::http_header& map);
+	virtual bool onReady(Client *client);
 
 	/**
 	 * Appelé lorsque l'on recoit un message de la part d'un client

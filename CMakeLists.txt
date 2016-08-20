@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(Server)
 
-#set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 #include(ExternalProject)
 #include(External_boost)
@@ -39,6 +39,14 @@ if(Boost_FOUND)
 else()
 endif()
 
+# Search SQLite3
+find_package(SQLite3 REQUIRED)
+if(SQLITE3_FOUND)
+    message(WARNING "SQLITE3_INCLUDE_DIRS: ${SQLITE3_INCLUDE_DIRS}")
+    message(WARNING "SQLITE3_LIBRARIES: ${SQLITE3_LIBRARIES}")
+    include_directories(${SQLITE3_INCLUDE_DIRS})
+endif()
+
 
 # Search Curses
 find_package(Curses QUIET)
@@ -67,6 +75,6 @@ target_include_directories(Server_src PUBLIC
     $<INSTALL_INTERFACE:lib/rapidjson/include/>  # <prefix>lib/rapidjson/include/
 )
 
-target_link_libraries(Server_run Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson )
-target_link_libraries(Server_run2 Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson )
+target_link_libraries(Server_run Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3)
+target_link_libraries(Server_run2 Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3)
 

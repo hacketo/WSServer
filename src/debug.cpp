@@ -27,6 +27,15 @@ namespace debug {
         myfile.close();
     }
 
+    void print(errors::error &e){
+        std::stringstream ss;
+        if (e.master.length() > 0){
+            ss << "[" << e.master<< "] : ";
+        }
+        ss << "(" << e.code << ") : " << e.msg;
+        std::cout << ss.str() << std::endl ;
+    }
+
     void debugField(GenericValue* value , int baseDepth){
 
 		std::string tabs = getTabs(baseDepth);

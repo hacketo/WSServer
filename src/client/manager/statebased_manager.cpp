@@ -56,8 +56,8 @@ bool StateBasedManager::onEnter(Client *client) {
 	return Manager::onEnter(client);
 }
 
-bool StateBasedManager::onReady(Client *client, protocol::http::http_header& map) {
-	return Manager::onReady(client, map);
+bool StateBasedManager::onReady(Client *client) {
+	return Manager::onReady(client);
 }
 
 void StateBasedManager::onReceive(Client *client, packet::Packet *packet) {

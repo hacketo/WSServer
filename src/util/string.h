@@ -15,6 +15,13 @@ namespace string {
 		size_t offset = max_size > 0 ? std::min<size_t >(s.size(),max_size) : s.size();
 		std::copy(string, string + offset, ret);
 	}
+
+	inline std::string sprintf(std::string msg , std::string tokenValue) {
+		uint64_t size = msg.length() + tokenValue.length();
+		char buffer[size];
+		std::sprintf(buffer, msg.c_str(), tokenValue);
+		return std::string(buffer);
+	};
 }
 
 #endif //WS_SERVER_STRING_H

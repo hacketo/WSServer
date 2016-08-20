@@ -76,10 +76,12 @@ private:
 class ModulesController {
 
 public:
-
-	ModulesController(Client *client, ModulesManager* moduleManager);
-
+	typedef std::unique_ptr<ModulesController> u_ptr;
 	typedef std::map<uint64_t , ModuleClientController*>::iterator module_iterator;
+
+	static u_ptr create(Client *client, ModulesManager* moduleManager){
+		return u_ptr(new ModulesController(client, moduleManager));
+	}
 
 	/**
 	 * Enregistre le module passé en paramètre si il est valide,
@@ -103,6 +105,8 @@ public:
 	void unregisterAll();
 
 private:
+	ModulesController(Client *client, ModulesManager* moduleManager);
+
 	ModulesManager* modulesManager;
 	Client* client;
 	std::map<uint64_t , ModuleClientController*> controllers;

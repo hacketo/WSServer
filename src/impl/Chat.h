@@ -14,7 +14,7 @@ class Chat : public Manager {
 public:
 	Chat(ModulesManager *modulesManager);
 
-	virtual bool onReady(Client *client, protocol::http::http_header& map) override;
+	virtual bool onReady(Client *client) override;
 
 	virtual void onReceive(Client *client, protocol::packet::Packet *packet) override;
 

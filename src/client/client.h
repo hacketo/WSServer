@@ -19,13 +19,15 @@
 #include "../modules/sessionmanager.h"
 #endif
 
+using namespace protocol;
+
 class ClientsManager;
 
 /**
  * Thread safe worker pour recevoir et traiter les frames recue sur 2 threads différents
  * Décode les frames recues
  */
-class IncomingMessagesWorker : public Worker<protocol::frame::Frame>{
+class IncomingMessagesWorker : public Worker<frame::Frame>{
 public:
 	typedef std::unique_ptr<IncomingMessagesWorker> u_ptr;
 	static u_ptr create(ClientsManager* manager, Client *client, size_t size = 50){
@@ -41,7 +43,7 @@ private:
 	/**
 	 * Buffer temporaire pour les nouveau message
 	 */
-	uint8_t temp_buffer[protocol::constant::max_buffer_size];
+	uint8_t temp_buffer[constant::max_buffer_size];
 
 	Client* client;
 	void job();
@@ -52,7 +54,7 @@ private:
  * Thread safe worker pour envoyer les messages au client
  * Recoit une liste de message à encoder et envoyer au client
  */
-class OutgoingMessagesWorker : public Worker<protocol::frame::Frame> {
+class OutgoingMessagesWorker : public Worker<frame::Frame> {
 public:
 	typedef std::unique_ptr<OutgoingMessagesWorker> u_ptr;
 	static u_ptr create(Client *client, size_t size = 50){
@@ -101,7 +103,7 @@ public:
 	/**
 	 * Envoi en message au client, thread safe
 	 */
-	void send(protocol::frame::FrameInterface *holder);
+	void send(frame::FrameInterface *holder);
 
 	bool isAlive();
 
@@ -157,32 +159,31 @@ private:
 	/**
 	 * Parse le premier header recu pour l'upgrade de la connexion
 	 */
-	bool get_http_header(protocol::http::http_header& header);
+	void get_http_header(http::handshake* handshake, errors::error& error);
 
     /**
      * Envoi le handshake http au client
      * @param header
-     * @return
      */
-	bool send_handshake(protocol::http::http_header& header);
+	void send_handshake(const char* websocket_key, errors::error& error);
 
 	size_t recv_sync(char *data, boost::system::error_code &error);
 
 	void send_sync(unsigned char *data, size_t size, boost::system::error_code &error);
 
 	ClientsManager* clientManager;
-	ModulesController* modulesController;
+	ModulesController::u_ptr modulesController;
 #if USE_SESSIONS
-	Session::u_ptr session;
+	Session* session;
 #endif
 };
 
 
 class ClosingClientsWorker : public Worker<u_int32_t>{
 public:
-	typedef std::unique_ptr<ClosingClientsWorker> unique_ptr;
-	static unique_ptr create(ClientsManager* manager, size_t size = 50){
-		return unique_ptr(new ClosingClientsWorker(manager, size));
+	typedef std::unique_ptr<ClosingClientsWorker> u_ptr;
+	static u_ptr create(ClientsManager* manager, size_t size = 50){
+		return u_ptr(new ClosingClientsWorker(manager, size));
 	}
 	ClosingClientsWorker(ClientsManager* manager,size_t size = 50);
 	void init_job_thread();
@@ -213,19 +214,34 @@ public:
 	bool on_enter(Client *client);
 
 	/**
+	 * Appelé lorsqu'un le handshake à été recu et parsé
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 * @return
+	 */
+	bool on_handshakerecv(Client *client, http::handshake* handshake, errors::error& e);
+	/**
+	 * Appelé lorsqu'un le handshake à été recu et parsé
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 * @return
+	 */
+	bool on_handshakesend(Client *client, http::handshake* handshake, errors::error& e);
+
+	/**
 	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @param client
 	 * @return
 	 */
-	bool on_ready(Client *client, protocol::http::http_header& map);
+	bool on_ready(Client *client);
 
 	/**
 	 * Appelé lorsque l'on recoit un message de la part d'un client
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @param client
 	 */
-	void on_receive(Client *client, protocol::packet::Packet *packet);
+	void on_receive(Client *client, packet::Packet *packet);
 
 	/**
 	 * Appelé lorsqu'un client est déconnecté
@@ -245,14 +261,14 @@ public:
 private:
 
 #if USE_SESSIONS
-	SessionManager* sessionManager;
+	SessionManager::u_ptr sessionManager;
 #endif
 
 	ModulesManager* modulesManager;
 	uint32_t Client_ID;
-	Manager::unique_ptr manager;
+	Manager::u_ptr manager;
 	bool alive;
-	ClosingClientsWorker::unique_ptr worker_closingclients;
+	ClosingClientsWorker::u_ptr worker_closingclients;
 	std::map<u_int32_t , Client::s_ptr> clients;
 };
 

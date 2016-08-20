@@ -9,18 +9,20 @@ namespace config {
 
 	std::string SERVER_NAME = "ServerName";
 
-	std::string HTTP_ORIGIN = "http://red.hacketo.lan/";
+	std::string HTTP_ORIGIN = "http://red.hacketo.lan";
 
 
 	//std::string WS_LOCATION = "ws://127.0.0.1:9876"; computed
 
 	std::string SERVER_IP = "127.0.0.1";
 
+	ushort WS_VERSION = 13;
+
 	short SERVER_PORT = 9876;
 
 	bool USE_SSL = false;
 
-	long SESSION_TIME = 24 * 60 * 60 * 1000;
+	uint32_t SESSION_TIME = 2 * 60 * 60 * 1000; // 2Heures
 
 	unsigned int MAX_CLIENTS = 250;
 

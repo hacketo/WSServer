@@ -5,7 +5,6 @@
 #include "../protocol/opcode.h"
 #include "../server/errors.h"
 
-using namespace protocol;
 
 //<editor-fold desc="Client">
 
@@ -15,7 +14,7 @@ Client::Client(ClientsManager* manager, u_int32_t client_id, boost::asio::io_ser
     alive = false;
     flag = 0;
 	state_id = 0;
-	modulesController = new ModulesController(this, clientManager->getModulesManager());
+	modulesController = ModulesController::create(this, clientManager->getModulesManager());
 }
 
 Client::~Client(){}
@@ -26,39 +25,48 @@ boost::asio::ip::tcp::socket& Client::socket(){
 
 void Client::start() {
 	boost::asio::ip::tcp::endpoint ep = socket_.remote_endpoint();
+
 	ip = ep.address().to_string();
 
 	alive = clientManager->on_enter(this);
+	errors::error e;
+
 	if (alive){
 
-		protocol::http::http_header header;
+		http::handshake* handshake = new http::handshake;
 
-		if (get_http_header(header)) {
+		get_http_header(handshake, e);
+		if (!e) {
 
+			// if handshake has cookie sid, récupérer la session
+			alive = clientManager->on_handshakerecv(this, handshake, e);
+			if (alive) {
 
-			if (send_handshake(header)) {
-				alive = clientManager->on_ready(this, header);
-				if (alive) {
-					incoming_worker = IncomingMessagesWorker::create(clientManager, this);
-					outgoing_worker = OutgoingMessagesWorker::create(this);
+				send_handshake(handshake->wsKey.c_str(), e);
 
-					incoming_worker->init_job_thread();
-					outgoing_worker->init_job_thread();
-					incoming_worker->start_read_loop();
+				if (!e) {
+					alive = clientManager->on_ready(this);
+					if (alive) {
+						incoming_worker = IncomingMessagesWorker::create(clientManager, this);
+						outgoing_worker = OutgoingMessagesWorker::create(this);
+
+						incoming_worker->init_job_thread();
+						outgoing_worker->init_job_thread();
+						incoming_worker->start_read_loop();
+					}
 				}
 			}
-			else {
-				debug::print("Handshake problem /!");
-			}
 		}
-		else {
-			debug::print("Header problem !");
-		}
+
 	}
 
-    if (!alive){
-        socket_.close();
-    }
+	if (e) {
+		debug::print(e);
+		alive = false;
+	}
+	if (!alive){
+		socket_.close();
+	}
 }
 
 std::string Client::get_ip() {
@@ -70,9 +78,9 @@ uint32_t Client::get_id() {
 
 void Client::send(std::string message) {
 	//@todo check lock block
-	outgoing_worker->dispatch(protocol::frame::from_string(message));
+	outgoing_worker->dispatch(frame::from_string(message));
 }
-void Client::send(protocol::frame::FrameInterface *holder) {
+void Client::send(frame::FrameInterface *holder) {
 	//@todo check lock block
 	outgoing_worker->dispatch(holder->getFrame());
 }
@@ -81,44 +89,47 @@ void Client::send(protocol::frame::FrameInterface *holder) {
 /**
  * Parse le premier header recu pour l'upgrade de la connexion
  */
-bool Client::get_http_header(protocol::http::http_header& header){
+void Client::get_http_header(http::handshake* handshake, errors::error& error){
     char data[2048];
-    boost::system::error_code error;
+    boost::system::error_code e;
 
-    size_t bytes = recv_sync(data, error);
-    if ( error ) {
-        std::cerr << "Read header failed: " << boost::system::system_error(error).what() << std::endl;
-        return false;
+    size_t bytes = recv_sync(data, e);
+    if ( e ) {
+		error = errors::get_error("Client", errors::WS_RECV_ERROR,
+								 "Read headers failed: %s" , boost::system::system_error(e).what());
+		return;
     }
 
     std::string header_str(data, bytes);
-	protocol::http::parse_header(header_str, header);
-#if USE_SESSIONS
-	session->setHeader(header_str);
-#endif
-    return protocol::http::validate_header(header);
+
+	handshake->headers_raw = header_str;
+	http::parse_header(header_str, handshake, error);
+	if(!error){
+		http::validate_header(handshake, error);
+	}
 }
 
 /**
  * Parse le premier header recu pour l'upgrade de la connexion
  */
-bool Client::send_handshake(protocol::http::http_header& header){
+void Client::send_handshake(const char* websocket_key, errors::error& error){
 
-    protocol::http::handshake handshake =
-			protocol::http::get_handshake("ServerName", header["Sec-WebSocket-Key"], "http://red.hacketo.lan/", "ws://127.0.0.1:9876");
+	std::string ws_key;
 
-    boost::system::error_code error;
+	http::handshake* handshake = http::get_handshake(websocket_key, ws_key);
 
-	uint64_t size = handshake.header.size();
+	alive = clientManager->on_handshakesend(this, handshake, error);
+
+    boost::system::error_code e;
+
+	std::string hs = http::handshake_to_string(handshake);
+	uint64_t size = hs.length();
     uint8_t data[size];
-	string::convert(handshake.header, data);
-	send_sync(data, size, error);
-    if ( error ) {
-        std::cerr << "Send handshake failed: " <<
-				boost::system::system_error(error).what() << std::endl;
-        return false;
+	string::convert(hs, data);
+	send_sync(data, size, e);
+    if ( e ) {
+		error = errors::get_error("Client", errors::WS_SEND_ERROR, "Send handshake failed: %s", boost::system::system_error(e).what());
     }
-    return true;
 }
 
 size_t Client::recv_sync(char *data, boost::system::error_code &error){
@@ -164,7 +175,7 @@ void Client::joinThreads(){
 //<editor-fold desc="IncomingMessagesWorker">
 
 IncomingMessagesWorker::IncomingMessagesWorker(ClientsManager* manager, Client *client, size_t size) :
-		Worker<protocol::frame::Frame>(size), clientManager(manager), client(client){
+		Worker<frame::Frame>(size), clientManager(manager), client(client){
 }
 
 void IncomingMessagesWorker::init_job_thread(){
@@ -176,14 +187,14 @@ void IncomingMessagesWorker::start_read_loop(){
 	read_async_loop();
 }
 void IncomingMessagesWorker::read_async_loop(){
-	client->socket_.async_read_some(boost::asio::buffer(temp_buffer, protocol::constant::max_buffer_size),
+	client->socket_.async_read_some(boost::asio::buffer(temp_buffer, constant::max_buffer_size),
 									boost::bind(&IncomingMessagesWorker::on_read_some, this,
 												boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
 	);
 }
 void IncomingMessagesWorker::on_read_some(const boost::system::error_code& error, std::size_t bytes_transferred){
 	if (!error){
-		dispatch(protocol::frame::from_uint8_t(temp_buffer, static_cast<uint16_t>(bytes_transferred)));
+		dispatch(frame::from_uint8_t(temp_buffer, static_cast<uint16_t>(bytes_transferred)));
 		if (client->alive){
 			read_async_loop();
 		}
@@ -193,19 +204,19 @@ void IncomingMessagesWorker::on_read_some(const boost::system::error_code& error
 void IncomingMessagesWorker::job(){
 	while (client->alive){
 		if(pool.is_not_empty()){
-			protocol::frame::Frame frame;
+			frame::Frame frame;
 			pool.pop_back(&frame);
 
-			protocol::frame::decode(&frame);
-			if (frame.op_code == protocol::opcode::CLOSE){
+			frame::decode(&frame);
+			if (frame.op_code == opcode::CLOSE){
 				client->alive = false;
 				clientManager->on_close(client);
 				continue;
 			}
 
 			errors::error e;
-			protocol::packet::Packet::u_ptr p = protocol::packet::Packet::u_ptr(new protocol::packet::Packet());
-			protocol::packet::parse(p.get(), frame.msg, e);
+			packet::Packet::u_ptr p = packet::Packet::u_ptr(new packet::Packet());
+			packet::parse(p.get(), frame.msg, e);
 
 			clientManager->on_receive(client, p.get());
 		}
@@ -218,7 +229,7 @@ void IncomingMessagesWorker::job(){
 //<editor-fold desc="OutgoingMessagesWorker">
 
 OutgoingMessagesWorker::OutgoingMessagesWorker(Client *client, size_t size) :
-		Worker<protocol::frame::Frame>(size), client(client){
+		Worker<frame::Frame>(size), client(client){
 }
 void OutgoingMessagesWorker::init_job_thread() {
 	worker = boost::thread(&OutgoingMessagesWorker::job, this);
@@ -226,10 +237,10 @@ void OutgoingMessagesWorker::init_job_thread() {
 void OutgoingMessagesWorker::job(){
 	while (client->alive){
 		if(pool.is_not_empty()){
-			protocol::frame::Frame frame;
+			frame::Frame frame;
 			pool.pop_back(&frame);
 
-			protocol::frame::encode(&frame);
+			frame::encode(&frame);
 
 			boost::system::error_code error;
 			client->send_sync(frame.buffer,frame.bufferSize, error);
@@ -268,12 +279,13 @@ void ClosingClientsWorker::job(){
 }
 
 ClientsManager::ClientsManager(Manager* m) :
-		Client_ID(0), alive(true), manager(Manager::unique_ptr(m)), modulesManager(m->getModulesManager()){
+		Client_ID(0), alive(true), manager(Manager::u_ptr(m)), modulesManager(m->getModulesManager()){
 
 	worker_closingclients = ClosingClientsWorker::create(this);
 	worker_closingclients->init_job_thread();
 #if USE_SESSIONS
-	sessionManager = new SessionManager;
+	sessionManager = SessionManager::u_ptr(new SessionManager);
+	alive = sessionManager->alive;
 #endif
 }
 
@@ -290,14 +302,25 @@ bool ClientsManager::isAlive() {
 }
 
 bool ClientsManager::on_enter(Client *client) {
-#if USE_SESSIONS
-	sessionManager->start_session(client);
-#endif
 	return manager->onEnter(client);
 }
 
-bool ClientsManager::on_ready(Client *client, protocol::http::http_header& map) {
-	return manager->onReady(client, map);
+bool ClientsManager::on_handshakerecv(Client *client, http::handshake* handshake, errors::error& e){
+#if USE_SESSIONS
+	sessionManager->start_session(client, handshake, e);
+#endif
+	return manager->onHandshakeRecv(client, handshake);
+}
+
+bool ClientsManager::on_handshakesend(Client *client, http::handshake* handshake, errors::error& e){
+#if USE_SESSIONS
+	sessionManager->update_handshake(client, handshake, e);
+#endif
+	return manager->onHandshakeSend(client, handshake);
+}
+
+bool ClientsManager::on_ready(Client *client) {
+	return manager->onReady(client);
 }
 
 void ClientsManager::on_receive(Client *client, packet::Packet *packet) {
