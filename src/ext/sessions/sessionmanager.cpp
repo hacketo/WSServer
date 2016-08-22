@@ -1,14 +1,14 @@
 //
 // Created by hacketo on 19/08/16.
 //
-#include "../../server/config.h"
+#include "server/config.h"
 
-#include "sessionmanager.h"
+#include "ext/sessions/sessionmanager.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include "../../client/client.h"
-#include "../../debug.h"
-#include "../../util/date.h"
+#include "client/client.h"
+#include "debug.h"
+#include "util/date.h"
 
 using namespace protocol::packet;
 
@@ -55,7 +55,8 @@ void InvalidateSessionsWorker::job(){
 
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
 	}
-	debug::print("SessionManager InvalidateSessionsWorker ended");
+
+	DEBUG_PRINT("SessionManager InvalidateSessionsWorker ended");
 }
 
 const std::string SessionManager::COOKIE_NAME = "ws_sid";
@@ -65,7 +66,7 @@ SessionManager::SessionManager() : alive(true){
 	errors::error e = invalidateSessionWorker->init_job_thread();
 
 	if (e){
-		debug::print("Can't start session error : ",e.msg);
+		DEBUG_PRINT("Can't start session error : ",e.msg);
 		alive = false;
 	}
 

@@ -8,7 +8,7 @@
 #define TEST_FRIENDS \
     friend class modules_test_null_initialized_check_Test;
 
-#include "../../src/ext/modules/base_module.h"
+#include "ext/modules/base_module.h"
 
 
 

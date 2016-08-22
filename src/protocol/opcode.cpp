@@ -3,7 +3,7 @@
 //
 
 #include <cstdint>
-#include "opcode.h"
+#include "protocol/opcode.h"
 
 namespace protocol {
 

@@ -2,7 +2,7 @@
 // Created by hacketo on 11/08/16.
 //
 
-#include "../../src/util/genericvalue.h"
+#include "util/genericvalue.h"
 #include "gtest/gtest.h"
 
 class IntValueFixture : public ::testing::Test {

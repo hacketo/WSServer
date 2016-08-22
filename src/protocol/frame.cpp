@@ -2,8 +2,8 @@
 // Created by hacketo on 14/08/16.
 //
 
-#include "frame.h"
-#include "opcode.h"
+#include "protocol/frame.h"
+#include "protocol/opcode.h"
 
 namespace protocol{
 frame::Frame frame::from_string(std::string msg) {
@@ -54,8 +54,8 @@ void frame::decode(frame::Frame *frame) {
 
 		if (opcodeis_valid) {
 			frame->valid = true;
-			//debug::print("LENGTH : ", payload_len);
-			//debug::print("INDEX_MASK : ", first_mask_index);
+			//DEBUG_PRINT("LENGTH : ", payload_len);
+			//DEBUG_PRINT("INDEX_MASK : ", first_mask_index);
 
 
 			uint8_t mask[4];
@@ -64,18 +64,18 @@ void frame::decode(frame::Frame *frame) {
 			if (opcode::is_control(op_code)) {
 
 				if (op_code == opcode::CLOSE) {
-					//debug::print("CLOSE_FRAME");
+					//DEBUG_PRINT("CLOSE_FRAME");
 				} else if (op_code == opcode::PONG) {
 
 				}
 			} else {
 
 				if (op_code == opcode::TEXT) {
-					//debug::print("TEXT_FRAME");
+					//DEBUG_PRINT("TEXT_FRAME");
 				} else if (op_code == opcode::BINARY) {
-					//debug::print("BINARY_FRAME");
+					//DEBUG_PRINT("BINARY_FRAME");
 				} else if (op_code == opcode::CONTINUATION) {
-					//debug::print("CONTINUATION_FRAME");
+					//DEBUG_PRINT("CONTINUATION_FRAME");
 				}
 			}
 
@@ -85,7 +85,7 @@ void frame::decode(frame::Frame *frame) {
 					decodedPayload[j] = data[i] ^ mask[j % 4];
 				}
 				frame->msg = std::string(decodedPayload, decodedPayload + payload_len);
-				//debug::print("Parsed payload : ", frame->msg);
+				//DEBUG_PRINT("Parsed payload : ", frame->msg);
 			}
 		}
 	}

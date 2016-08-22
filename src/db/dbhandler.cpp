@@ -2,8 +2,8 @@
 // Created by hacketo on 19/08/16.
 //
 
-#include "dbhandler.h"
-#include "../debug.h"
+#include "db/dbhandler.h"
+#include "debug.h"
 #include <boost/filesystem.hpp>
 
 const char * DbHandler::DP_PATH = "";

@@ -3,7 +3,7 @@
 //
 
 #include <openssl/sha.h>
-#include "sha1.h"
+#include "util/sha1.h"
 
 std::string get_sha1(std::string sequence){
     unsigned char digest[SHA_DIGEST_LENGTH]; // == 20

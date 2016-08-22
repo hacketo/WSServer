@@ -2,7 +2,7 @@
 // Created by hacketo on 14/08/16.
 //
 
-#include "client_timer.h"
+#include "ext/modules/client_timer.h"
 
 Client_timer::Client_timer(Client *client, uint64_t time_to_wait):
 	client(Client::s_ptr(client)),

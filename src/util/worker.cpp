@@ -2,7 +2,7 @@
 // Created by hacketo on 19/08/16.
 //
 
-#include "worker.h"
+#include "util/worker.h"
 
 template <class T>
 Worker<T>::Worker(size_t size) : pool(size){

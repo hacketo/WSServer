@@ -2,8 +2,8 @@
 // Created by hacketo on 14/08/16.
 //
 
-#include "pub_sub.h"
-#include "../../client/client.h"
+#include "ext/modules/pub_sub.h"
+#include "client/client.h"
 
 bool Pub_sub::reg(Client* client, ModuleClientController** controller){
 	if (!is_client_already_subscribed(client)){

@@ -1,4 +1,4 @@
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR} ../../include)
 
 add_executable(runUnitTests
         stringdata_test.cpp
@@ -11,6 +11,4 @@ add_executable(runUnitTests
         jsonparse_test.cpp
         modules_test.cpp time_test.cpp)
 
-
-target_link_libraries(runUnitTests gtest gtest_main)
-target_link_libraries(runUnitTests Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson)
+target_link_libraries(runUnitTests gtest gtest_main WSServerlib)

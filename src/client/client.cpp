@@ -1,8 +1,8 @@
 #include <boost/algorithm/string.hpp>
-#include "client.h"
+#include "client/client.h"
 
-#include "../debug.h"
-#include "../protocol/opcode.h"
+#include "debug.h"
+#include "protocol/opcode.h"
 
 
 //<editor-fold desc="Client">
@@ -62,7 +62,7 @@ void Client::start() {
 	}
 
 	if (e) {
-		debug::print(e);
+		DEBUG_PRINT(e);
 		alive = false;
 	}
 	if (!alive){
@@ -223,7 +223,7 @@ void IncomingMessagesWorker::job(){
 			clientManager->on_receive(client, p.get());
 		}
 	}
-	debug::print("IncomingMessagesWorker ",client->id, " ended");
+	DEBUG_PRINT("IncomingMessagesWorker ",client->id, " ended");
 }
 
 //</editor-fold>
@@ -248,11 +248,11 @@ void OutgoingMessagesWorker::job(){
 			client->send_sync(frame.buffer,frame.bufferSize, error);
 
 			if (error){
-				debug::print("Send data failed: " , boost::system::system_error(error).what());
+				DEBUG_PRINT("Send data failed: " , boost::system::system_error(error).what());
 			}
 		}
 	}
-	debug::print("OutgoingMessagesWorker ",client->id, " ended");
+	DEBUG_PRINT("OutgoingMessagesWorker ",client->id, " ended");
 }
 
 //</editor-fold>
@@ -277,7 +277,7 @@ void ClosingClientsWorker::job(){
 			manager->handleClientClosed(clientId);
 		}
 	}
-	debug::print("Clients_Manager ClosingClientsWorker ended");
+	DEBUG_PRINT("Clients_Manager ClosingClientsWorker ended");
 }
 
 ClientsManager::ClientsManager(Manager* m) :

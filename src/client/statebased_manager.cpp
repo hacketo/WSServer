@@ -2,10 +2,10 @@
 // Created by hacketo on 10/08/16.
 //
 
-#include "statebased_manager.h"
-#include "../debug.h"
-#include "client.h"
-#include "../util/algo.h"
+#include "client/statebased_manager.h"
+#include "debug.h"
+#include "client/client.h"
+#include "util/algo.h"
 
 using namespace protocol;
 

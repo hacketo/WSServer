@@ -2,7 +2,7 @@
 // Created by hacketo on 28/05/15.
 //
 
-#include "timer.h"
+#include "util/timer.h"
 
 #include <boost/format.hpp>
 

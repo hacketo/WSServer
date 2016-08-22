@@ -2,8 +2,8 @@
 // Created by hacketo on 09/08/16.
 //
 
-#include "packet.h"
-#include "../debug.h"
+#include "protocol/packet.h"
+#include "debug.h"
 #include "rapidjson/error/en.h"
 #include <boost/algorithm/string/predicate.hpp>
 

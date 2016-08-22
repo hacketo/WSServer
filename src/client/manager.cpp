@@ -1,9 +1,9 @@
 //
 // Created by hacketo on 10/08/16.
 //
-#include "manager.h"
-#include "../debug.h"
-#include "client.h"
+#include "client/manager.h"
+#include "debug.h"
+#include "client/client.h"
 
 Manager::Manager(){
 #ifdef USE_MODULES
@@ -12,7 +12,7 @@ Manager::Manager(){
 }
 
 bool Manager::onEnter(Client *client){
-	debug::print("New client : ",client->get_id(),"-",client->get_ip());
+	DEBUG_PRINT("New client : ",client->get_id(),"-",client->get_ip());
 	return true;
 }
 
@@ -20,7 +20,7 @@ bool Manager::onHandshakeRecv(Client *client, protocol::http::handshake* handsha
 bool Manager::onHandshakeSend(Client *client, protocol::http::handshake* handshake){ return true;}
 
 bool Manager::onReady(Client *client){
-	debug::print("Start Listening : ",client->get_id(),"-",client->get_ip());
+	DEBUG_PRINT("Start Listening : ",client->get_id(),"-",client->get_ip());
 	return true;
 }
 

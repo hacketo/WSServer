@@ -2,35 +2,47 @@
 // Created by hacketo on 15/08/16.
 //
 
-#include "errors.h"
-#include "../util/string.h"
+#include "server/errors.h"
+#include "util/string.h"
 
-errors::error::error(){
+namespace errors {
+
+error::error() {
 	code = 0;
 	msg = "";
 	master = "";
 };
 
-errors::error errors::get_error(uint16_t code) {
+
+std::ostream &operator<<(std::ostream &str, const error &v) {
+	if (v.master.length() > 0) {
+		str << "[" << v.master << "] : ";
+	}
+	str << "(" << v.code << ") : " << v.msg;
+	return str;
+}
+
+error get_error(uint16_t code) {
 	error e;
 	e.code = code;
 	return e;
 };
 
-errors::error errors::get_error(uint16_t code, std::string msg) {
+error get_error(uint16_t code, std::string msg) {
 	error e;
 	e.code = code;
 	e.msg = msg;
 	return e;
 };
-errors::error errors::get_error(uint16_t code, std::string msg, std::string tokenValue) {
+
+error get_error(uint16_t code, std::string msg, std::string tokenValue) {
 	error e;
 	e.code = code;
 	e.msg = string::sprintf(msg, tokenValue);
 	return e;
 };
 
-errors::error errors::get_error(std::string master, uint16_t code, std::string msg) {
+error get_error(std::string master, uint16_t code, std::string msg) {
 	error e;
 	e.code = code;
 	e.msg = msg;
@@ -38,7 +50,7 @@ errors::error errors::get_error(std::string master, uint16_t code, std::string m
 	return e;
 };
 
-errors::error errors::get_error(std::string master, uint16_t code, std::string msg , std::string tokenValue) {
+error get_error(std::string master, uint16_t code, std::string msg, std::string tokenValue) {
 	error e;
 	e.code = code;
 	e.msg = string::sprintf(msg, tokenValue);
@@ -46,3 +58,4 @@ errors::error errors::get_error(std::string master, uint16_t code, std::string m
 	return e;
 };
 
+}

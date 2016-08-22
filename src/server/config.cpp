@@ -2,7 +2,7 @@
 // Created by hacketo on 12/08/16.
 //
 
-#include "config.h"
+#include "server/config.h"
 
 
 namespace config {

@@ -2,9 +2,9 @@
 // Created by hacketo on 20/08/16.
 //
 
-#include "sessiondb.h"
-#include "sessionmanager.h"
-#include "../../debug.h"
+#include "ext/sessions/sessiondb.h"
+#include "ext/sessions/sessionmanager.h"
+#include "debug.h"
 
 
 SessionDB::SessionDB() : DbHandler(){};
@@ -76,7 +76,7 @@ errors::error SessionDB::saveSession(Session * session, bool ended){
 	std::string start_time = session->getStartTime();
 	std::string end_time = ended ? session->getEndTime() : "";
 
-	//debug::print("ip:",ip,", data:",data,", start_time:",start_time,", end_time:",end_time);
+	//DEBUG_PRINT("ip:",ip,", data:",data,", start_time:",start_time,", end_time:",end_time);
 
 	sqlite3_bind_int(stmtSaveClient, 1, indexSessionSave);
 	sqlite3_bind_text(stmtSaveClient, 2, sessionId, strlen(sessionId), SQLITE_TRANSIENT);

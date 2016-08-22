@@ -3,7 +3,8 @@
 //
 
 #include <memory>
-#include "genericvalue.h"
+#include <debug.h>
+#include "util/genericvalue.h"
 
 
 GenericValue::GenericValue() : initialized(false){}
@@ -148,6 +149,51 @@ float GenericValue::getFloat() const {THROW_NOT_SUPPORTED()}
 //<editor-fold desc="Null">
 
 bool GenericValue::isNull() const { return false; }
+
+#if WS_DEBUG
+void GenericValue::debugValue(GenericValue *value, int baseDepth) {
+
+	std::string tabs = debug::getTabs(baseDepth);
+
+	if (value->isString()){
+		debug::print(tabs,"String : ", value->getString());
+	}
+
+	else if (value->isInt()){
+		debug::print(tabs,"Int : ", value->getInt());
+	}
+	else if (value->isNull()){
+		debug::print(tabs,"Null");
+	}
+
+	else if (value->isBool()){
+		debug::print(tabs,"Bool : ", value->getBool() ? "true" : "false");
+	}
+	else if (value->isFloat()){
+		debug::print(tabs,"Float : ", value->getFloat());
+	}
+
+	else if (value->isArray()){
+		debug::print(tabs,"Array : ");
+		for (ArrayValue::const_iterator itr = value->begin_array(); itr != value->end_array(); ++itr){
+			debugValue(itr->get(), baseDepth+1);
+		}
+	}
+
+	else if (value->isObject()){
+		debug::print(tabs,"Object : ");
+		baseDepth++;
+
+		std::vector<std::string> keys = value->getKeys();
+		for (std::vector<std::string>::iterator itr = keys.begin();
+			 itr != keys.end(); ++itr){
+			debug::print(debug::getTabs(baseDepth),*itr);
+			debugValue(value->get(*itr), baseDepth);
+		}
+	}
+
+}
+#endif
 
 //</editor-fold>
 

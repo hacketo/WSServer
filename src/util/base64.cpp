@@ -2,7 +2,7 @@
 // Created by hacketo on 08/08/16.
 //
 
-#include "base64.h"
+#include "util/base64.h"
 
 std::string  base64_encode(const std::string text){
     unsigned long writePaddChars = (3-text.length()%3)%3;

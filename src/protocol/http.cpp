@@ -2,11 +2,11 @@
 // Created by hacketo on 28/05/15.
 //
 
-#include "http.h"
-#include "../util/base64.h"
-#include "../util/sha1.h"
-#include "../server/config.h"
-#include "../util/date.h"
+#include "protocol/http.h"
+#include "util/base64.h"
+#include "util/sha1.h"
+#include "server/config.h"
+#include "util/date.h"
 
 
 namespace protocol{

@@ -4,8 +4,8 @@
 
 
 #include "gtest/gtest.h"
-#include "../../src/protocol/packet.h"
-#include "../../src/server/config.h"
+#include "protocol/packet.h"
+#include "server/config.h"
 
 using namespace protocol::packet;
 
