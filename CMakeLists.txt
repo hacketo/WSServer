@@ -94,7 +94,7 @@ set(HEADER_FILES
   include/util/exception.h
   include/util/genericvalue.h
   include/util/sha1.h
-        include/util/safedeque.h
+  include/util/safedeque.h
   include/util/timer.h
   include/util/worker.h)
 

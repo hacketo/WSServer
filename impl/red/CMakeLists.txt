@@ -4,6 +4,8 @@ project(Red)
 
 include_directories(../../include)
 
-add_executable(Red src/main.cpp src/RED.cpp src/RED.h)
+add_executable(Red src/main.cpp)
 
-target_link_libraries(Red WSServerlib)
+add_library(Red_lib STATIC src/RED.cpp src/RED.h)
+
+target_link_libraries(Red Red_lib WSServerlib)
