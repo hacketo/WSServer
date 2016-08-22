@@ -6,7 +6,7 @@
 
 #include "constant.h"
 #include "util/exception.h"
-#include "util/string.h"
+#include "util/algo.h"
 
 /**
  *       0                   1                   2                   3

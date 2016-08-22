@@ -9,7 +9,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -E")
 
 # Search OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -94,8 +94,7 @@ set(HEADER_FILES
   include/util/exception.h
   include/util/genericvalue.h
   include/util/sha1.h
-  include/util/string.h
-  include/util/safedeque.h
+        include/util/safedeque.h
   include/util/timer.h
   include/util/worker.h)
 
@@ -116,7 +115,6 @@ set(SOURCE_FILES
   src/protocol/opcode.cpp
   src/server/config.cpp
   src/server/errors.cpp
-  src/util/algo.cpp
   src/util/base64.cpp
   src/util/date.cpp
   src/util/sha1.cpp

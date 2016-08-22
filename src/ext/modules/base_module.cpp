@@ -50,7 +50,7 @@ namespace modules {
 
 
 	bool base_module::is_client_already_subscribed(Client *client) {
-		return algo::map_contains_key<uint32_t, Client *>(&clients, client->get_id());
+		return MAP_CONTAINS_KEY(clients, client->get_id());
 	}
 
 	bool base_module::isAlive() const{
@@ -94,7 +94,7 @@ namespace modules {
 			return false;
 		}*/
 
-		if (algo::map_contains_key<uint64_t, base_module *>(&modules, moduleId)) {
+		if (MAP_CONTAINS_KEY(modules, moduleId)) {
 			return modules[moduleId] == module;
 		}
 		return false;
@@ -157,14 +157,14 @@ namespace modules {
 	}
 
 	ModuleClientController *ModulesController::getModuleController(uint64_t moduleId) {
-		if (algo::map_contains_key<uint64_t, ModuleClientController *>(&controllers, moduleId)) {
+		if (MAP_CONTAINS_KEY(controllers, moduleId)) {
 			return controllers[moduleId];
 		}
 		return nullptr;
 	}
 
 	bool ModulesController::has(uint64_t moduleId) {
-		return algo::map_contains_key<uint64_t, ModuleClientController *>(&controllers, moduleId);
+		return MAP_CONTAINS_KEY(controllers, moduleId);
 	}
 
 	void ModulesController::unregisterAll() {

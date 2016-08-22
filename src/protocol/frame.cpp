@@ -20,7 +20,9 @@ namespace protocol {
 		f->fin = true;
 		f->bufferSize = msg.length();
 		f->buffer = new uint8_t[f->bufferSize];
-		string::convert(msg, f->buffer, f->bufferSize);
+
+		STRING_TO_UINT8(msg, f->buffer, f->bufferSize);
+		//string::convert(msg, f->buffer, f->bufferSize);
 		return f;
 	}
 

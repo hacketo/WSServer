@@ -72,7 +72,7 @@ namespace http {
 		std::string s = handshake_to_string(pHandshake);
 		size = s.length();
 		*buffer = new uint8_t[size];
-		string::convert(s, *buffer, size);
+		STRING_TO_UINT8(s,*buffer, size)
 	}
 
 	void validate_header(http::handshake *handshake, errors::error& error) {

@@ -3,7 +3,7 @@
 //
 
 #include "server/errors.h"
-#include "util/string.h"
+#include "util/algo.h"
 
 namespace errors {
 
@@ -38,7 +38,8 @@ error get_error(uint16_t code, const std::string msg) {
 error get_error(uint16_t code, const std::string msg, const std::string tokenValue) {
 	error e;
 	e.code = code;
-	e.msg = string::sprintf(msg, tokenValue);
+	e.msg = msg;
+	SPRINTF(e.msg ,tokenValue);
 	return e;
 };
 
@@ -53,7 +54,8 @@ error get_error(const std::string master, uint16_t code, const std::string msg) 
 error get_error(const std::string master, uint16_t code, const std::string msg, const std::string tokenValue) {
 	error e;
 	e.code = code;
-	e.msg = string::sprintf(msg, tokenValue);
+	e.msg = msg;
+	SPRINTF(e.msg ,tokenValue);
 	e.master = master;
 	return e;
 };

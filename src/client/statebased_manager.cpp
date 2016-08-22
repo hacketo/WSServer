@@ -49,7 +49,7 @@ void StateBasedManager::updateClientState(Client *client, u_int32_t id, bool sen
 }
 
 bool StateBasedManager::hasState(uint32_t state) {
-	return algo::map_contains_key<u_int32_t, State*>(&states, state);
+	return MAP_CONTAINS_KEY(states, state);
 }
 
 bool StateBasedManager::onEnter(Client *client) {

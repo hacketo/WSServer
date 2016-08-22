@@ -4,6 +4,8 @@ project(Chat)
 
 include_directories(../../include)
 
-add_executable(Chat src/main.cpp src/Chat.cpp src/Chat.h)
+add_executable(Chat src/main.cpp )
 
-target_link_libraries(Chat WSServerlib)
+add_library(Chat_lib STATIC src/Chat.cpp src/Chat.h)
+
+target_link_libraries(Chat Chat_lib WSServerlib)
