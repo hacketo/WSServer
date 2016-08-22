@@ -7,15 +7,14 @@
 
 #include <boost/uuid/random_generator.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
-#include "base_module.h"
 #include "../util/worker.h"
-#include "../db/dbhandler.h"
 #include "../db/sessiondb.h"
 #include "../protocol/http.h"
 
+
 class SessionManager;
 class InvalidateSessionsWorker;
-
+class Client;
 class Session {
 	friend class InvalidateSessionsWorker;
 	friend class SessionManager;

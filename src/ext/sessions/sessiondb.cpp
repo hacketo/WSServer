@@ -6,6 +6,10 @@
 #include "../modules/sessionmanager.h"
 #include "../debug.h"
 
+
+SessionDB::SessionDB() : DbHandler(){};
+
+
 errors::error SessionDB::open_database() {
 
 

@@ -2,10 +2,12 @@
 // Created by hacketo on 14/08/16.
 //
 
-#include "base_module.h"
-#include "../client/client.h"
-#include "../debug.h"
+#include "../server/config.h"
 
+#include "base_module.h"
+
+#include "../debug.h"
+#include "../client/client.h"
 
 //<editor-fold desc="ModuleClientController">
 

@@ -13,6 +13,7 @@ class Session;
 class SessionDB : public DbHandler {
 
 public:
+	SessionDB();
 	errors::error open_database();
 
 	errors::error saveSession(Session *pSession, bool ended);

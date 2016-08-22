@@ -6,9 +6,11 @@
 #define SERVER_PUB_SUB_H
 
 
-#include "../client/client.h"
-#include "../util/algo.h"
+#include <stdint.h>
 #include "base_module.h"
+#include <memory>
+
+class Client;
 
 class Pub_sub : public base_module{
 
@@ -42,9 +44,7 @@ public:
 
 private:
 
-	inline bool is_client_already_subscribed(Client* client){
-		return algo::map_contains_key<uint32_t, Client*>(&clients, client->get_id());
-	}
+	bool is_client_already_subscribed(Client* client);
 
 	std::map<uint32_t, Client*> clients;
 	typedef std::map<uint32_t, Client*>::iterator client_iterator;
@@ -54,7 +54,7 @@ private:
 class Pub_subClientController : public ModuleClientController {
 public:
 	Pub_subClientController(base_module* module);
-	virtual void handle(Client* client,std::string action, GenericValue* data);
+	virtual void handle(Client* client, std::string action, GenericValue* data);
 };
 
 #endif //SERVER_PUB_SUB_H

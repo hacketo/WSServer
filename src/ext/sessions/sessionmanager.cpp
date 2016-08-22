@@ -1,6 +1,7 @@
 //
 // Created by hacketo on 19/08/16.
 //
+#include "../server/config.h"
 
 #include "sessionmanager.h"
 #include <boost/lexical_cast.hpp>
@@ -9,11 +10,7 @@
 #include "../debug.h"
 #include "../util/date.h"
 
-#if USE_SESSIONS
-
 using namespace protocol::packet;
-
-
 
 InvalidateSessionsWorker::InvalidateSessionsWorker(SessionManager* manager, size_t size) :
 		Worker<u_int32_t>(size), manager(manager), sessionDB(&manager->sessionDB){
@@ -191,5 +188,3 @@ std::string Session::getIP(){
 std::string Session::getJSONData(){
 	return GenericValue::toJSON(data.get());
 }
-
-#endif

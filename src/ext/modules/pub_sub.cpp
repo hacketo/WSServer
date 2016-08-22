@@ -3,9 +3,7 @@
 //
 
 #include "pub_sub.h"
-
-
-
+#include "../client/client.h"
 
 bool Pub_sub::reg(Client* client, ModuleClientController** controller){
 	if (!is_client_already_subscribed(client)){
@@ -35,6 +33,10 @@ bool Pub_sub::publish(protocol::frame::FrameInterface* frameInterface){
 		it->second->send(frameInterface);
 	}
 	return true;
+}
+
+bool Pub_sub::is_client_already_subscribed(Client* client){
+	return algo::map_contains_key<uint32_t, Client*>(&clients, client->get_id());
 }
 
 Pub_subClientController::Pub_subClientController(base_module* module) :
