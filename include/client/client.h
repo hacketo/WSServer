@@ -23,6 +23,14 @@ using namespace ext::modules;
 using namespace ext::sessions;
 #endif
 
+
+
+#ifndef MOCK_SOCKET
+#define SOCKET_CLASS boost::asio::ip::tcp::socket
+#else
+MOCK_SOCKET
+#endif
+
 using namespace protocol;
 
 class ClientsManager;
@@ -78,7 +86,9 @@ class Client : public boost::enable_shared_from_this<Client> {
 	friend class IncomingMessagesWorker;
 	friend class OutgoingMessagesWorker;
 	friend class ClientsManager;
+#ifdef USE_SESSIONS
 	friend class ext::sessions::SessionManager;
+#endif
 public:
 
 	virtual ~Client();
@@ -164,7 +174,7 @@ private:
 	 */
     bool alive;
 
-    boost::asio::ip::tcp::socket socket_;
+	MOCK_SOCKET socket_;
 
 	Client(ClientsManager* manager, u_int32_t client_id, boost::asio::io_service& io_service);
 

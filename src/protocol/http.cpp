@@ -56,13 +56,11 @@ namespace http {
 
 		ss << pHandshake->baseHeader << "\r\n";
 
-		header_iterator it;
-
-		for (it = pHandshake->headers.begin(); it != pHandshake->headers.end(); ++it){
-			ss << it->first << ": "<< it->second <<"\r\n";
+		for (auto &it : pHandshake->headers){
+			ss << it.first << ": "<< it.second <<"\r\n";
 		}
-		for (it = pHandshake->cookies.begin(); it != pHandshake->cookies.end(); ++it){
-			ss << "Set-Cookie :" << it->first << "=" << it->second <<"\r\n";
+		for (auto &it : pHandshake->cookies){
+			ss << "Set-Cookie :" << it.first << "=" << it.second <<"\r\n";
 		}
 		ss << "\r\n";
 		return ss.str();
@@ -72,7 +70,7 @@ namespace http {
 		std::string s = handshake_to_string(pHandshake);
 		size = s.length();
 		*buffer = new uint8_t[size];
-		STRING_TO_UINT8(s,*buffer, size)
+		STRING_TO_UINT8(s,*buffer, size);
 	}
 
 	void validate_header(http::handshake *handshake, errors::error& error) {
@@ -112,9 +110,8 @@ namespace http {
 	}
 
 	void dump_headers(http_header *headers) {
-		for (header_iterator iter = headers->begin();
-			 iter != headers->end(); iter++) {
-			std::cout << "Key: '" << iter->first << "' Value: '" << iter->second << "'" << std::endl;
+		for (auto& iter : *headers) {
+			std::cout << "Key: '" << iter.first << "' Value: '" << iter.second << "'" << std::endl;
 		}
 	}
 

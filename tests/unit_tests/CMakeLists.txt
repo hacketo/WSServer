@@ -12,6 +12,6 @@ add_executable(runUnitTests
         modules_test.cpp
         time_test.cpp
         safedeque_test.cpp
-        )
+        client_test.cpp)
 
-target_link_libraries(runUnitTests gtest gtest_main WSServerlib)
+target_link_libraries(runUnitTests gtest gmock gtest_main WSServerlib)

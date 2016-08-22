@@ -9,7 +9,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -E")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Search OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -59,9 +59,6 @@ endif ()
 
 add_subdirectory(libs)
 
-set(server_required_libraries ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3)
-
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs
   ${CMAKE_CURRENT_SOURCE_DIR}/libs/rapidjson
   ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -79,6 +76,7 @@ set(HEADER_FILES
   include/ext/modules/pub_sub.h
   include/ext/modules/base_module.h
   include/ext/sessions/sessionmanager.h
+  include/mocks/socket_mock.h
   include/protocol/constant.h
   include/protocol/frame.h
   include/protocol/http.h
@@ -122,7 +120,7 @@ set(SOURCE_FILES
   src/util/genericvalue.cpp)
 
 
-set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES})
+set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES} )
 
 add_library(${PROJECT_NAME} SHARED ${SERVER_FILES})
 
@@ -136,7 +134,11 @@ if (USE_SESSIONS)
   target_compile_definitions(${PROJECT_NAME} PUBLIC USE_SESSIONS=1)
 endif ()
 
+add_subdirectory(tests)
 
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+set(server_required_libraries ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3 gtest gmock gtest_main)
 target_link_libraries(${PROJECT_NAME} ${server_required_libraries})
 
 
@@ -145,6 +147,5 @@ install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION include/${PROJECT_NAME})
 
 
-add_subdirectory(tests)
 add_subdirectory(impl/chat)
 add_subdirectory(impl/red)

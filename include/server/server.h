@@ -6,6 +6,8 @@
 #include <string>
 
 #include <boost/asio.hpp>
+#include <thread>
+#include <debug.h>
 #include "client/client.h"
 
 namespace server{
@@ -57,6 +59,8 @@ namespace server{
 	 */
 	void init(ServerData* data, boost::asio::io_service &io_service,
 			  Manager *m = new Manager){
+
+		DEBUG_PRINT("MAX THREADS ",std::thread::hardware_concurrency());
 
 		data->acceptor = new boost::asio::ip::tcp::acceptor(io_service,
 										boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), data->port));
