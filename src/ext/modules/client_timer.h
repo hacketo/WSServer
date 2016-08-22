@@ -5,7 +5,7 @@
 #ifndef SERVER_CLIENT_TIMER_H
 #define SERVER_CLIENT_TIMER_H
 
-#include "../client/client.h"
+#include "../../client/client.h"
 
 /**
  * Utilisé pour avoir un modèle d'attente de réponse d'un client

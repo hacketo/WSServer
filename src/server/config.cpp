@@ -29,8 +29,6 @@ namespace config {
 
 	char DEFAULT_PARSER = protocol::packet::ParserType::JSON;
 
-
-	bool USE_MODULES = true;
 	std::string ACTION_KEY = "action";
 	std::string MODULE_KEY = "module";
 	std::string MODULE_ACTION_KEY = "action";

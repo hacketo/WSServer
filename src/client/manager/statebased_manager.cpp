@@ -5,11 +5,11 @@
 #include "statebased_manager.h"
 #include "../../debug.h"
 #include "../client.h"
+#include "../../util/algo.h"
 
 using namespace protocol;
 
-StateBasedManager::StateBasedManager(ModulesManager* modulesManager) :
-		Manager(modulesManager){
+StateBasedManager::StateBasedManager() : Manager(){
 
 	getChangeStatePacket = [](u_int32_t i) -> packet::Packet* {
 		return new ChangeStatePacket(i);
@@ -105,9 +105,11 @@ void State::handle(Client *client, packet::PacketData *packet) {
 		}
 	}
 }
+#ifdef USE_MODULES
 ModulesManager* State::getModulesManager(){
 	return manager->getModulesManager();
 }
+#endif
 
 StateBasedManager* State::getManager(){
 	return manager;

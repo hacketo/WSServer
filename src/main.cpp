@@ -2,13 +2,20 @@
 #include <boost/asio.hpp>
 #include "server/server.h"
 #include "impl/Chat.h"
-#include "server/config.h"
 
 
 int main(){
 
+#ifdef USE_MODULES
+	std::cout << "modules : " << USE_MODULES << std::endl;
+#endif
+#ifdef USE_SESSIONS
+	std::cout << "sessions : "<<USE_SESSIONS<<std::endl;
+#endif
+
+
 	config::DEFAULT_PARSER = protocol::packet::ParserType::NO;
-	Chat* chat = new Chat(new ModulesManager());
+	Chat* chat = new Chat();
 
 	try {
 		boost::asio::io_service io_service;

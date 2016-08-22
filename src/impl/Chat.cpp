@@ -3,10 +3,11 @@
 //
 
 #include "Chat.h"
+#include "../client/client.h"
 
 using namespace protocol;
 
-Chat::Chat(ModulesManager *modulesManager) : Manager(modulesManager) {
+Chat::Chat() : Manager() {
 	pubsub = new Pub_sub();
 	modulesManager->REGISTER(pubsub);
 }

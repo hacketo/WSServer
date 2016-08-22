@@ -3,7 +3,6 @@
 
 #include "../debug.h"
 #include "../protocol/opcode.h"
-#include "../server/errors.h"
 
 
 //<editor-fold desc="Client">
@@ -14,7 +13,9 @@ Client::Client(ClientsManager* manager, u_int32_t client_id, boost::asio::io_ser
     alive = false;
     flag = 0;
 	state_id = 0;
+#ifdef USE_MODULES
 	modulesController = ModulesController::create(this, clientManager->getModulesManager());
+#endif
 }
 
 Client::~Client(){}
@@ -140,7 +141,7 @@ void Client::send_sync(unsigned char *data, size_t size,
     socket_.write_some(boost::asio::buffer(data, size), error);
 }
 
-
+#ifdef USE_MODULES
 bool Client::registerModule(base_module* module){
 	return modulesController->reg(module);
 }
@@ -153,6 +154,7 @@ bool Client::hasModuleRegistered(uint64_t moduleId){
 ModuleClientController* Client::getModuleController(uint64_t moduleId){
 	return modulesController->getModuleController(moduleId);
 }
+#endif
 
 bool Client::isAlive(){
 	return alive;
@@ -279,11 +281,16 @@ void ClosingClientsWorker::job(){
 }
 
 ClientsManager::ClientsManager(Manager* m) :
-		Client_ID(0), alive(true), manager(Manager::u_ptr(m)), modulesManager(m->getModulesManager()){
+		Client_ID(0), alive(true), manager(Manager::u_ptr(m)) {
+
+#ifdef USE_MODULES
+	modulesManager = m->getModulesManager();
+#endif
 
 	worker_closingclients = ClosingClientsWorker::create(this);
 	worker_closingclients->init_job_thread();
-#if USE_SESSIONS
+
+#ifdef USE_SESSIONS
 	sessionManager = SessionManager::u_ptr(new SessionManager);
 	alive = sessionManager->alive;
 #endif
@@ -306,14 +313,14 @@ bool ClientsManager::on_enter(Client *client) {
 }
 
 bool ClientsManager::on_handshakerecv(Client *client, http::handshake* handshake, errors::error& e){
-#if USE_SESSIONS
+#ifdef USE_SESSIONS
 	sessionManager->start_session(client, handshake, e);
 #endif
 	return manager->onHandshakeRecv(client, handshake);
 }
 
 bool ClientsManager::on_handshakesend(Client *client, http::handshake* handshake, errors::error& e){
-#if USE_SESSIONS
+#ifdef USE_SESSIONS
 	sessionManager->update_handshake(client, handshake, e);
 #endif
 	return manager->onHandshakeSend(client, handshake);
@@ -324,7 +331,7 @@ bool ClientsManager::on_ready(Client *client) {
 }
 
 void ClientsManager::on_receive(Client *client, packet::Packet *packet) {
-
+#ifdef USE_MODULES
 	for(packet::packet_iterator it = packet->begin() ; it != packet->end() ; ++it ){
 		packet::PacketData *p = it->get();
 		if (p->packetType == packet::MODULE){
@@ -332,6 +339,7 @@ void ClientsManager::on_receive(Client *client, packet::Packet *packet) {
 			modulesManager->onReceive(client, packetData);
 		}
 	}
+#endif
 
 	manager->onReceive(client, packet);
 
@@ -339,11 +347,14 @@ void ClientsManager::on_receive(Client *client, packet::Packet *packet) {
 
 void ClientsManager::on_close(Client *client) {
 	manager->onClose(client);
-#if USE_SESSIONS
+#ifdef USE_SESSIONS
 	sessionManager->close_session(client);
 #endif
 
+#ifdef USE_MODULES
 	client->modulesController->unregisterAll();
+#endif
+
 	//@todo check lock block
 	worker_closingclients->dispatch(client->get_id());
 }
@@ -352,9 +363,11 @@ void ClientsManager::on_error(Client *client) {
 	manager->onError(client);
 }
 
+#ifdef USE_MODULES
 ModulesManager* ClientsManager::getModulesManager(){
 	return modulesManager;
 }
+#endif
 
 void ClientsManager::handleClientClosed(uint32_t clientId){
 	if(clients.count(clientId) > 0) {

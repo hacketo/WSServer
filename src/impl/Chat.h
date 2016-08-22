@@ -7,12 +7,12 @@
 
 
 #include "../client/manager/manager.h"
-#include "../modules/pub_sub.h"
+#include "../ext/modules/pub_sub.h"
 
 class Chat : public Manager {
 
 public:
-	Chat(ModulesManager *modulesManager);
+	Chat();
 
 	virtual bool onReady(Client *client) override;
 

@@ -5,8 +5,10 @@
 #include "../../debug.h"
 #include "../client.h"
 
-Manager::Manager(ModulesManager* modulesManager) :
-		modulesManager(modulesManager){
+Manager::Manager(){
+#ifdef USE_MODULES
+	modulesManager = new ModulesManager();
+#endif
 }
 
 bool Manager::onEnter(Client *client){
@@ -28,6 +30,8 @@ void Manager::onError(Client *client){}
 void Manager::onServerError(){}
 void Manager::onExit(){}
 
+#ifdef USE_MODULES
 ModulesManager* Manager::getModulesManager(){
 	return modulesManager;
 }
+#endif

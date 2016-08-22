@@ -9,7 +9,6 @@
 #include <string>
 #include "../protocol/packet/packet.h"
 
-#define USE_SESSIONS 0
 
 namespace config {
 
@@ -35,8 +34,6 @@ namespace config {
 
 	extern char DEFAULT_PARSER ;//  protocol::packet::ParserType::NO;
 
-
-	extern bool USE_MODULES ;//  true;
 	extern std::string ACTION_KEY ;//  "action";
 	extern std::string MODULE_KEY ;//  "module";
 	extern std::string MODULE_ACTION_KEY ;//  "action";

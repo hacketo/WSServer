@@ -8,8 +8,6 @@
 
 #include "manager.h"
 #include "../../protocol/packet/packet.h"
-#include "../../modules/base_module.h"
-
 
 class StateBasedManager;
 class State;
@@ -64,8 +62,9 @@ public:
 	void handle(Client *client, protocol::packet::PacketData *packet);
 
 
-
+#ifdef USE_MODULES
 	ModulesManager* getModulesManager();
+#endif
 	StateBasedManager* getManager();
 
 private:
@@ -87,7 +86,7 @@ public:
 
 	std::function<protocol::packet::Packet*(u_int32_t)> getChangeStatePacket;
 
-	StateBasedManager(ModulesManager* modulesManager);
+	StateBasedManager();
 	~StateBasedManager();
 
 	void initStates(std::vector<State *> states);

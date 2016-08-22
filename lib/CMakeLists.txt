@@ -1,43 +1,42 @@
-project(lib)
-
 
 add_library(rapidjson STATIC
-        rapidjson/include/rapidjson/allocators.h
-        rapidjson/include/rapidjson/document.h
-        rapidjson/include/rapidjson/encodedstream.h
-        rapidjson/include/rapidjson/encodings.h
-        rapidjson/include/rapidjson/filereadstream.h
-        rapidjson/include/rapidjson/filewritestream.h
-        rapidjson/include/rapidjson/fwd.h
-        rapidjson/include/rapidjson/istreamwrapper.h
-        rapidjson/include/rapidjson/memorybuffer.h
-        rapidjson/include/rapidjson/memorystream.h
-        rapidjson/include/rapidjson/ostreamwrapper.h
-        rapidjson/include/rapidjson/pointer.h
-        rapidjson/include/rapidjson/prettywriter.h
-        rapidjson/include/rapidjson/rapidjson.h
-        rapidjson/include/rapidjson/reader.h
-        rapidjson/include/rapidjson/schema.h
-        rapidjson/include/rapidjson/stream.h
-        rapidjson/include/rapidjson/stringbuffer.h
-        rapidjson/include/rapidjson/writer.h
-        rapidjson/include/rapidjson/error/en.h
-        rapidjson/include/rapidjson/error/error.h
-        rapidjson/include/rapidjson/internal/biginteger.h
-        rapidjson/include/rapidjson/internal/diyfp.h
-        rapidjson/include/rapidjson/internal/dtoa.h
-        rapidjson/include/rapidjson/internal/ieee754.h
-        rapidjson/include/rapidjson/internal/itoa.h
-        rapidjson/include/rapidjson/internal/meta.h
-        rapidjson/include/rapidjson/internal/pow10.h
-        rapidjson/include/rapidjson/internal/regex.h
-        rapidjson/include/rapidjson/internal/stack.h
-        rapidjson/include/rapidjson/internal/strfunc.h
-        rapidjson/include/rapidjson/internal/strtod.h
-        rapidjson/include/rapidjson/internal/swap.h
-        rapidjson/include/rapidjson/msinttypes/inttypes.h
-        rapidjson/include/rapidjson/msinttypes/stdint.h
-    )
+    rapidjson/allocators.h
+    rapidjson/document.h
+    rapidjson/encodedstream.h
+    rapidjson/encodings.h
+    rapidjson/filereadstream.h
+    rapidjson/filewritestream.h
+    rapidjson/fwd.h
+    rapidjson/istreamwrapper.h
+    rapidjson/memorybuffer.h
+    rapidjson/memorystream.h
+    rapidjson/ostreamwrapper.h
+    rapidjson/pointer.h
+    rapidjson/prettywriter.h
+    rapidjson/rapidjson.h
+    rapidjson/reader.h
+    rapidjson/schema.h
+    rapidjson/stream.h
+    rapidjson/stringbuffer.h
+    rapidjson/writer.h
+    rapidjson/error/en.h
+    rapidjson/error/error.h
+    rapidjson/internal/biginteger.h
+    rapidjson/internal/diyfp.h
+    rapidjson/internal/dtoa.h
+    rapidjson/internal/ieee754.h
+    rapidjson/internal/itoa.h
+    rapidjson/internal/meta.h
+    rapidjson/internal/pow10.h
+    rapidjson/internal/regex.h
+    rapidjson/internal/stack.h
+    rapidjson/internal/strfunc.h
+    rapidjson/internal/strtod.h
+    rapidjson/internal/swap.h
+    rapidjson/msinttypes/inttypes.h
+    rapidjson/msinttypes/stdint.h
+)
 
 set_target_properties(rapidjson PROPERTIES LINKER_LANGUAGE CXX)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})

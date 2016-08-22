@@ -11,8 +11,8 @@
 
 #include <cstdint>
 #include <map>
-#include "../util/algo.h"
-#include "../protocol/packet/packet.h"
+#include "../../util/algo.h"
+#include "../../protocol/packet/packet.h"
 
 class Client;
 class base_module;

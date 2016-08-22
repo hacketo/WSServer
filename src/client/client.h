@@ -9,13 +9,15 @@
 #include "../protocol/frame.h"
 #include "../protocol/constant.h"
 #include "../util/worker.h"
-#include "../modules/base_module.h"
+
 #include "manager/manager.h"
 #include "../protocol/packet/packet.h"
-#include "../server/config.h"
 
+#ifdef USE_MODULES
+#include "../ext/modules/base_module.h"
+#endif
 
-#if USE_SESSIONS
+#ifdef USE_SESSIONS
 #include "../modules/sessionmanager.h"
 #endif
 
@@ -107,11 +109,15 @@ public:
 
 	bool isAlive();
 
+#ifdef USE_MODULES
 	bool registerModule(base_module* module);
-	bool unregisterModule(base_module* module);
-	bool hasModuleRegistered(uint64_t moduleId);
-	ModuleClientController* getModuleController(uint64_t moduleId);
 
+	bool unregisterModule(base_module* module);
+
+	bool hasModuleRegistered(uint64_t moduleId);
+
+	ModuleClientController* getModuleController(uint64_t moduleId);
+#endif
 
 
 	std::string get_ip();
@@ -172,8 +178,12 @@ private:
 	void send_sync(unsigned char *data, size_t size, boost::system::error_code &error);
 
 	ClientsManager* clientManager;
+
+#ifdef USE_MODULES
 	ModulesController::u_ptr modulesController;
-#if USE_SESSIONS
+#endif
+
+#ifdef USE_SESSIONS
 	Session* session;
 #endif
 };
@@ -257,14 +267,19 @@ public:
 
 	void handleClientClosed(uint32_t client);
 
+#ifdef USE_MODULES
 	ModulesManager* getModulesManager();
-private:
-
-#if USE_SESSIONS
-	SessionManager::u_ptr sessionManager;
 #endif
 
+private:
+
+#ifdef USE_SESSIONS
+	SessionManager::u_ptr sessionManager;
+#endif
+#ifdef USE_MODULES
 	ModulesManager* modulesManager;
+#endif
+
 	uint32_t Client_ID;
 	Manager::u_ptr manager;
 	bool alive;

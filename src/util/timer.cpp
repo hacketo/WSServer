@@ -4,7 +4,6 @@
 
 #include "timer.h"
 
-#include <stdio.h>
 #include <boost/format.hpp>
 
 Timer::Timer() {

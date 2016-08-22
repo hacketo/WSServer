@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include "../../server/config.h"
 #include "rapidjson/document.h"
 #include "rapidjson/allocators.h"
 #include "../frame.h"
@@ -19,10 +20,10 @@ namespace packet{
 	enum ParserType {
 		NO, JSON
 	};
-
 	enum PacketType{
 		DATA, ACTION, MODULE
 	};
+
 
 	class PacketData {
 	public:
@@ -68,7 +69,10 @@ namespace packet{
 		Packet(PacketData* data);
 		Packet(GenericValue* value);
 		Packet(std::string action, GenericValue* value = new NullValue());
+
+#ifdef USE_MODULES
 		Packet(uint64_t  moduleId, std::string action, GenericValue* value);
+#endif
 		~Packet();
 
 		/**

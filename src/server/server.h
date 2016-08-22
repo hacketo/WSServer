@@ -56,7 +56,7 @@ namespace server{
 	 * @param manager
 	 */
 	void init(ServerData* data, boost::asio::io_service &io_service,
-			  Manager *m = new Manager(new ModulesManager)){
+			  Manager *m = new Manager){
 
 		data->acceptor = new boost::asio::ip::tcp::acceptor(io_service,
 										boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), data->port));

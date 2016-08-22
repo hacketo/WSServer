@@ -3,7 +3,7 @@
 //
 
 #include "pub_sub.h"
-#include "../client/client.h"
+#include "../../client/client.h"
 
 bool Pub_sub::reg(Client* client, ModuleClientController** controller){
 	if (!is_client_already_subscribed(client)){

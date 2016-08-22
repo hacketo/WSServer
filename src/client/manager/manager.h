@@ -5,12 +5,14 @@
 #ifndef SERVER_MANAGER_H
 #define SERVER_MANAGER_H
 
-
+#include "../../server/config.h"
 #include "../../protocol/frame.h"
 #include "../../protocol/packet/packet.h"
-#include "../../modules/base_module.h"
 #include "../../protocol/http.h"
 
+#ifdef USE_MODULES
+#include "../../ext/modules/base_module.h"
+#endif
 
 class Client;
 
@@ -18,7 +20,7 @@ class Manager{
 
 public:
 
-	Manager(ModulesManager* modulesManager);
+	Manager();
 
 	typedef std::unique_ptr<Manager> u_ptr;
 
@@ -86,9 +88,12 @@ public:
 	 */
 	virtual void onExit();
 
+#ifdef USE_MODULES
 	ModulesManager* getModulesManager();
 protected:
 	ModulesManager* modulesManager;
+#endif
+
 };
 
 

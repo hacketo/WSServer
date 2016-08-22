@@ -5,8 +5,8 @@
 #include "packet.h"
 #include "../../debug.h"
 #include "rapidjson/error/en.h"
-#include "../../server/config.h"
 #include <boost/algorithm/string/predicate.hpp>
+
 namespace protocol {
 namespace packet{
 
@@ -15,9 +15,12 @@ namespace packet{
 	ActionPacketData::ActionPacketData(std::string action, GenericValue* value) : PacketData(value), action(action){ packetType = ACTION; };
 	ActionPacketData::ActionPacketData(GenericValue* value) : PacketData(value){ packetType = ACTION; };
 	ActionPacketData::ActionPacketData() : PacketData(){ packetType = ACTION; };
+
+#ifdef USE_MODULES
 	ModulePacketData::ModulePacketData(uint64_t  moduleId, std::string action, GenericValue* value) : ActionPacketData(value){ packetType = MODULE; };
 	ModulePacketData::ModulePacketData(GenericValue* value) : ActionPacketData(value){ packetType = MODULE; };
 	ModulePacketData::ModulePacketData() : ActionPacketData(){ packetType = MODULE; };
+#endif
 
 	Packet::Packet() : packets() {}
 
@@ -30,10 +33,11 @@ namespace packet{
 	Packet::Packet(std::string action, GenericValue* value) : packets() {
 		addPacket(new ActionPacketData(action, value));
 	}
+#ifdef USE_MODULES
 	Packet::Packet(uint64_t  moduleId, std::string action, GenericValue* value) : packets() {
 		addPacket(new ModulePacketData(moduleId, action, value));
 	}
-
+#endif
 	Packet::~Packet() {
 		// check a delete les pointeur d'abord
 		packets.clear();
@@ -93,18 +97,23 @@ namespace packet{
 	void parseFromJSON(Packet* packet, rapidjson::Value* object, errors::error& error) {
 
 		const char * actionKey = config::ACTION_KEY.c_str();
+#ifdef USE_MODULES
 		const char * moduleKey = config::MODULE_KEY.c_str();
 		const char * moduleActionKey = config::MODULE_ACTION_KEY.c_str();
+#endif
 		const char * dataKey = config::DATA_KEY.c_str();
 
 		PacketData* data;
+#ifdef USE_MODULES
 		if (object->HasMember(moduleKey)){
 			ModulePacketData * d = new ModulePacketData();
 			d->module = (*object)[moduleKey].GetInt();
 			d->action = (*object)[moduleActionKey].GetString();
 			data = d;
 		}
-		else if (object->HasMember(actionKey)){
+		else
+#endif
+		if (object->HasMember(actionKey)){
 			ActionPacketData * d = new ActionPacketData();
 			d->action = (*object)[actionKey].GetString();
 			data = d;
@@ -127,8 +136,10 @@ namespace packet{
 
 	std::string toJson(Packet* packet, bool prettyprint) {
 		const char * actionKey = config::ACTION_KEY.c_str();
+#ifdef USE_MODULES
 		const char * moduleKey = config::MODULE_KEY.c_str();
 		const char * moduleActionKey = config::MODULE_ACTION_KEY.c_str();
+#endif
 		const char * dataKey = config::DATA_KEY.c_str();
 
 		rapidjson::StringBuffer sb;
@@ -151,14 +162,15 @@ namespace packet{
 				writer->Key(actionKey);
 				writer->String(p->action.c_str(), static_cast<rapidjson::SizeType>(p->action.length()));
 			}
+#ifdef USE_MODULES
 			else if (packetData->packetType == PacketType::MODULE){
 				ModulePacketData *p = reinterpret_cast<ModulePacketData*>(packetData);
 				writer->Key(moduleKey);
 				writer->Int(p->module);
 				writer->Key(moduleActionKey);
 				writer->String(p->action.c_str(), static_cast<rapidjson::SizeType>(p->action.length()));
-
 			}
+#endif
 
 			if (packetData->data) {
 				writer->Key(dataKey);

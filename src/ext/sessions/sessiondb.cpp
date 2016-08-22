@@ -3,8 +3,8 @@
 //
 
 #include "sessiondb.h"
-#include "../modules/sessionmanager.h"
-#include "../debug.h"
+#include "sessionmanager.h"
+#include "../../debug.h"
 
 
 SessionDB::SessionDB() : DbHandler(){};

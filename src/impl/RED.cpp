@@ -3,8 +3,7 @@
 //
 
 #include "RED.h"
-
-
+#include "../client/client.h"
 
 ListFilesAction::ListFilesAction(State *state) : Action("dir", state){}
 void ListFilesAction::handle(Client* client, GenericValue* packet){
@@ -21,21 +20,20 @@ void GetFileContentAction::handle(Client* client, GenericValue* packet){
 	objectValue->set("content", new StringValue("file content"));
 	Packet::u_ptr p = Packet::u_ptr(new Packet("file", objectValue));
 	client->send(p.get());
-	((MainState*)state)->pubsub->publish(p.get());
 }
 
 
 
 MainState::MainState(StateBasedManager *manager) : State(MainState::ID, manager){
-	pubsub = new Pub_sub();
-	getModulesManager()->REGISTER(pubsub);
+	//pubsub = new Pub_sub();
+	//getModulesManager()->REGISTER(pubsub);
 
 }
 void MainState::on_enter(Client* client){
-	client->registerModule(pubsub);
+	//client->registerModule(pubsub);
 }
 void MainState::on_exit(Client* client){
-	client->unregisterModule(pubsub);
+	//client->unregisterModule(pubsub);
 }
 
 void MainState::init_actions(){

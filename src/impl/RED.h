@@ -6,7 +6,6 @@
 #define SERVER_RED_H
 
 #include "../client/manager/statebased_manager.h"
-#include "../modules/pub_sub.h"
 
 using namespace protocol::packet;
 
@@ -27,7 +26,6 @@ public:
 class MainState : public State {
 public:
 	static const u_int32_t ID = 1;
-	Pub_sub* pubsub;
 	MainState(StateBasedManager *manager);
 	virtual void on_enter(Client* client) override;
 	virtual void on_exit(Client* client) override;

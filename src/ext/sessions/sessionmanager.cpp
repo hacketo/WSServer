@@ -1,14 +1,14 @@
 //
 // Created by hacketo on 19/08/16.
 //
-#include "../server/config.h"
+#include "../../server/config.h"
 
 #include "sessionmanager.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include "../client/client.h"
-#include "../debug.h"
-#include "../util/date.h"
+#include "../../client/client.h"
+#include "../../debug.h"
+#include "../../util/date.h"
 
 using namespace protocol::packet;
 

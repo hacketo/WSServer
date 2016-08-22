@@ -1,17 +1,14 @@
 cmake_minimum_required(VERSION 3.2)
+
 project(Server)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -E")
 
 #include(ExternalProject)
 #include(External_boost)
-
-message(WARNING "start running cmake...")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(SOURCE_FILES src/main.cpp)
-
-message(WARNING "sources files : ${SOURCE_FILES}")
 
 
 # Search OpenSSL
@@ -19,25 +16,24 @@ find_package(OpenSSL REQUIRED)
 if( OPENSSL_FOUND )
     include_directories(${OPENSSL_INCLUDE_DIRS})
     message(WARNING "Using OpenSSL ${OPENSSL_VERSION}")
-else()
-    # Error; with REQUIRED, pkg_search_module() will throw an error by it's own
 endif()
 
 
 # Search Boost
-
-set(Boost_USE_STATIC_LIBS        ON) # only find static libs
-set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME    OFF)
-
 find_package(Boost 1.54.0 COMPONENTS thread date_time filesystem system REQUIRED)
 if(Boost_FOUND)
     message(WARNING "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+    message(WARNING "Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
     message(WARNING "Boost_LIBRARIES: ${Boost_LIBRARIES}")
     message(WARNING "Boost_VERSION: ${Boost_VERSION}")
+    link_directories(${Boost_LIBRARY_DIRS})
     include_directories(${Boost_INCLUDE_DIRS})
-else()
+
+    set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+    set(Boost_USE_MULTITHREADED      ON)
+    set(Boost_USE_STATIC_RUNTIME    OFF)
 endif()
+
 
 # Search SQLite3
 find_package(SQLite3 REQUIRED)
@@ -62,19 +58,24 @@ if(CURSES_FOUND)
 endif()
 
 
-add_subdirectory(src)
 add_subdirectory(lib)
+
+
+add_executable(chat src/main.cpp )
+add_executable(red src/main_state.cpp )
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+
+
+#link_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
+
+add_subdirectory(src)
+
 add_subdirectory(tests)
 
-add_executable(Server_run ${SOURCE_FILES} )
-add_executable(Server_run2 src/main_state.cpp )
+set(server_required_libraries ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3)
 
+target_link_libraries(chat chat_src ${server_required_libraries} )
 
-target_include_directories(Server_src PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib/rapidjson/include/>
-    $<INSTALL_INTERFACE:lib/rapidjson/include/>  # <prefix>lib/rapidjson/include/
-)
-
-target_link_libraries(Server_run Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3)
-target_link_libraries(Server_run2 Server_src ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3)
-
+target_link_libraries(red red_src ${server_required_libraries} )
