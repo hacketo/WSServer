@@ -2,8 +2,8 @@
 // Created by hacketo on 10/08/16.
 //
 #include "manager.h"
-#include "../../debug.h"
-#include "../client.h"
+#include "../debug.h"
+#include "client.h"
 
 Manager::Manager(){
 #ifdef USE_MODULES

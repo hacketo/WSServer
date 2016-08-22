@@ -17,7 +17,7 @@ set(HEADER_FILES
     protocol/constant.h
     protocol/frame.h
     protocol/http.h
-    protocol/packet/packet.h
+    protocol/packet.h
     protocol/opcode.h
     protocol/statuscode.h
 

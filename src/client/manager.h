@@ -5,10 +5,10 @@
 #ifndef SERVER_MANAGER_H
 #define SERVER_MANAGER_H
 
-#include "../../server/config.h"
-#include "../../protocol/frame.h"
-#include "../../protocol/packet/packet.h"
-#include "../../protocol/http.h"
+#include "../server/config.h"
+#include "../protocol/frame.h"
+#include "../protocol/packet.h"
+#include "../protocol/http.h"
 
 #ifdef USE_MODULES
 #include "../../ext/modules/base_module.h"

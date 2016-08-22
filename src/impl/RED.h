@@ -5,7 +5,7 @@
 #ifndef SERVER_RED_H
 #define SERVER_RED_H
 
-#include "../client/manager/statebased_manager.h"
+#include "../client/statebased_manager.h"
 
 using namespace protocol::packet;
 

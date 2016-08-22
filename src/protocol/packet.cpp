@@ -3,7 +3,7 @@
 //
 
 #include "packet.h"
-#include "../../debug.h"
+#include "../debug.h"
 #include "rapidjson/error/en.h"
 #include <boost/algorithm/string/predicate.hpp>
 

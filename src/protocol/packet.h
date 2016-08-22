@@ -7,12 +7,12 @@
 
 #include <string>
 #include <vector>
-#include "../../server/config.h"
+#include "../server/config.h"
 #include "rapidjson/document.h"
 #include "rapidjson/allocators.h"
-#include "../frame.h"
-#include "../../util/genericvalue.h"
-#include "../../server/errors.h"
+#include "frame.h"
+#include "../util/genericvalue.h"
+#include "../server/errors.h"
 
 namespace protocol {
 namespace packet{

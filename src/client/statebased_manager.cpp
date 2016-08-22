@@ -3,9 +3,9 @@
 //
 
 #include "statebased_manager.h"
-#include "../../debug.h"
-#include "../client.h"
-#include "../../util/algo.h"
+#include "../debug.h"
+#include "client.h"
+#include "../util/algo.h"
 
 using namespace protocol;
 

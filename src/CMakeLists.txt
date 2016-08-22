@@ -4,8 +4,8 @@ set(HEADER_FILES
     debug.h
 
     client/client.h
-    client/manager/manager.h
-    client/manager/statebased_manager.h
+        client/manager.h
+        client/statebased_manager.h
 
     db/dbhandler.h
 
@@ -19,7 +19,7 @@ set(HEADER_FILES
     protocol/constant.h
     protocol/frame.h
     protocol/http.h
-    protocol/packet/packet.h
+    protocol/packet.h
     protocol/opcode.h
     protocol/statuscode.h
 
@@ -43,8 +43,8 @@ set(SOURCE_FILES
     debug.cpp
 
     client/client.cpp
-    client/manager/manager.cpp
-    client/manager/statebased_manager.cpp
+        client/manager.cpp
+        client/statebased_manager.cpp
 
     db/dbhandler.cpp
 
@@ -56,7 +56,7 @@ set(SOURCE_FILES
 
     protocol/frame.cpp
     protocol/http.cpp
-    protocol/packet/packet.cpp
+        protocol/packet.cpp
     protocol/opcode.cpp
 
     server/config.cpp

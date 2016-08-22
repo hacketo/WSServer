@@ -7,7 +7,7 @@
 
 
 #include <string>
-#include "../protocol/packet/packet.h"
+#include "../protocol/packet.h"
 
 
 namespace config {

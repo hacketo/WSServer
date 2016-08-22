@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <map>
 #include "../../util/algo.h"
-#include "../../protocol/packet/packet.h"
+#include "../../protocol/packet.h"
 
 class Client;
 class base_module;

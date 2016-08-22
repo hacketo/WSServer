@@ -10,8 +10,8 @@
 #include "../protocol/constant.h"
 #include "../util/worker.h"
 
-#include "manager/manager.h"
-#include "../protocol/packet/packet.h"
+#include "manager.h"
+#include "../protocol/packet.h"
 
 #ifdef USE_MODULES
 #include "../ext/modules/base_module.h"

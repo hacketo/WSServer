@@ -6,7 +6,7 @@
 #define SERVER_CHAT_H
 
 
-#include "../client/manager/manager.h"
+#include "../client/manager.h"
 #include "../ext/modules/pub_sub.h"
 
 class Chat : public Manager {

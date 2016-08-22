@@ -4,7 +4,7 @@
 
 
 #include "gtest/gtest.h"
-#include "../../src/protocol/packet/packet.h"
+#include "../../src/protocol/packet.h"
 #include "../../src/server/config.h"
 
 using namespace protocol::packet;

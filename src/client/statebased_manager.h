@@ -7,7 +7,7 @@
 
 
 #include "manager.h"
-#include "../../protocol/packet/packet.h"
+#include "../protocol/packet.h"
 
 class StateBasedManager;
 class State;
