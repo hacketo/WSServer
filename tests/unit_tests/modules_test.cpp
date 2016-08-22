@@ -5,8 +5,7 @@
 
 #include "gtest/gtest.h"
 
-#define TEST_FRIENDS \
-    friend class modules_test_null_initialized_check_Test;
+#define private public
 
 #include "ext/modules/base_module.h"
 
@@ -14,9 +13,9 @@
 
 TEST(modules_test, null_initialized_check) {
 
-	ModulesManager* manager = new ModulesManager();
+	ext::modules::ModulesManager* manager = new ext::modules::ModulesManager();
 
-	base_module* module = new base_module;
+	ext::modules::base_module* module = new ext::modules::base_module;
 
 	manager->REGISTER(module);
 

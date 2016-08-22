@@ -16,7 +16,7 @@ class State;
 class Action{
 
 public:
-	Action(std::string name, State *state);
+	Action(std::string& name, State *state);
 
 	std::string name;
 

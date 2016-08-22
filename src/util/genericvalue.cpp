@@ -42,7 +42,8 @@ GenericValue* GenericValue::parse(rapidjson::Value *value) {
 	GenericValue* packetValue;
 
 	if (value->IsString()) {
-		packetValue = new StringValue(value->GetString());
+		std::string v = value->GetString();
+		packetValue = new StringValue(v);
 	} else if (value->IsNull()) {
 		packetValue = new NullValue();
 	} else if (value->IsInt()) {
@@ -55,7 +56,8 @@ GenericValue* GenericValue::parse(rapidjson::Value *value) {
 		packetValue = new ObjectValue();
 		for (rapidjson::Value::MemberIterator itr = value->MemberBegin();
 			 itr != value->MemberEnd(); ++itr) {
-			packetValue->set(itr->name.GetString(), parse(&itr->value));
+			std::string v = itr->name.GetString();
+			packetValue->set(v, parse(&itr->value));
 		}
 	} else if (value->IsArray()) {
 		packetValue = new ArrayValue();
@@ -78,13 +80,13 @@ GenericValue::obj_const_iterator GenericValue::end_object() {THROW_NOT_SUPPORTED
 
 bool GenericValue::isObject() const { return false; }
 
-void GenericValue::set(std::string key, GenericValue* value) {THROW_NOT_SUPPORTED()}
+void GenericValue::set(const std::string key, GenericValue* value) {THROW_NOT_SUPPORTED()}
 
-GenericValue* GenericValue::get(std::string key) {THROW_NOT_SUPPORTED()}
+GenericValue* GenericValue::get(const std::string key) {THROW_NOT_SUPPORTED()}
 
 std::vector<std::string> GenericValue::getKeys() const {THROW_NOT_SUPPORTED()}
 
-GenericValue* GenericValue::operator[](std::string key) {THROW_NOT_SUPPORTED()}
+GenericValue* GenericValue::operator[](const std::string key) {THROW_NOT_SUPPORTED()}
 
 //</editor-fold>
 
@@ -120,7 +122,7 @@ bool GenericValue::getBool() const {THROW_NOT_SUPPORTED()}
 
 bool GenericValue::isString() const { return false; }
 
-void GenericValue::setString(std::string value) {THROW_NOT_SUPPORTED()}
+void GenericValue::setString(const std::string value) {THROW_NOT_SUPPORTED()}
 
 std::string GenericValue::getString() const {THROW_NOT_SUPPORTED()}
 
@@ -219,7 +221,7 @@ ObjectValue::~ObjectValue() {
 
 bool ObjectValue::isObject() const { return true; }
 
-void ObjectValue::set(std::string key, GenericValue* value) {
+void ObjectValue::set(const std::string key, GenericValue* value) {
 	check_circular_reference(value);
 	if (objects.count(key) == 0) {
 		keys.push_back(key);
@@ -227,7 +229,7 @@ void ObjectValue::set(std::string key, GenericValue* value) {
 	objects[key] = u_ptr(value);
 }
 
-GenericValue* ObjectValue::get(std::string key) {
+GenericValue* ObjectValue::get(const std::string key) {
 	if (objects.count(key) > 0) {
 		return objects[key].get();
 	}
@@ -344,7 +346,10 @@ inline std::string BoolValue::getReadableType() const {
 //<editor-fold desc="StringValue">
 
 StringValue::StringValue() : GenericValue(){}
-StringValue::StringValue(std::string data) : GenericValue() ,  stringValue(data) {
+StringValue::StringValue(const std::string data) : GenericValue() ,  stringValue(data) {
+	set_initialized();
+}
+StringValue::StringValue(const char * data) : GenericValue() ,  stringValue(data) {
 	set_initialized();
 }
 
@@ -352,7 +357,7 @@ bool StringValue::isString() const { return true; }
 
 std::string StringValue::getString() const {CHECK_INITIALIZED(); return stringValue; }
 
-void StringValue::setString(std::string value) { stringValue = value; set_initialized();}
+void StringValue::setString(const std::string value) { stringValue = value; set_initialized();}
 
 inline std::string StringValue::getReadableType() const{
 	return "StringValue";

@@ -33,6 +33,8 @@ namespace http {
 	typedef http_header::const_iterator header_iterator;
 
 
+	const std::string GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
 	const std::string FIELD_WS_VERSION = "Sec-WebSocket-Version";
 	const std::string FIELD_WS_KEY = "Sec-WebSocket-Key";
 	const std::string FIELD_HOST = "Host";
@@ -47,10 +49,10 @@ namespace http {
 	std::string get_ws_location();
 	std::string get_host();
 
-	http::handshake* get_handshake(std::string unencodedkey, std::string &ws_key);
+	http::handshake* get_handshake(const char * unencodedkey);
 
 	void add_cookie(http::handshake* handshake, const std::string& key, const std::string& value, u_int32_t offset);
-	void parse_header(const std::string &header, http::handshake* handshake, errors::error& error);
+	void parse_header(const std::string& header, http::handshake* handshake, errors::error& error);
 
 	/**
 	 * Valide le header
@@ -73,6 +75,7 @@ namespace http {
 	bool next_chars_CRLF(const char *header, int i);
 
 	std::string handshake_to_string(handshake *pHandshake);
+	void handshake_to_uint8(http::handshake *pHandshake, uint8_t** buffer, uint64_t& size);
 }
 }
 #endif //WS_SERVER_HTTP_H

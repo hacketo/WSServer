@@ -4,7 +4,7 @@
 
 #include "util/base64.h"
 
-std::string  base64_encode(const std::string text){
+std::string  base64_encode(std::string text){
     unsigned long writePaddChars = (3-text.length()%3)%3;
     std::string base64(it_base64_t(text.begin()),it_base64_t(text.end()));
     base64.append(writePaddChars,'=');

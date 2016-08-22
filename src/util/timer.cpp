@@ -6,6 +6,8 @@
 
 #include <boost/format.hpp>
 
+
+
 Timer::Timer() {
     reset();
 }
@@ -18,8 +20,11 @@ long Timer::elapsed() {
     return diff.total_milliseconds();
 }
 
-void Timer::printTime(std::string msg){
-    boost::format output("%.2f");
-    output % (elapsed()/1000.0) ;
+void Timer::printTime(const std::string& msg){
+    boost::format output("%.10f");
+    long e = elapsed();
+    output % (e/1000.0) ;
     std::cout << msg << " : " << output << "s " << std::endl;
 }
+
+Timer Timer::timer = Timer();

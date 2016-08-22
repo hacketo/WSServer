@@ -33,17 +33,18 @@ namespace http {
 		return ss.str();
 	}
 
-	http::handshake* get_handshake(std::string unencodedKey, std::string &ws_key) {
+	http::handshake* get_handshake(const char* unencodedKey) {
 
-		std::string key = unencodedKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-		ws_key = base64_encode(get_sha1(key.c_str()));
+		std::string key = unencodedKey + GUID;
 
 		http::handshake* hd = new http::handshake;
+		hd->wsKey = base64_encode(get_sha1(key.c_str()));
+
 		hd->baseHeader = "HTTP/1.1 101 Web Socket Protocol Handshake";
 		hd->headers["Upgrade"] = "WebSocket";
 		hd->headers["Connection"] = "Upgrade";
 		hd->headers["Server"] = config::SERVER_NAME;
-		hd->headers["Sec-WebSocket-Accept"] = ws_key;
+		hd->headers["Sec-WebSocket-Accept"] = hd->wsKey;
 		hd->headers["Sec-WebSocket-Origin"] = config::HTTP_ORIGIN;
 		hd->headers["Sec-WebSocket-Location"] = get_ws_location();
 
@@ -65,6 +66,13 @@ namespace http {
 		}
 		ss << "\r\n";
 		return ss.str();
+	}
+
+	void handshake_to_uint8(http::handshake *pHandshake, uint8_t** buffer, uint64_t& size) {
+		std::string s = handshake_to_string(pHandshake);
+		size = s.length();
+		*buffer = new uint8_t[size];
+		string::convert(s, *buffer, size);
 	}
 
 	void validate_header(http::handshake *handshake, errors::error& error) {

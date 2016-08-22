@@ -9,6 +9,8 @@
 #include "client/manager.h"
 #include "ext/modules/pub_sub.h"
 
+using ext::modules::pubsub::Pub_sub;
+
 class Chat : public Manager {
 
 public:

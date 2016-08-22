@@ -15,7 +15,7 @@
 #include <boost/timer/timer.hpp> // for auto_cpu_timer
 
 template<class T>
-class SynchronizedPool {
+class SafeDeQue {
 public:
 
 	typedef boost::circular_buffer<T> container_type;
@@ -24,7 +24,7 @@ public:
 	typedef typename boost::call_traits<value_type>::param_type param_type;
 
 // `param_type` represents the "best" way to pass a parameter of type `value_type` to a method.
-	explicit SynchronizedPool(size_type capacity) : m_unread(0), m_container(capacity) {}
+	explicit SafeDeQue(size_type capacity) : m_unread(0), m_container(capacity) {}
 
 	/**
 	 * Méthode d'ajout d'un item dans la liste
@@ -33,7 +33,7 @@ public:
 	 */
 	void push_front(param_type item) {
 		boost::mutex::scoped_lock lock(m_mutex);
-		m_not_full.wait(lock, boost::bind(&SynchronizedPool<value_type>::is_not_full, this));
+		m_not_full.wait(lock, boost::bind(&SafeDeQue<value_type>::is_not_full, this));
 		m_container.push_front(item);
 		++m_unread;
 		lock.unlock();
@@ -47,10 +47,14 @@ public:
 	 */
 	void pop_back(value_type *pItem) {
 		boost::mutex::scoped_lock lock(m_mutex);
-		m_not_empty.wait(lock, boost::bind(&SynchronizedPool<value_type>::is_not_empty, this));
+		m_not_empty.wait(lock, boost::bind(&SafeDeQue<value_type>::is_not_empty, this));
 		*pItem = m_container[--m_unread];
 		lock.unlock();
 		m_not_full.notify_one();
+	}
+
+	size_type weight(){
+		return m_unread;
 	}
 
 	bool is_not_empty() const { return m_unread > 0; }
@@ -58,8 +62,8 @@ public:
 	bool is_not_full() const { return m_unread < m_container.capacity(); }
 
 private:
-	SynchronizedPool(const SynchronizedPool &) {};              // Disabled copy constructor.
-	SynchronizedPool &operator=(const SynchronizedPool &) {}; // Disabled assign operator.
+	SafeDeQue(const SafeDeQue &) {};              // Disabled copy constructor.
+	SafeDeQue &operator=(const SafeDeQue &) {}; // Disabled assign operator.
 
 	size_type m_unread;
 	container_type m_container;

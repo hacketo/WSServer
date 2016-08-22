@@ -72,8 +72,8 @@ namespace errors{
 	error get_error(uint16_t code);
 	error get_error(uint16_t code, std::string msg);
 	error get_error(uint16_t code, std::string msg, std::string tokenValue);
-	error get_error(std::string master, uint16_t code, std::string msg);
-	error get_error(std::string master, uint16_t code, std::string msg , std::string tokenValue);
+	error get_error(const std::string master, uint16_t code, const std::string msg);
+	error get_error(const std::string master, uint16_t code, const std::string msg , const std::string tokenValue);
 }
 
 #endif //SERVER_ERRORS_H

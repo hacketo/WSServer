@@ -13,7 +13,9 @@ public:
     Timer();
     void reset();
     long elapsed();
-    void printTime(std::string msg);
+    void printTime(const std::string& msg);
+
+	static Timer timer;
 
 private:
     boost::posix_time::ptime time1;

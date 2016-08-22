@@ -12,6 +12,7 @@
 
 #ifdef USE_MODULES
 #include "ext/modules/base_module.h"
+using ext::modules::ModulesManager;
 #endif
 
 class Client;

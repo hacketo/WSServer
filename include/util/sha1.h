@@ -7,6 +7,6 @@
 
 #include <string>
 
-std::string get_sha1(std::string sequence);
+std::string get_sha1(const std::string& sequence);
 
 #endif //SERVER_SHA1_H

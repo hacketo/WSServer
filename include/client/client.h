@@ -4,7 +4,7 @@
 #include "boost/asio.hpp"
 #include "boost/thread/thread.hpp"
 #include "boost/enable_shared_from_this.hpp"
-#include "util/synchronizedpool.h"
+#include "util/safedeque.h"
 #include "protocol/http.h"
 #include "protocol/frame.h"
 #include "protocol/constant.h"
@@ -15,21 +15,24 @@
 
 #ifdef USE_MODULES
 #include "ext/modules/base_module.h"
+using namespace ext::modules;
 #endif
 
 #ifdef USE_SESSIONS
 #include "ext/sessions/sessionmanager.h"
+using namespace ext::sessions;
 #endif
 
 using namespace protocol;
 
 class ClientsManager;
 
+
 /**
  * Thread safe worker pour recevoir et traiter les frames recue sur 2 threads différents
  * Décode les frames recues
  */
-class IncomingMessagesWorker : public Worker<frame::Frame>{
+class IncomingMessagesWorker : public Worker<frame::FrameBuffer>{
 public:
 	typedef std::unique_ptr<IncomingMessagesWorker> u_ptr;
 	static u_ptr create(ClientsManager* manager, Client *client, size_t size = 50){
@@ -46,6 +49,7 @@ private:
 	 * Buffer temporaire pour les nouveau message
 	 */
 	uint8_t temp_buffer[constant::max_buffer_size];
+	uint32_t packetID = 0;
 
 	Client* client;
 	void job();
@@ -56,7 +60,7 @@ private:
  * Thread safe worker pour envoyer les messages au client
  * Recoit une liste de message à encoder et envoyer au client
  */
-class OutgoingMessagesWorker : public Worker<frame::Frame> {
+class OutgoingMessagesWorker : public Worker<frame::Frame*> {
 public:
 	typedef std::unique_ptr<OutgoingMessagesWorker> u_ptr;
 	static u_ptr create(Client *client, size_t size = 50){
@@ -74,7 +78,7 @@ class Client : public boost::enable_shared_from_this<Client> {
 	friend class IncomingMessagesWorker;
 	friend class OutgoingMessagesWorker;
 	friend class ClientsManager;
-	friend class SessionManager;
+	friend class ext::sessions::SessionManager;
 public:
 
 	virtual ~Client();
@@ -100,12 +104,14 @@ public:
 	/**
 	 * Envoi en message au client, thread safe
 	 */
-	void send(std::string message);
+	void send(std::string& message);
 
 	/**
 	 * Envoi en message au client, thread safe
 	 */
 	void send(frame::FrameInterface *holder);
+
+	void send(frame::Frame* frame);
 
 	bool isAlive();
 

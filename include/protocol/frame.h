@@ -41,7 +41,18 @@ namespace frame {
 		LEN_MASK = 0x80
 	};
 
-	struct Frame {
+	struct FrameBuffer {
+		uint32_t bufferSize = constant::max_buffer_size;
+		uint8_t buffer[constant::max_buffer_size];
+		uint32_t _id;
+		uint8_t opcode;
+	};
+
+	class Frame {
+	public:
+
+		~Frame();
+
 		/** True si la frame est raw venant du client */
 		bool encoded = false;
 
@@ -55,23 +66,26 @@ namespace frame {
 		/** Payload décodé */
 		std::string msg;
 
-		uint16_t bufferSize = constant::max_buffer_size;
-		uint8_t buffer[constant::max_buffer_size];
+		uint32_t bufferSize;
+		uint8_t* buffer;
 
 		/** @todo:Erreur de frame ? */
 		int flags = 0;
 	};
 
-	Frame from_string(std::string msg);
+	Frame* from_string(std::string& msg);
 
-	Frame from_uint8_t(uint8_t *data, uint16_t s);
+	FrameBuffer from_uint8_t(uint8_t *data, uint16_t s, uint16_t id);
+
+	uint8_t get_opcode(FrameBuffer* buffer);
+	uint32_t get_framelen(FrameBuffer* buffer);
 
 	/**
 	 * Parse le buffer du holder dans une nouvelle Frame
 	 * @param holder
 	 * @return
 	 */
-	void decode(Frame *frame);
+	void decode(Frame *frame, uint8_t *buffer, uint32_t bufferSize);
 
 
 	/**
@@ -81,10 +95,11 @@ namespace frame {
 	 */
 	void encode(Frame *frame);
 
+	uint32_t get_expected_frame_size(uint32_t s);
 
 	class FrameInterface {
 	public:
-		virtual Frame getFrame() { throw new NotImplementedException(); };
+		virtual Frame* getFrame() { throw new NotImplementedException(); };
 	};
 }
 

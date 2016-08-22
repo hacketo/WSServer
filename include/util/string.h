@@ -16,7 +16,7 @@ namespace string {
 		std::copy(string, string + offset, ret);
 	}
 
-	inline std::string sprintf(std::string msg , std::string tokenValue) {
+	inline std::string sprintf(const std::string& msg , const std::string& tokenValue) {
 		uint64_t size = msg.length() + tokenValue.length();
 		char buffer[size];
 		std::sprintf(buffer, msg.c_str(), tokenValue);

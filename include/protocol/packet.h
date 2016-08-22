@@ -38,14 +38,14 @@ namespace packet{
 	class ActionPacketData : public PacketData {
 	public:
 		std::string action;
-		ActionPacketData(std::string action,GenericValue* value);
+		ActionPacketData(const std::string action,GenericValue* value);
 		ActionPacketData(GenericValue* value);
 		ActionPacketData();
 	};
 	class ModulePacketData : public ActionPacketData{
 	public:
 		uint64_t module;
-		ModulePacketData(uint64_t  moduleId, std::string action, GenericValue* value);
+		ModulePacketData(uint64_t  moduleId, const std::string action, GenericValue* value);
 		ModulePacketData(GenericValue* value);
 		ModulePacketData();
 	};
@@ -68,10 +68,10 @@ namespace packet{
 		Packet();
 		Packet(PacketData* data);
 		Packet(GenericValue* value);
-		Packet(std::string action, GenericValue* value = new NullValue());
+		Packet(const std::string action, GenericValue* value = new NullValue());
 
 #ifdef USE_MODULES
-		Packet(uint64_t  moduleId, std::string action, GenericValue* value);
+		Packet(uint64_t  moduleId, const std::string action, GenericValue* value);
 #endif
 		~Packet();
 
@@ -100,7 +100,7 @@ namespace packet{
 		 * Retourne une structure contenant la représentation json du packet
 		 * @return
 		 */
-		virtual frame::Frame getFrame() override;
+		virtual frame::Frame* getFrame() override;
 
 	private:
 		/**
@@ -125,9 +125,9 @@ namespace packet{
 	 * @param json
 	 * @return
 	 */
-	void parse(Packet* packet, std::string valueToParse, errors::error& error);
+	void parse(Packet* packet, std::string& valueToParse, errors::error& error);
 	void parseFromJSON(Packet* packet, rapidjson::Value* object, errors::error& error);
-	void parseFromJSON(Packet* packet, std::string json, errors::error& error);
+	void parseFromJSON(Packet* packet, std::string& json, errors::error& error);
 
 }
 }

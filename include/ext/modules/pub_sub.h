@@ -9,52 +9,72 @@
 #include <stdint.h>
 #include "base_module.h"
 #include <memory>
+#include <util/worker.h>
+
+using protocol::frame::Frame;
 
 class Client;
 
-class Pub_sub : public base_module{
+namespace ext {
+namespace modules {
+namespace pubsub {
+	class Pub_sub;
 
-	friend class Pub_subModule;
+	class OutgoingMessagesWorker : public Worker<Frame*> {
+	public:
+		typedef std::unique_ptr<OutgoingMessagesWorker> u_ptr;
 
-public:
+		static u_ptr create(Pub_sub *pubsub, size_t size = 50) {
+			return u_ptr(new OutgoingMessagesWorker(pubsub, size));
+		}
 
-	typedef std::unique_ptr<Pub_sub> u_ptr;
-	/**
-	 * Appelé pour qu'un client subsribe a ce Pub_sub
-	 * @THREAD2
-	 * @param client
-	 * @return
-	 */
-	bool reg(Client* client, ModuleClientController** controller) override;
+		OutgoingMessagesWorker(Pub_sub *pubsub, size_t size = 50);
 
-	/**
-	 * Appelé pour qu'un client unsubsribe a ce Pub_sub
-	 * @param client
-	 * @return
-	 */
-	bool unregister(Client* client) override;
+		void init_job_thread();
 
-	/**
-	 * Appelé pour publier un message auc clients abonnés
-	 * @THREAD1
-	 * @param packet
-	 * @return
-	 */
-	bool publish(protocol::frame::FrameInterface* frameInterface);
+	private:
+		Pub_sub *pubsub;
 
-private:
+		void job();
+	};
 
-	bool is_client_already_subscribed(Client* client);
+	class Pub_sub : public base_module {
 
-	std::map<uint32_t, Client*> clients;
-	typedef std::map<uint32_t, Client*>::iterator client_iterator;
-};
+		friend class OutgoingMessagesWorker;
+		friend class Pub_subModule;
+
+	public:
+
+		Pub_sub();
+
+		typedef std::unique_ptr<Pub_sub> u_ptr;
 
 
-class Pub_subClientController : public ModuleClientController {
-public:
-	Pub_subClientController(base_module* module);
-	virtual void handle(Client* client, std::string action, GenericValue* data);
-};
+		/**
+		 * Appelé pour publier un message auc clients abonnés
+		 * @THREAD1
+		 * @param packet
+		 * @return
+		 */
+		bool publish(protocol::frame::FrameInterface *frameInterface);
 
+	protected:
+		OutgoingMessagesWorker::u_ptr worker;
+
+		virtual errors::error join() override;
+		virtual ModuleClientController *getNewClientController() override;
+
+	};
+
+
+	class Pub_subClientController : public ModuleClientController {
+	public:
+		Pub_subClientController(base_module *module);
+
+		virtual void handle(Client *client, std::string& action, GenericValue *data);
+	};
+
+}
+}
+}
 #endif //SERVER_PUB_SUB_H

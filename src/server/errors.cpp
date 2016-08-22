@@ -28,21 +28,21 @@ error get_error(uint16_t code) {
 	return e;
 };
 
-error get_error(uint16_t code, std::string msg) {
+error get_error(uint16_t code, const std::string msg) {
 	error e;
 	e.code = code;
 	e.msg = msg;
 	return e;
 };
 
-error get_error(uint16_t code, std::string msg, std::string tokenValue) {
+error get_error(uint16_t code, const std::string msg, const std::string tokenValue) {
 	error e;
 	e.code = code;
 	e.msg = string::sprintf(msg, tokenValue);
 	return e;
 };
 
-error get_error(std::string master, uint16_t code, std::string msg) {
+error get_error(const std::string master, uint16_t code, const std::string msg) {
 	error e;
 	e.code = code;
 	e.msg = msg;
@@ -50,7 +50,7 @@ error get_error(std::string master, uint16_t code, std::string msg) {
 	return e;
 };
 
-error get_error(std::string master, uint16_t code, std::string msg, std::string tokenValue) {
+error get_error(const std::string master, uint16_t code, const std::string msg, const std::string tokenValue) {
 	error e;
 	e.code = code;
 	e.msg = string::sprintf(msg, tokenValue);

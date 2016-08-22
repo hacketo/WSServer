@@ -21,7 +21,7 @@ typedef transform_width< binary_from_base64<remove_whitespace<std::string::const
 typedef insert_linebreaks<base64_from_binary<transform_width<std::string::const_iterator,6,8> >, 72 > it_base64_t;
 
 
-std::string  base64_encode(const std::string text);
+std::string  base64_encode(std::string text);
 
 std::string  base64_decode(std::string base64);
 

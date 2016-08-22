@@ -6,21 +6,30 @@
 #define SERVER_WORKER_H
 
 #include <boost/thread/thread.hpp>
-#include "synchronizedpool.h"
+#include "safedeque.h"
 
 template <class T>
 class Worker {
 
 public:
 	Worker(size_t size = 50) : pool(size){}
+	~Worker(){
+		join();
+	}
 	bool isAlive(){return alive;}
-	void dispatch(T v){return pool.push_front(v);}
-	void join(){worker.join();}
+	void dispatch(T v){
+		return pool.push_front(v);
+	}
+
+	void join(){
+		alive = false;
+		worker.join();
+	}
 
 protected:
 	bool alive;
 	boost::thread worker;
-	SynchronizedPool<T> pool;
+	SafeDeQue<T> pool;
 };
 
 #endif //SERVER_WORKER_H

@@ -12,12 +12,12 @@ namespace packet{
 
 	PacketData::PacketData(GenericValue* value) : data(GenericValue::u_ptr(value)), packetType(DATA), consumed(false){};
 	PacketData::PacketData() : packetType(DATA), consumed(false){};
-	ActionPacketData::ActionPacketData(std::string action, GenericValue* value) : PacketData(value), action(action){ packetType = ACTION; };
+	ActionPacketData::ActionPacketData(const std::string action, GenericValue* value) : PacketData(value), action(action){ packetType = ACTION; };
 	ActionPacketData::ActionPacketData(GenericValue* value) : PacketData(value){ packetType = ACTION; };
 	ActionPacketData::ActionPacketData() : PacketData(){ packetType = ACTION; };
 
 #ifdef USE_MODULES
-	ModulePacketData::ModulePacketData(uint64_t  moduleId, std::string action, GenericValue* value) : ActionPacketData(value){ packetType = MODULE; };
+	ModulePacketData::ModulePacketData(uint64_t  moduleId, const std::string action, GenericValue* value) : ActionPacketData(value){ packetType = MODULE; };
 	ModulePacketData::ModulePacketData(GenericValue* value) : ActionPacketData(value){ packetType = MODULE; };
 	ModulePacketData::ModulePacketData() : ActionPacketData(){ packetType = MODULE; };
 #endif
@@ -30,11 +30,11 @@ namespace packet{
 	Packet::Packet(GenericValue* value) : packets() {
 		addPacket(new PacketData(value));
 	}
-	Packet::Packet(std::string action, GenericValue* value) : packets() {
+	Packet::Packet(const std::string action, GenericValue* value) : packets() {
 		addPacket(new ActionPacketData(action, value));
 	}
 #ifdef USE_MODULES
-	Packet::Packet(uint64_t  moduleId, std::string action, GenericValue* value) : packets() {
+	Packet::Packet(uint64_t  moduleId, const std::string action, GenericValue* value) : packets() {
 		addPacket(new ModulePacketData(moduleId, action, value));
 	}
 #endif
@@ -50,15 +50,19 @@ namespace packet{
 		return packets.at(index).get();
 	}
 
-	frame::Frame Packet::getFrame() {
+	frame::Frame* Packet::getFrame() {
+		std::string s;
 		if (config::DEFAULT_PARSER == ParserType::JSON){
-			return frame::from_string(toJson(this));
+			s = toJson(this);
 		}
-		return frame::from_string(this->get(0)->data->getString());
+		else{
+			s = this->get(0)->data->getString();
+		}
+		return frame::from_string(s);
 	}
 
 
-	void parse(Packet *packet, std::string valueToParse, errors::error& error) {
+	void parse(Packet *packet, std::string& valueToParse, errors::error& error) {
 		if (config::DEFAULT_PARSER == ParserType::JSON){
 			parseFromJSON(packet, valueToParse, error);
 			return;
@@ -68,7 +72,7 @@ namespace packet{
 		packet->addPacket(packetData);
 	}
 
-	void parseFromJSON(Packet *packet, std::string json, errors::error& error) {
+	void parseFromJSON(Packet *packet, std::string& json, errors::error& error) {
 
 		rapidjson::Document document;
 		rapidjson::Document::AllocatorType &a = document.GetAllocator();

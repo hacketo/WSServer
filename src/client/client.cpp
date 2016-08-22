@@ -1,4 +1,5 @@
 #include <boost/algorithm/string.hpp>
+#include <util/timer.h>
 #include "client/client.h"
 
 #include "debug.h"
@@ -77,13 +78,20 @@ uint32_t Client::get_id() {
 	return id;
 }
 
-void Client::send(std::string message) {
+void Client::send(std::string& message) {
 	//@todo check lock block
+	DEBUG_PRINT("outgoing_worker->dispatch");
 	outgoing_worker->dispatch(frame::from_string(message));
 }
 void Client::send(frame::FrameInterface *holder) {
 	//@todo check lock block
+	DEBUG_PRINT("outgoing_worker->dispatch");
 	outgoing_worker->dispatch(holder->getFrame());
+}
+void Client::send(frame::Frame* frame) {
+	//@todo check lock block
+	DEBUG_PRINT("outgoing_worker->dispatch");
+	outgoing_worker->dispatch(frame);
 }
 
 
@@ -115,18 +123,15 @@ void Client::get_http_header(http::handshake* handshake, errors::error& error){
  */
 void Client::send_handshake(const char* websocket_key, errors::error& error){
 
-	std::string ws_key;
-
-	http::handshake* handshake = http::get_handshake(websocket_key, ws_key);
+	http::handshake* handshake = http::get_handshake(websocket_key);
 
 	alive = clientManager->on_handshakesend(this, handshake, error);
 
     boost::system::error_code e;
 
-	std::string hs = http::handshake_to_string(handshake);
-	uint64_t size = hs.length();
-    uint8_t data[size];
-	string::convert(hs, data);
+	uint8_t *data;
+	uint64_t size;
+	http::handshake_to_uint8(handshake, &data, size);
 	send_sync(data, size, e);
     if ( e ) {
 		error = errors::get_error("Client", errors::WS_SEND_ERROR, "Send handshake failed: %s", boost::system::system_error(e).what());
@@ -174,10 +179,12 @@ void Client::joinThreads(){
 
 //</editor-fold>
 
+
+
 //<editor-fold desc="IncomingMessagesWorker">
 
 IncomingMessagesWorker::IncomingMessagesWorker(ClientsManager* manager, Client *client, size_t size) :
-		Worker<frame::Frame>(size), clientManager(manager), client(client){
+		Worker<frame::FrameBuffer>(size), clientManager(manager), client(client){
 }
 
 void IncomingMessagesWorker::init_job_thread(){
@@ -196,7 +203,9 @@ void IncomingMessagesWorker::read_async_loop(){
 }
 void IncomingMessagesWorker::on_read_some(const boost::system::error_code& error, std::size_t bytes_transferred){
 	if (!error){
-		dispatch(frame::from_uint8_t(temp_buffer, static_cast<uint16_t>(bytes_transferred)));
+		DEBUG_PRINT("Received some stuff : ",bytes_transferred);
+		dispatch(frame::from_uint8_t(temp_buffer, static_cast<uint16_t>(bytes_transferred), packetID));
+		packetID++;
 		if (client->alive){
 			read_async_loop();
 		}
@@ -204,23 +213,68 @@ void IncomingMessagesWorker::on_read_some(const boost::system::error_code& error
 }
 
 void IncomingMessagesWorker::job(){
+
+	uint32_t frameSize = 0;
+	uint32_t consumed = 0;
+	bool hasSize = false;
+
+	uint8_t* buffer;
+
+	uint16_t lastFramebufferID = 0;
+
 	while (client->alive){
 		if(pool.is_not_empty()){
-			frame::Frame frame;
-			pool.pop_back(&frame);
+			frame::FrameBuffer frameBuffer;
+			pool.pop_back(&frameBuffer);
 
-			frame::decode(&frame);
-			if (frame.op_code == opcode::CLOSE){
-				client->alive = false;
-				clientManager->on_close(client);
+			assert(lastFramebufferID == frameBuffer._id);
+			lastFramebufferID++;
+
+			uint32_t& bufferSize = frameBuffer.bufferSize;
+
+			if(bufferSize == 0){
 				continue;
 			}
 
-			errors::error e;
-			packet::Packet::u_ptr p = packet::Packet::u_ptr(new packet::Packet());
-			packet::parse(p.get(), frame.msg, e);
+			// Si on a des données à exploité et que l'on a pas encore la taille de la frame
+			// Cela veut dire que c'est le début d'une nouvelle frame
+			if (bufferSize > 1 && !hasSize){
+				hasSize = true;
+				frameSize = std::max<uint32_t>(bufferSize, frame::get_framelen(&frameBuffer));
+				buffer = new uint8_t[frameSize];
+			}
 
-			clientManager->on_receive(client, p.get());
+			assert(buffer);
+
+			memcpy(buffer+consumed,frameBuffer.buffer, bufferSize);
+
+			consumed += bufferSize;
+
+			if (consumed == frameSize){
+
+				frame::Frame* frame = new frame::Frame;
+
+				frame::decode(frame, buffer, frameSize);
+				if (frame->op_code == opcode::CLOSE){
+					client->alive = false;
+					clientManager->on_close(client);
+					continue;
+				}
+
+				errors::error e;
+				packet::Packet::u_ptr p = packet::Packet::u_ptr(new packet::Packet());
+				packet::parse(p.get(), frame->msg, e);
+
+				delete[] buffer;
+
+				clientManager->on_receive(client, p.get());
+
+				consumed = 0;
+				hasSize = false;
+				frameSize = 0;
+			}
+
+
 		}
 	}
 	DEBUG_PRINT("IncomingMessagesWorker ",client->id, " ended");
@@ -231,7 +285,7 @@ void IncomingMessagesWorker::job(){
 //<editor-fold desc="OutgoingMessagesWorker">
 
 OutgoingMessagesWorker::OutgoingMessagesWorker(Client *client, size_t size) :
-		Worker<frame::Frame>(size), client(client){
+		Worker<frame::Frame*>(size), client(client){
 }
 void OutgoingMessagesWorker::init_job_thread() {
 	worker = boost::thread(&OutgoingMessagesWorker::job, this);
@@ -239,17 +293,20 @@ void OutgoingMessagesWorker::init_job_thread() {
 void OutgoingMessagesWorker::job(){
 	while (client->alive){
 		if(pool.is_not_empty()){
-			frame::Frame frame;
+			frame::Frame* frame;
 			pool.pop_back(&frame);
 
-			frame::encode(&frame);
-
+			DEBUG_PRINT("outgoing_worker->job before encode");
+			frame::encode(frame);
+			DEBUG_PRINT("outgoing_worker->job before send");
 			boost::system::error_code error;
-			client->send_sync(frame.buffer,frame.bufferSize, error);
+			client->send_sync(frame->buffer,frame->bufferSize, error);
 
 			if (error){
 				DEBUG_PRINT("Send data failed: " , boost::system::system_error(error).what());
 			}
+
+			delete frame;
 		}
 	}
 	DEBUG_PRINT("OutgoingMessagesWorker ",client->id, " ended");
@@ -346,6 +403,7 @@ void ClientsManager::on_receive(Client *client, packet::Packet *packet) {
 }
 
 void ClientsManager::on_close(Client *client) {
+	DEBUG_PRINT("ClientsManager::on_close");
 	manager->onClose(client);
 #ifdef USE_SESSIONS
 	sessionManager->close_session(client);
@@ -371,6 +429,7 @@ ModulesManager* ClientsManager::getModulesManager(){
 
 void ClientsManager::handleClientClosed(uint32_t clientId){
 	if(clients.count(clientId) > 0) {
+		DEBUG_PRINT("ClientsManager::handleClientClosed : ",clientId);
 		Client::s_ptr client = clients[clientId];
 		assert(!client->isAlive());
 		client->closeSocket();

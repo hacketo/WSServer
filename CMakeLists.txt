@@ -2,11 +2,14 @@ cmake_minimum_required(VERSION 3.2)
 
 project(WSServerlib)
 
+set(USE_MODULES 1)
+set(USE_SESSIONS 1)
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -E")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Search OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -76,7 +79,6 @@ set(HEADER_FILES
   include/ext/modules/pub_sub.h
   include/ext/modules/base_module.h
   include/ext/sessions/sessionmanager.h
-  include/ext/sessions/sessiondb.h
   include/protocol/constant.h
   include/protocol/frame.h
   include/protocol/http.h
@@ -93,7 +95,7 @@ set(HEADER_FILES
   include/util/genericvalue.h
   include/util/sha1.h
   include/util/string.h
-  include/util/synchronizedpool.h
+  include/util/safedeque.h
   include/util/timer.h
   include/util/worker.h)
 
@@ -108,7 +110,6 @@ set(SOURCE_FILES
   src/ext/modules/pub_sub.cpp
   src/ext/modules/base_module.cpp
   src/ext/sessions/sessionmanager.cpp
-  src/ext/sessions/sessiondb.cpp
   src/protocol/frame.cpp
   src/protocol/http.cpp
   src/protocol/packet.cpp
@@ -126,6 +127,17 @@ set(SOURCE_FILES
 set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES})
 
 add_library(${PROJECT_NAME} SHARED ${SERVER_FILES})
+
+
+if (USE_MODULES)
+  message(WARNING "USE_MODULES=1")
+  target_compile_definitions(${PROJECT_NAME} PUBLIC USE_MODULES=1)
+endif ()
+if (USE_SESSIONS)
+  message(WARNING "USE_SESSIONS=1")
+  target_compile_definitions(${PROJECT_NAME} PUBLIC USE_SESSIONS=1)
+endif ()
+
 
 target_link_libraries(${PROJECT_NAME} ${server_required_libraries})
 

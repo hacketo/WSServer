@@ -45,9 +45,9 @@ public:
 
 	virtual bool isObject() const;
 
-	virtual void set(std::string key, GenericValue* value);
+	virtual void set(const std::string key, GenericValue* value);
 
-	virtual GenericValue* get(std::string key);
+	virtual GenericValue* get(const std::string key);
 
 	virtual std::vector<std::string> getKeys() const;
 
@@ -82,7 +82,7 @@ public:
 
 	/** String */
 
-	virtual void setString(std::string value);
+	virtual void setString(const std::string value);
 
 	virtual bool isString() const;
 
@@ -198,11 +198,12 @@ private:
 class StringValue : public GenericValue {
 public:
 	StringValue();
-	StringValue(std::string data);
+	StringValue(const char * data);
+	StringValue(const std::string data);
 
 	std::string getString() const;
 
-	void setString(std::string value);
+	void setString(const std::string value);
 
 	bool isString() const;
 
@@ -308,9 +309,9 @@ public:
 	ObjectValue();
 	~ObjectValue();
 
-	void set(std::string key, GenericValue* value);
+	void set(const std::string key, GenericValue* value);
 
-	GenericValue* get(std::string key);
+	GenericValue* get(const std::string key);
 
 	std::vector<std::string> getKeys() const;
 
