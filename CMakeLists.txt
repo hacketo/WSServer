@@ -4,41 +4,35 @@ project(WSServerlib)
 
 set(USE_MODULES 1)
 set(USE_SESSIONS 1)
-
-
 set(PREPROCESS_ONLY 0)
 
+
 if (CMAKE_BUILD_TYPE EQUAL "Debug")
-  set(DEBUG_HANDLER 1)
+  set(ERROR_HANDLER 1)
 endif()
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 
 if (PREPROCESS_ONLY)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -E")
 endif ()
-if (DEBUG_HANDLER)
+if (ERROR_HANDLER)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic")
 endif ()
 
 
 include(projects)
 
-
-
-
-add_subdirectory(libs)
+add_subdirectory(libs/rapidjson)
 
 set(server_required_libraries ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3 libgtest libgmock)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs
-  ${CMAKE_CURRENT_SOURCE_DIR}/libs/rapidjson
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/libs/
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/
         ${GOOGLETEST_H} ${GOOGLEMOCK_H})
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
