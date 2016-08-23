@@ -29,23 +29,20 @@ public:
 	 * Appelé lorsqu'un client se connecte, avant l'envoi du header
 	 * donc pas possible dans cette méthode d'envoyer un message au client
 	 * Si la méthode retourne False le client sera déconnecté
-	 * @param client
 	 * @return
 	 */
 	virtual bool onEnter(Client *client);
 
 	/**
-	 * Appelé lorsqu'un le handshake à été recu et parsé
+	 * Appelé lorsqu'un le handshakeClient à été recu et parsé
 	 * Si la méthode retourne False le client sera déconnecté
-	 * @param client
 	 * @return
 	 */
 	virtual bool onHandshakeRecv(Client *client, protocol::http::handshake* handshake);
 
 	/**
-	 * Appelé le handshake est prêt à etre envoyé
+	 * Appelé lorsque le handshakeRéponse est prêt à etre envoyé
 	 * Si la méthode retourne False le client sera déconnecté
-	 * @param client
 	 * @return
 	 */
 	virtual bool onHandshakeSend(Client *client, protocol::http::handshake* handshake);
@@ -53,7 +50,6 @@ public:
 	/**
 	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur
 	 * Si la méthode retourne False le client sera déconnecté
-	 * @param client
 	 * @return
 	 */
 	virtual bool onReady(Client *client);
@@ -61,31 +57,26 @@ public:
 	/**
 	 * Appelé lorsque l'on recoit un message de la part d'un client
 	 * Si la méthode retourne False le client sera déconnecté
-	 * @param client
 	 */
 	virtual void onReceive(Client *client, protocol::packet::Packet *packet);
 
 	/**
 	 * Appelé lorsqu'un client est déconnecté
-	 * @param client
 	 */
 	virtual void onClose(Client *client);
 
 	/**
 	 * Appelé lorqu'une érreur survient pour un client
-	 * @param client
 	 */
 	virtual void onError(Client *client);
 
 	/**
 	 * Appelé lors d'une érreur serveur
-	 * @param client
 	 */
 	virtual void onServerError();
 
 	/**
 	 * Appelé lorsque le serveur se ferme
-	 * @param client
 	 */
 	virtual void onExit();
 

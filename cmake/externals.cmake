@@ -17,14 +17,14 @@ endif ()
 
 
 # Search Boost
-find_package(Boost 1.54.0 COMPONENTS thread date_time filesystem system REQUIRED)
+find_package(Boost 1.54.0 COMPONENTS program_options thread date_time filesystem system REQUIRED)
 if (Boost_FOUND)
   message(WARNING "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
   message(WARNING "Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
   message(WARNING "Boost_LIBRARIES: ${Boost_LIBRARIES}")
   message(WARNING "Boost_VERSION: ${Boost_VERSION}")
 else()
-  include(externals/boost)
+  #include(externals/boost)
 
 endif ()
 link_directories(${Boost_LIBRARY_DIRS})

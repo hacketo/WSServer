@@ -4,6 +4,7 @@ project(WSServerlib)
 
 set(USE_MODULES 1)
 set(USE_SESSIONS 1)
+set(WS_DEBUG 1)
 set(PREPROCESS_ONLY 0)
 
 
@@ -104,6 +105,10 @@ endif ()
 if (USE_SESSIONS)
   message(WARNING "USE_SESSIONS=1")
   target_compile_definitions(${PROJECT_NAME} PUBLIC USE_SESSIONS=1)
+endif ()
+if (WS_DEBUG)
+  message(WARNING "WS_DEBUG=1")
+  target_compile_definitions(${PROJECT_NAME} PUBLIC WS_DEBUG=1)
 endif ()
 
 target_link_libraries(${PROJECT_NAME} ${server_required_libraries})

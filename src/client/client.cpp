@@ -26,9 +26,7 @@ boost::asio::ip::tcp::socket& Client::socket(){
 }
 
 void Client::start() {
-	boost::asio::ip::tcp::endpoint ep = socket_.remote_endpoint();
-
-	ip = ep.address().to_string();
+	ip = boost::lexical_cast<std::string>(socket_.remote_endpoint());
 
 	alive = clientManager->on_enter(this);
 	errors::error_code e;
@@ -127,15 +125,18 @@ void Client::send_handshake(const char* websocket_key, errors::error_code& error
 
 	alive = clientManager->on_handshakesend(this, handshake, error);
 
-    boost::system::error_code e;
+	if (!error && alive) {
+		boost::system::error_code e;
 
-	uint8_t *data;
-	uint64_t size;
-	http::handshake_to_uint8(handshake, &data, size);
-	send_sync(data, size, e);
-    if ( e ) {
-		error = errors::get_error("Client", errors::WS_SEND_ERROR, "Send handshake failed: %s", boost::system::system_error(e).what());
-    }
+		uint8_t *data;
+		uint64_t size;
+		http::handshake_to_uint8(handshake, &data, size);
+		send_sync(data, size, e);
+		if (e) {
+			error = errors::get_error("Client", errors::WS_SEND_ERROR, "Send handshake failed: %s",
+									  boost::system::system_error(e).what());
+		}
+	}
 }
 
 size_t Client::recv_sync(char *data, boost::system::error_code &error){
@@ -216,18 +217,18 @@ void IncomingMessagesWorker::job(){
 
 	uint32_t frameSize = 0;
 	uint32_t consumed = 0;
-	bool hasSize = false;
 
 	uint8_t* buffer;
 
 	uint16_t lastFramebufferID = 0;
 
 	while (client->alive){
-		if(pool.is_not_empty()){
+		if(safeDeQue.is_not_empty()){
 			frame::FrameBuffer frameBuffer;
-			pool.pop_back(&frameBuffer);
+			safeDeQue.pop_back(frameBuffer);
 
 			assert(lastFramebufferID == frameBuffer._id);
+
 			lastFramebufferID++;
 
 			uint32_t& bufferSize = frameBuffer.bufferSize;
@@ -236,26 +237,24 @@ void IncomingMessagesWorker::job(){
 				continue;
 			}
 
-			// Si on a des données à exploité et que l'on a pas encore la taille de la frame
-			// Cela veut dire que c'est le début d'une nouvelle frame
-			if (bufferSize > 1 && !hasSize){
-				hasSize = true;
+			// Si buffer null on doit le créé en essayant de trouver la taille de la frame
+			if (!buffer){
 				frameSize = std::max<uint32_t>(bufferSize, frame::get_framelen(&frameBuffer));
 				buffer = new uint8_t[frameSize];
 			}
 
-			assert(buffer);
 
-			memcpy(buffer+consumed,frameBuffer.buffer, bufferSize);
+
+			memcpy(buffer + consumed, frameBuffer.buffer, bufferSize);
 
 			consumed += bufferSize;
 
-			if (consumed == frameSize){
+			if (consumed == frameSize) {
 
-				frame::Frame* frame = new frame::Frame;
+				frame::Frame::u_ptr frame = frame::Frame::create();
 
-				frame::decode(frame, buffer, frameSize);
-				if (frame->op_code == opcode::CLOSE){
+				frame::decode(frame.get(), buffer, frameSize);
+				if (frame->op_code == opcode::CLOSE) {
 					client->alive = false;
 					clientManager->on_close(client);
 					continue;
@@ -265,16 +264,13 @@ void IncomingMessagesWorker::job(){
 				packet::Packet::u_ptr p = packet::Packet::u_ptr(new packet::Packet());
 				packet::parse(p.get(), frame->msg, e);
 
-				delete[] buffer;
-
 				clientManager->on_receive(client, p.get());
 
 				consumed = 0;
-				hasSize = false;
 				frameSize = 0;
+
+				// Buffer delete by ~Frame()
 			}
-
-
 		}
 	}
 	DEBUG_PRINT("IncomingMessagesWorker ",client->id, " ended");
@@ -291,19 +287,22 @@ void OutgoingMessagesWorker::init_job_thread() {
 	worker = boost::thread(&OutgoingMessagesWorker::job, this);
 }
 void OutgoingMessagesWorker::job(){
-	while (client->alive){
-		if(pool.is_not_empty()){
-			frame::Frame* frame;
-			pool.pop_back(&frame);
+	//@todo check that shit
+	while (!interrupted){
+		safeDeQue.wait_one(m_mutex);
+		if(!interrupted && safeDeQue.is_not_empty()) {
+
+			frame::Frame *frame;
+			safeDeQue.pop_back(frame);
 
 			DEBUG_PRINT("outgoing_worker->job before encode");
 			frame::encode(frame);
 			DEBUG_PRINT("outgoing_worker->job before send");
 			boost::system::error_code error;
-			client->send_sync(frame->buffer,frame->bufferSize, error);
+			client->send_sync(frame->buffer, frame->bufferSize, error);
 
-			if (error){
-				DEBUG_PRINT("Send data failed: " , boost::system::system_error(error).what());
+			if (error) {
+				DEBUG_PRINT("Send data failed: ", boost::system::system_error(error).what());
 			}
 
 			delete frame;
@@ -327,10 +326,10 @@ void ClosingClientsWorker::init_job_thread(){
 
 void ClosingClientsWorker::job(){
 	while (manager->isAlive()){
-		if(pool.is_not_empty()){
+		if(safeDeQue.is_not_empty()){
 
 			u_int32_t clientId;
-			pool.pop_back(&clientId);
+			safeDeQue.pop_back(clientId);
 			manager->handleClientClosed(clientId);
 		}
 	}

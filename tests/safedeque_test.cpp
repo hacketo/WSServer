@@ -31,7 +31,7 @@ TEST(safedeque_test, testinit){
 	EXPECT_EQ(4, deque.weight());
 
 	std::string t ;
-	deque.pop_back(&t);
+	deque.pop_back(t);
 
 	EXPECT_EQ(3, deque.weight());
 
@@ -51,7 +51,11 @@ TEST(safedeque_test, testpointer){
 	EXPECT_EQ(2, deque.weight());
 
 	std::string* t ;
-	deque.pop_back(&t);
+	deque.pop_back(t);
 
 	EXPECT_EQ(a, t);
+
+
+	delete (a);
+	delete (b);
 }

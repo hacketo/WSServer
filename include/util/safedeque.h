@@ -37,7 +37,7 @@ public:
 		m_container.push_front(item);
 		++m_unread;
 		lock.unlock();
-		m_not_empty.notify_one();
+		m_not_empty.notify_all();
 	}
 
 	/**
@@ -45,16 +45,23 @@ public:
 	 * Thread safe, peut bloqué tant que l'action d'ajout n'est pas terminée
 	 * @param item
 	 */
-	void pop_back(value_type *pItem) {
+	void pop_back(value_type& pItem) {
 		boost::mutex::scoped_lock lock(m_mutex);
 		m_not_empty.wait(lock, boost::bind(&SafeDeQue<value_type>::is_not_empty, this));
-		*pItem = m_container[--m_unread];
+
+
+		pItem = m_container[--m_unread];
 		lock.unlock();
 		m_not_full.notify_one();
 	}
 
 	size_type weight(){
 		return m_unread;
+	}
+
+	void wait_one(boost::mutex& mutex){
+		boost::mutex::scoped_lock lock(mutex);
+		m_not_empty.wait(lock, boost::bind(&SafeDeQue<value_type>::is_not_empty, this));
 	}
 
 	bool is_not_empty() const { return m_unread > 0; }

@@ -16,10 +16,23 @@ class Chat : public Manager {
 public:
 	Chat();
 
+	/**
+	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @return
+	 */
 	virtual bool onReady(Client *client) override;
 
+
+	/**
+	 * Appelé lorsque l'on recoit un message de la part d'un client
+	 * Si la méthode retourne False le client sera déconnecté
+	 */
 	virtual void onReceive(Client *client, protocol::packet::Packet *packet) override;
 
+	/**
+	 * Appelé lorsqu'un client est déconnecté
+	 */
 	virtual void onClose(Client *client) override;
 
 	Pub_sub* pubsub;

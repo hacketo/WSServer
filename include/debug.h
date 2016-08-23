@@ -16,7 +16,7 @@
 #if WS_DEBUG
 #define DEBUG_PRINT(...) debug::print(__VA_ARGS__)
 #else
-#define DEBUG_PRINT(value)
+#define DEBUG_PRINT(...)
 #endif
 
 

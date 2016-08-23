@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <string>
+#include <memory>
 
 #include "constant.h"
 #include "util/exception.h"
@@ -51,13 +52,21 @@ namespace frame {
 	class Frame {
 	public:
 
+		typedef std::unique_ptr<Frame> u_ptr;
+		static u_ptr create(){
+			return u_ptr(new Frame);
+		}
+
+		Frame();
 		~Frame();
 
 		/** True si la frame est raw venant du client */
 		bool encoded = false;
+		bool is_data = false;
 
 		/** False si la frame n'est pas valide */
 		bool valid = false;
+
 		bool fin = false;
 
 		/** Op code de la frame */
@@ -75,7 +84,7 @@ namespace frame {
 
 	Frame* from_string(std::string& msg);
 
-	FrameBuffer from_uint8_t(uint8_t *data, uint16_t s, uint16_t id);
+	FrameBuffer from_uint8_t(uint8_t *buffer, uint16_t size, uint16_t id);
 
 	uint8_t get_opcode(FrameBuffer* buffer);
 	uint32_t get_framelen(FrameBuffer* buffer);

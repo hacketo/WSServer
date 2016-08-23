@@ -6,6 +6,7 @@
 #include "ext/modules/pub_sub.h"
 #include "client/client.h"
 
+
 namespace ext {
 namespace modules {
 namespace pubsub {
@@ -20,20 +21,22 @@ namespace pubsub {
 	}
 
 	void OutgoingMessagesWorker::job(){
-		while (alive){
-			if(pool.is_not_empty()){
+		while (!interrupted){
+			if(safeDeQue.is_not_empty()){
 				Frame *frame;
-				pool.pop_back(&frame);
+
+				DEBUG_PRINT("pubsub::OutgoingMessagesWorker[",pubsub->get_id(),"] Wait frame");
+				safeDeQue.pop_back(frame);
 
 				frame::encode(frame);
+
+				assert(frame->encoded);
 
 				for (base_module::client_iterator it = pubsub->begin(); it != pubsub->end(); ++it) {
 					if (it->second) {
 						it->second->send(frame);
 					}
 				}
-
-				delete frame;
 			}
 		}
 		DEBUG_PRINT("pubsub::OutgoingMessagesWorker[",pubsub->get_id(),"] ENDED");
@@ -65,8 +68,6 @@ namespace pubsub {
 
 		return errors::error_code();
 	}
-
-
 
 
 	Pub_subClientController::Pub_subClientController(base_module *module) :

@@ -13,24 +13,26 @@ namespace protocol {
 		delete[] buffer;
 	}
 
+	frame::Frame::Frame() :
+			encoded(false), is_data(false), valid(false), fin(false){
+
+	}
+
 	frame::Frame* frame::from_string(std::string& msg) {
 		frame::Frame* f = new frame::Frame;
-		f->encoded = false;
 		f->op_code = opcode::TEXT;
 		f->fin = true;
 		f->bufferSize = msg.length();
 		f->buffer = new uint8_t[f->bufferSize];
-
 		STRING_TO_UINT8(msg, f->buffer, f->bufferSize);
-		//string::convert(msg, f->buffer, f->bufferSize);
 		return f;
 	}
 
-	frame::FrameBuffer frame::from_uint8_t(uint8_t *data, uint16_t s, uint16_t id) {
+	frame::FrameBuffer frame::from_uint8_t(uint8_t *buffer, uint16_t size, uint16_t id) {
 		frame::FrameBuffer f;
 		f._id = id;
-		f.bufferSize = s;
-		std::copy(data, data + f.bufferSize, f.buffer);
+		f.bufferSize = size;
+		std::copy(buffer, buffer + f.bufferSize, f.buffer);
 		return f;
 	}
 
@@ -53,67 +55,73 @@ namespace protocol {
 
 	/**
 	 * Parse le buffer du holder dans une nouvelle Frame
+	 *
 	 * @param holder
 	 * @return
 	 */
 	void frame::decode(Frame *frame, uint8_t *buffer, uint32_t bufferSize) {
+		if (!frame->encoded) {
 
-		frame->buffer = buffer;
-		frame->bufferSize = bufferSize;
-
-
-		uint8_t op_code = buffer[0] & Mask::OPCODE;
-		int payload_len = buffer[1] & Mask::LEN_PAYLOAD;
-		int first_mask_index = 2;
-
-		frame->op_code = op_code;
-
-		//log_data("frame", rawdata, data_len);
-
-		if (payload_len == 0x7E) { // size 16 bit
-			first_mask_index = 4;
-			payload_len = (buffer[2] << 8) + buffer[3];
-		} else if (payload_len == 0x7F) { // size 64 bit
-			first_mask_index = 10;
-			payload_len = (buffer[7] << 16) + (buffer[8] << 8) + buffer[9];
-		}
-
-		bool opcodeis_valid = opcode::is_valid(op_code);
-
-		if (opcodeis_valid) {
-			frame->valid = true;
-			DEBUG_PRINT("LENGTH : ", payload_len);
-			DEBUG_PRINT("INDEX_MASK : ", first_mask_index);
+			frame->buffer = buffer;
+			frame->bufferSize = bufferSize;
 
 
-			uint8_t mask[4];
-			std::copy(buffer + first_mask_index, buffer + first_mask_index + 4, mask);
+			uint8_t op_code = buffer[0] & Mask::OPCODE;
+			int payload_len = buffer[1] & Mask::LEN_PAYLOAD;
+			int first_mask_index = 2;
 
-			if (opcode::is_control(op_code)) {
+			frame->op_code = op_code;
 
-				if (op_code == opcode::CLOSE) {
-					//DEBUG_PRINT("CLOSE_FRAME");
-				} else if (op_code == opcode::PONG) {
+			//log_data("frame", rawdata, data_len);
 
-				}
-			} else {
-
-				if (op_code == opcode::TEXT) {
-					//DEBUG_PRINT("TEXT_FRAME");
-				} else if (op_code == opcode::BINARY) {
-					//DEBUG_PRINT("BINARY_FRAME");
-				} else if (op_code == opcode::CONTINUATION) {
-					//DEBUG_PRINT("CONTINUATION_FRAME");
-				}
+			if (payload_len == 0x7E) { // size 16 bit
+				first_mask_index = 4;
+				payload_len = (buffer[2] << 8) + buffer[3];
+			} else if (payload_len == 0x7F) { // size 64 bit
+				first_mask_index = 10;
+				payload_len = (buffer[7] << 16) + (buffer[8] << 8) + buffer[9];
 			}
 
-			if (payload_len > 0) {
-				uint8_t decodedPayload[payload_len];
-				for (int i = first_mask_index + 4, j = 0; j < payload_len; i++, j++) {
-					decodedPayload[j] = buffer[i] ^ mask[j % 4];
+			bool opcodeis_valid = opcode::is_valid(op_code);
+
+			if (opcodeis_valid) {
+				frame->valid = true;
+				DEBUG_PRINT("LENGTH : ", payload_len);
+				DEBUG_PRINT("INDEX_MASK : ", first_mask_index);
+
+
+				uint8_t mask[4];
+				std::copy(buffer + first_mask_index, buffer + first_mask_index + 4, mask);
+
+				if (opcode::is_control(op_code)) {
+
+					if (op_code == opcode::CLOSE) {
+						//DEBUG_PRINT("CLOSE_FRAME");
+					} else if (op_code == opcode::PONG) {
+
+					}
+				} else {
+
+					if (op_code == opcode::TEXT) {
+						//DEBUG_PRINT("TEXT_FRAME");
+					} else if (op_code == opcode::BINARY) {
+						//DEBUG_PRINT("BINARY_FRAME");
+					} else if (op_code == opcode::CONTINUATION) {
+						//DEBUG_PRINT("CONTINUATION_FRAME");
+					}
 				}
-				frame->msg = std::string(decodedPayload, decodedPayload + payload_len);
-				//DEBUG_PRINT("Parsed payload : ", frame->msg);
+
+				if (payload_len > 0) {
+					uint8_t decodedPayload[payload_len];
+					for (int i = first_mask_index + 4, j = 0; j < payload_len; i++, j++) {
+						decodedPayload[j] = buffer[i] ^ mask[j % 4];
+					}
+					frame->msg = std::string(decodedPayload, decodedPayload + payload_len);
+					//DEBUG_PRINT("Parsed payload : ", frame->msg);
+					frame->is_data = true;
+				}
+
+				frame->encoded = false;
 			}
 		}
 

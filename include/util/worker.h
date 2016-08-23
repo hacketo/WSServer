@@ -12,24 +12,31 @@ template <class T>
 class Worker {
 
 public:
-	Worker(size_t size = 50) : pool(size){}
+	Worker(size_t size = 50) : safeDeQue(size), interrupted(false){}
 	~Worker(){
 		join();
 	}
-	bool isAlive(){return alive;}
 	void dispatch(T v){
-		return pool.push_front(v);
+		return safeDeQue.push_front(v);
 	}
 
 	void join(){
-		alive = false;
+		interrupt();
 		worker.join();
 	}
 
+	void interrupt(){
+		interrupted = true;
+		m_mutex.unlock();
+	}
+
 protected:
-	bool alive;
+	bool interrupted;
+	boost::mutex m_mutex;
 	boost::thread worker;
-	SafeDeQue<T> pool;
+	SafeDeQue<T> safeDeQue;
+
+
 };
 
 #endif //SERVER_WORKER_H
