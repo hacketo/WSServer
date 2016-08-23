@@ -347,8 +347,8 @@ void ClientsManager::init(){
 	modulesManager = manager->getModulesManager();
 #endif
 
-	//worker_closingclients = ClosingClientsWorker::u_ptr(new ClosingClientsWorker(this));
-	//worker_closingclients->init_job_thread();
+	worker_closingclients = ClosingClientsWorker::u_ptr(new ClosingClientsWorker(this));
+	worker_closingclients->init_job_thread();
 
 #ifdef USE_SESSIONS
 	sessionManager = SessionManager::u_ptr(new SessionManager);
@@ -417,7 +417,7 @@ void ClientsManager::on_close(Client *client) {
 #endif
 
 	//@todo check lock block
-	//worker_closingclients->dispatch(client->get_id());
+	worker_closingclients->dispatch(client->get_id());
 }
 
 void ClientsManager::on_error(Client *client) {

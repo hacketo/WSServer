@@ -1,6 +1,6 @@
 project(tests)
 
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR} ../include)
+include_directories(${GOOGLETEST_H} ${GOOGLEMOCK_H} ../include)
 
 add_executable(runUnitTests
         stringdata_test.cpp
@@ -17,4 +17,4 @@ add_executable(runUnitTests
         client_test.cpp
         dumytest.cpp)
 
-target_link_libraries(runUnitTests libgtest libgmock gtest_main WSServerlib)
+target_link_libraries(runUnitTests libgtest libgmock WSServerlib)
