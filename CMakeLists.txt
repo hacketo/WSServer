@@ -24,7 +24,7 @@ if (ERROR_HANDLER)
 endif ()
 
 
-include(projects)
+include(externals)
 
 add_subdirectory(libs/rapidjson)
 
