@@ -61,7 +61,7 @@ namespace pubsub {
 	protected:
 		OutgoingMessagesWorker::u_ptr worker;
 
-		virtual errors::error join() override;
+		virtual errors::error_code join() override;
 		virtual ModuleClientController *getNewClientController() override;
 
 	};

@@ -64,7 +64,7 @@ namespace modules {
 		return clients.end();
 	}
 
-	errors::error base_module::join(){}
+	errors::error_code base_module::join(){}
 
 //</editor-fold>
 

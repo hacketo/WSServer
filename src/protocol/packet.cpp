@@ -62,7 +62,7 @@ namespace packet{
 	}
 
 
-	void parse(Packet *packet, std::string& valueToParse, errors::error& error) {
+	void parse(Packet *packet, std::string& valueToParse, errors::error_code& error) {
 		if (config::DEFAULT_PARSER == ParserType::JSON){
 			parseFromJSON(packet, valueToParse, error);
 			return;
@@ -72,7 +72,7 @@ namespace packet{
 		packet->addPacket(packetData);
 	}
 
-	void parseFromJSON(Packet *packet, std::string& json, errors::error& error) {
+	void parseFromJSON(Packet *packet, std::string& json, errors::error_code& error) {
 
 		rapidjson::Document document;
 		rapidjson::Document::AllocatorType &a = document.GetAllocator();
@@ -98,7 +98,7 @@ namespace packet{
 
 	}
 
-	void parseFromJSON(Packet* packet, rapidjson::Value* object, errors::error& error) {
+	void parseFromJSON(Packet* packet, rapidjson::Value* object, errors::error_code& error) {
 
 		const char * actionKey = config::ACTION_KEY.c_str();
 #ifdef USE_MODULES

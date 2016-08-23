@@ -25,10 +25,10 @@ bool DbHandler::is_error() {
 	return error;
 }
 
-errors::error DbHandler::open_database(const char* filename) {
+errors::error_code DbHandler::open_database(const char* filename) {
 
 	int  rc;
-	errors::error e;
+	errors::error_code e;
 	/* Open database */
 	this->filename = filename;
 
@@ -59,9 +59,9 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName){
 
 
 
-errors::error DbHandler::exec(const char* sql){
+errors::error_code DbHandler::exec(const char* sql){
 	char *zErrMsg = 0;
-	errors::error e;
+	errors::error_code e;
 
 
 	/* Create SQL statement
@@ -75,14 +75,14 @@ errors::error DbHandler::exec(const char* sql){
 	/* Execute SQL statement */
 	int  rc = sqlite3_exec(database, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		e = errors::get_error("DbHandler", errors::SQL_ERROR, "SQL error: %s\n", zErrMsg);
+		e = errors::get_error("DbHandler", errors::SQL_ERROR, "SQL error_code: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
 	return e;
 }
 
-errors::error DbHandler::close(){
-	errors::error e;
+errors::error_code DbHandler::close(){
+	errors::error_code e;
 
 	sqlite3_close(database);
 

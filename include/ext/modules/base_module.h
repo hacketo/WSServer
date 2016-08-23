@@ -85,7 +85,7 @@ namespace modules {
 
 		std::map<uint32_t, Client *> clients;
 
-		virtual errors::error join();
+		virtual errors::error_code join();
 	private:
 
 

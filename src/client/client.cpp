@@ -31,7 +31,7 @@ void Client::start() {
 	ip = ep.address().to_string();
 
 	alive = clientManager->on_enter(this);
-	errors::error e;
+	errors::error_code e;
 
 	if (alive){
 
@@ -98,7 +98,7 @@ void Client::send(frame::Frame* frame) {
 /**
  * Parse le premier header recu pour l'upgrade de la connexion
  */
-void Client::get_http_header(http::handshake* handshake, errors::error& error){
+void Client::get_http_header(http::handshake* handshake, errors::error_code& error){
     char data[2048];
     boost::system::error_code e;
 
@@ -121,7 +121,7 @@ void Client::get_http_header(http::handshake* handshake, errors::error& error){
 /**
  * Parse le premier header recu pour l'upgrade de la connexion
  */
-void Client::send_handshake(const char* websocket_key, errors::error& error){
+void Client::send_handshake(const char* websocket_key, errors::error_code& error){
 
 	http::handshake* handshake = http::get_handshake(websocket_key);
 
@@ -261,7 +261,7 @@ void IncomingMessagesWorker::job(){
 					continue;
 				}
 
-				errors::error e;
+				errors::error_code e;
 				packet::Packet::u_ptr p = packet::Packet::u_ptr(new packet::Packet());
 				packet::parse(p.get(), frame->msg, e);
 
@@ -340,12 +340,15 @@ void ClosingClientsWorker::job(){
 ClientsManager::ClientsManager(Manager* m) :
 		Client_ID(0), alive(true), manager(Manager::u_ptr(m)) {
 
+}
+
+void ClientsManager::init(){
 #ifdef USE_MODULES
-	modulesManager = m->getModulesManager();
+	modulesManager = manager->getModulesManager();
 #endif
 
-	worker_closingclients = ClosingClientsWorker::create(this);
-	worker_closingclients->init_job_thread();
+	//worker_closingclients = ClosingClientsWorker::u_ptr(new ClosingClientsWorker(this));
+	//worker_closingclients->init_job_thread();
 
 #ifdef USE_SESSIONS
 	sessionManager = SessionManager::u_ptr(new SessionManager);
@@ -369,14 +372,14 @@ bool ClientsManager::on_enter(Client *client) {
 	return manager->onEnter(client);
 }
 
-bool ClientsManager::on_handshakerecv(Client *client, http::handshake* handshake, errors::error& e){
+bool ClientsManager::on_handshakerecv(Client *client, http::handshake* handshake, errors::error_code& e){
 #ifdef USE_SESSIONS
 	sessionManager->start_session(client, handshake, e);
 #endif
 	return manager->onHandshakeRecv(client, handshake);
 }
 
-bool ClientsManager::on_handshakesend(Client *client, http::handshake* handshake, errors::error& e){
+bool ClientsManager::on_handshakesend(Client *client, http::handshake* handshake, errors::error_code& e){
 #ifdef USE_SESSIONS
 	sessionManager->update_handshake(client, handshake, e);
 #endif
@@ -414,7 +417,7 @@ void ClientsManager::on_close(Client *client) {
 #endif
 
 	//@todo check lock block
-	worker_closingclients->dispatch(client->get_id());
+	//worker_closingclients->dispatch(client->get_id());
 }
 
 void ClientsManager::on_error(Client *client) {

@@ -84,9 +84,9 @@ namespace sessions {
 	class SessionDB : public DbHandler {
 	public:
 		SessionDB();
-		errors::error open_database();
-		errors::error saveSession(Session *pSession, bool ended);
-		errors::error close();
+		errors::error_code open_database();
+		errors::error_code saveSession(Session *pSession, bool ended);
+		errors::error_code close();
 
 	private:
 		uint64_t indexSessionSave;
@@ -105,7 +105,7 @@ namespace sessions {
 
 		InvalidateSessionsWorker(SessionManager *manager, size_t size = 50);
 
-		errors::error init_job_thread();
+		errors::error_code init_job_thread();
 
 	private:
 
@@ -127,9 +127,9 @@ namespace sessions {
 
 		SessionManager();
 
-		void start_session(Client *client, protocol::http::handshake *handshake, errors::error &error);
+		void start_session(Client *client, protocol::http::handshake *handshake, errors::error_code &error);
 
-		void update_handshake(Client *client, protocol::http::handshake *handshake, errors::error &error);
+		void update_handshake(Client *client, protocol::http::handshake *handshake, errors::error_code &error);
 
 		bool close_session(Client *client);
 

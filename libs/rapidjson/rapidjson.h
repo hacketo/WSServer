@@ -214,7 +214,7 @@
 #    elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #      define RAPIDJSON_ENDIAN RAPIDJSON_BIGENDIAN
 #    else
-#      error Unknown machine endianess detected. User needs to define RAPIDJSON_ENDIAN.
+#      error_code Unknown machine endianess detected. User needs to define RAPIDJSON_ENDIAN.
 #    endif // __BYTE_ORDER__
 // Detect with GLIBC's endian.h
 #  elif defined(__GLIBC__)
@@ -224,7 +224,7 @@
 #    elif (__BYTE_ORDER == __BIG_ENDIAN)
 #      define RAPIDJSON_ENDIAN RAPIDJSON_BIGENDIAN
 #    else
-#      error Unknown machine endianess detected. User needs to define RAPIDJSON_ENDIAN.
+#      error_code Unknown machine endianess detected. User needs to define RAPIDJSON_ENDIAN.
 #   endif // __GLIBC__
 // Detect with _LITTLE_ENDIAN and _BIG_ENDIAN macro
 #  elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)
@@ -241,7 +241,7 @@
 #  elif defined(RAPIDJSON_DOXYGEN_RUNNING)
 #    define RAPIDJSON_ENDIAN
 #  else
-#    error Unknown machine endianess detected. User needs to define RAPIDJSON_ENDIAN.   
+#    error_code Unknown machine endianess detected. User needs to define RAPIDJSON_ENDIAN.
 #  endif
 #endif // RAPIDJSON_ENDIAN
 
@@ -310,7 +310,7 @@
 
 #if RAPIDJSON_48BITPOINTER_OPTIMIZATION == 1
 #if RAPIDJSON_64BIT != 1
-#error RAPIDJSON_48BITPOINTER_OPTIMIZATION can only be set to 1 when RAPIDJSON_64BIT=1
+#error_code RAPIDJSON_48BITPOINTER_OPTIMIZATION can only be set to 1 when RAPIDJSON_64BIT=1
 #endif
 #define RAPIDJSON_SETPOINTER(type, p, x) (p = reinterpret_cast<type *>((reinterpret_cast<uintptr_t>(p) & static_cast<uintptr_t>(RAPIDJSON_UINT64_C2(0xFFFF0000, 0x00000000))) | reinterpret_cast<uintptr_t>(reinterpret_cast<const void*>(x))))
 #define RAPIDJSON_GETPOINTER(type, p) (reinterpret_cast<type *>(reinterpret_cast<uintptr_t>(p) & static_cast<uintptr_t>(RAPIDJSON_UINT64_C2(0x0000FFFF, 0xFFFFFFFF))))

@@ -66,6 +66,10 @@ namespace server{
 										boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), data->port));
 		data->clientManager = ClientsManager::u_ptr(new ClientsManager(m));
 
+		data->clientManager->init();
+
+		errors::init_handler();
+
 		if (data->clientManager->isAlive()){
 
 			accept_loop(data);
@@ -76,6 +80,8 @@ namespace server{
 	void close(ServerData* data){
 		delete(data->acceptor);
 	}
+
+
 }
 
 #endif // WS_SERVER_H

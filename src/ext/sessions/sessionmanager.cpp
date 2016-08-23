@@ -20,9 +20,9 @@ InvalidateSessionsWorker::InvalidateSessionsWorker(SessionManager* manager, size
 
 
 }
-errors::error InvalidateSessionsWorker::init_job_thread(){
+errors::error_code InvalidateSessionsWorker::init_job_thread(){
 
-	errors::error e = sessionDB->open_database();
+	errors::error_code e = sessionDB->open_database();
 
 	if (!e) {
 		worker = boost::thread(&InvalidateSessionsWorker::job, this);
@@ -68,15 +68,15 @@ const std::string SessionManager::COOKIE_NAME = "ws_sid";
 
 SessionManager::SessionManager() : alive(true){
 	invalidateSessionWorker = InvalidateSessionsWorker::create(this);
-	errors::error e = invalidateSessionWorker->init_job_thread();
+	errors::error_code e = invalidateSessionWorker->init_job_thread();
 
 	if (e){
-		DEBUG_PRINT("Can't start SessionManager error : ",e.msg);
+		DEBUG_PRINT("Can't start SessionManager error_code : ",e.msg);
 		alive = false;
 	}
 
 }
-void SessionManager::start_session(Client* client, protocol::http::handshake* handshake, errors::error& error ){
+void SessionManager::start_session(Client* client, protocol::http::handshake* handshake, errors::error_code& error ){
 	//Create session / id
 
 	if (handshake->cookies.count(COOKIE_NAME)) {
@@ -103,7 +103,7 @@ void SessionManager::start_session(Client* client, protocol::http::handshake* ha
 	DEBUG_PRINT("Create Session : ",client->get_id()," - ",s->sessionId);
 }
 
-void SessionManager::update_handshake(Client* client, protocol::http::handshake* handshake, errors::error& error ) {
+void SessionManager::update_handshake(Client* client, protocol::http::handshake* handshake, errors::error_code& error ) {
 	if (client->session->updateCookie) {
 		http::add_cookie(handshake, COOKIE_NAME, client->session->sessionId, config::SESSION_TIME/1000);
 
@@ -201,10 +201,10 @@ std::string Session::getJSONData(){
 SessionDB::SessionDB() : DbHandler() {};
 
 
-errors::error SessionDB::open_database() {
+errors::error_code SessionDB::open_database() {
 
 
-	errors::error e = DbHandler::open_database("sessions");
+	errors::error_code e = DbHandler::open_database("sessions");
 
 	bool get_id_fromdb = true;
 
@@ -254,8 +254,8 @@ errors::error SessionDB::open_database() {
 	return e;
 }
 
-errors::error SessionDB::saveSession(Session *session, bool ended) {
-	errors::error e;
+errors::error_code SessionDB::saveSession(Session *session, bool ended) {
+	errors::error_code e;
 
 	const char *header = session->getHeader();
 	const char *sessionId = session->getSessionID();
@@ -286,8 +286,8 @@ errors::error SessionDB::saveSession(Session *session, bool ended) {
 	return e;
 }
 
-errors::error SessionDB::close() {
-	errors::error e;
+errors::error_code SessionDB::close() {
+	errors::error_code e;
 
 	sqlite3_finalize(stmtLastId);
 	sqlite3_finalize(stmtSaveClient);

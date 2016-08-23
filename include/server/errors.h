@@ -6,28 +6,34 @@
 #define SERVER_ERRORS_H
 
 #include <boost/system/error_code.hpp>
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 namespace errors{
 
-	class error{
+	class error_code{
 	public:
 		uint16_t code;
 		std::string msg;
 		std::string master;
 
-		error();
+		error_code();
 
-		// true if no error
+		// true if no error_code
 		bool operator!() const BOOST_SYSTEM_NOEXCEPT {
 			return code == 0;
 		}
-		// true if no error
+		// true if no error_code
 		operator bool () const BOOST_SYSTEM_NOEXCEPT {
 			return code != 0;
 		}
 	};
 
-	std::ostream & operator<<(std::ostream& str, const error& v);
+	std::ostream & operator<<(std::ostream& str, const error_code& v);
+
+	extern bool handler_init;
 
 	enum code: uint16_t{
 
@@ -69,11 +75,16 @@ namespace errors{
 
 	};
 
-	error get_error(uint16_t code);
-	error get_error(uint16_t code, std::string msg);
-	error get_error(uint16_t code, std::string msg, std::string tokenValue);
-	error get_error(const std::string master, uint16_t code, const std::string msg);
-	error get_error(const std::string master, uint16_t code, const std::string msg , const std::string tokenValue);
+	error_code get_error(uint16_t code);
+	error_code get_error(uint16_t code, std::string msg);
+	error_code get_error(uint16_t code, std::string msg, std::string tokenValue);
+	error_code get_error(const std::string master, uint16_t code, const std::string msg);
+	error_code get_error(const std::string master, uint16_t code, const std::string msg , const std::string tokenValue);
+
+
+
+	void init_handler();
+
 }
 
 #endif //SERVER_ERRORS_H

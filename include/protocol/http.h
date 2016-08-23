@@ -52,14 +52,14 @@ namespace http {
 	http::handshake* get_handshake(const char * unencodedkey);
 
 	void add_cookie(http::handshake* handshake, const std::string& key, const std::string& value, u_int32_t offset);
-	void parse_header(const std::string& header, http::handshake* handshake, errors::error& error);
+	void parse_header(const std::string& header, http::handshake* handshake, errors::error_code& error);
 
 	/**
 	 * Valide le header
 	 * @param header
 	 * @return True sir le header est valide
 	 */
-	void validate_header(http::handshake* handshake, errors::error& error);
+	void validate_header(http::handshake* handshake, errors::error_code& error);
 
 	/**
 	 * Utiliser pour débugger les header

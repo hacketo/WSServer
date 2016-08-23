@@ -5,11 +5,35 @@ project(WSServerlib)
 set(USE_MODULES 1)
 set(USE_SESSIONS 1)
 
+
+set(PREPROCESS_ONLY 1)
+
+if (CMAKE_BUILD_TYPE EQUAL "Debug")
+  set(DEBUG_HANDLER 1)
+endif()
+
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+
+if (PREPROCESS_ONLY)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -E")
+endif ()
+if (DEBUG_HANDLER)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic")
+endif ()
+
+
+# We need thread support
+find_package(Threads REQUIRED)
+
+# Enable ExternalProject CMake module
+include(ExternalProject)
+
 
 # Search OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -59,9 +83,13 @@ endif ()
 
 add_subdirectory(libs)
 
+set(server_required_libraries ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3 libgtest libgmock)
+
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs
   ${CMAKE_CURRENT_SOURCE_DIR}/libs/rapidjson
-  ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -134,18 +162,12 @@ if (USE_SESSIONS)
   target_compile_definitions(${PROJECT_NAME} PUBLIC USE_SESSIONS=1)
 endif ()
 
-add_subdirectory(tests)
-
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
-
-set(server_required_libraries ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3 gtest gmock gtest_main)
 target_link_libraries(${PROJECT_NAME} ${server_required_libraries})
-
 
 # Install rules
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION include/${PROJECT_NAME})
 
-
+add_subdirectory(tests)
 add_subdirectory(impl/chat)
 add_subdirectory(impl/red)

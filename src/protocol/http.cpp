@@ -73,7 +73,7 @@ namespace http {
 		STRING_TO_UINT8(s,*buffer, size);
 	}
 
-	void validate_header(http::handshake *handshake, errors::error& error) {
+	void validate_header(http::handshake *handshake, errors::error_code& error) {
 
 		http_header &header = handshake->headers;
 
@@ -124,7 +124,7 @@ namespace http {
 		handshake->cookies[key] = ss.str();
 	}
 
-	void parse_header(const std::string &header_str, http::handshake* handshake, errors::error& error) {
+	void parse_header(const std::string &header_str, http::handshake* handshake, errors::error_code& error) {
 
 		http_header &headers = handshake->headers;
 

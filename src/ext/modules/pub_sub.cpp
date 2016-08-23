@@ -59,11 +59,11 @@ namespace pubsub {
 		return new Pub_subClientController(this);
 	}
 
-	errors::error Pub_sub::join(){
+	errors::error_code Pub_sub::join(){
 		alive = false;
 		worker->join();
 
-		return errors::error();
+		return errors::error_code();
 	}
 
 

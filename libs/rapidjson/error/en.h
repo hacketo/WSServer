@@ -35,7 +35,7 @@ RAPIDJSON_NAMESPACE_BEGIN
 */
 inline const RAPIDJSON_ERROR_CHARTYPE* GetParseError_En(ParseErrorCode parseErrorCode) {
     switch (parseErrorCode) {
-        case kParseErrorNone:                           return RAPIDJSON_ERROR_STRING("No error.");
+        case kParseErrorNone:                           return RAPIDJSON_ERROR_STRING("No error_code.");
 
         case kParseErrorDocumentEmpty:                  return RAPIDJSON_ERROR_STRING("The document is empty.");
         case kParseErrorDocumentRootNotSingular:        return RAPIDJSON_ERROR_STRING("The document root must not be followed by other values.");
@@ -58,10 +58,10 @@ inline const RAPIDJSON_ERROR_CHARTYPE* GetParseError_En(ParseErrorCode parseErro
         case kParseErrorNumberMissFraction:             return RAPIDJSON_ERROR_STRING("Miss fraction part in number.");
         case kParseErrorNumberMissExponent:             return RAPIDJSON_ERROR_STRING("Miss exponent in number.");
 
-        case kParseErrorTermination:                    return RAPIDJSON_ERROR_STRING("Terminate parsing due to Handler error.");
-        case kParseErrorUnspecificSyntaxError:          return RAPIDJSON_ERROR_STRING("Unspecific syntax error.");
+        case kParseErrorTermination:                    return RAPIDJSON_ERROR_STRING("Terminate parsing due to Handler error_code.");
+        case kParseErrorUnspecificSyntaxError:          return RAPIDJSON_ERROR_STRING("Unspecific syntax error_code.");
 
-        default:                                        return RAPIDJSON_ERROR_STRING("Unknown error.");
+        default:                                        return RAPIDJSON_ERROR_STRING("Unknown error_code.");
     }
 }
 

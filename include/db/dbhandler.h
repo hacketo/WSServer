@@ -15,11 +15,11 @@ public:
 	DbHandler();
 	~DbHandler();
 
-	errors::error open_database(const char* filename);
-	errors::error exec(const char* sql);
+	errors::error_code open_database(const char* filename);
+	errors::error_code exec(const char* sql);
 	const char * get_dberror();
 
-	virtual errors::error close();
+	virtual errors::error_code close();
 
 	sqlite3_stmt* make_statement( const char * sql );
 

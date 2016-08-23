@@ -125,9 +125,9 @@ namespace packet{
 	 * @param json
 	 * @return
 	 */
-	void parse(Packet* packet, std::string& valueToParse, errors::error& error);
-	void parseFromJSON(Packet* packet, rapidjson::Value* object, errors::error& error);
-	void parseFromJSON(Packet* packet, std::string& json, errors::error& error);
+	void parse(Packet* packet, std::string& valueToParse, errors::error_code& error);
+	void parseFromJSON(Packet* packet, rapidjson::Value* object, errors::error_code& error);
+	void parseFromJSON(Packet* packet, std::string& json, errors::error_code& error);
 
 }
 }

@@ -14,7 +14,7 @@ TEST(jsonparse_test, testaccessingvalues){
 
 	std::string json = "[{\"action\":\"test1\",\"data\":{\"d1\":\"v1\",\"d2\":0,\"d3\":[\"v1\",0,false,null,1.5]}},{\"action\":\"test2\",\"data\":{\"d2\":\"v2\"}}]";
 
-	errors::error error;
+	errors::error_code error;
 	Packet::u_ptr p = Packet::u_ptr(new Packet());
 	parse(p.get(), json, error);
 

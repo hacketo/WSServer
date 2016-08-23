@@ -28,7 +28,7 @@ using namespace ext::sessions;
 #ifndef MOCK_SOCKET
 #define SOCKET_CLASS boost::asio::ip::tcp::socket
 #else
-MOCK_SOCKET
+#include SOCKET_CLASS_H
 #endif
 
 using namespace protocol;
@@ -103,7 +103,7 @@ public:
 	 * Référence de la socket tcp
 	 * @return
 	 */
-	boost::asio::ip::tcp::socket& socket();
+	SOCKET_CLASS& socket();
 
 	/**
 	 * Démarre la prise en compte du client,
@@ -174,20 +174,20 @@ private:
 	 */
     bool alive;
 
-	MOCK_SOCKET socket_;
+	SOCKET_CLASS socket_;
 
 	Client(ClientsManager* manager, u_int32_t client_id, boost::asio::io_service& io_service);
 
 	/**
 	 * Parse le premier header recu pour l'upgrade de la connexion
 	 */
-	void get_http_header(http::handshake* handshake, errors::error& error);
+	void get_http_header(http::handshake* handshake, errors::error_code& error);
 
     /**
      * Envoi le handshake http au client
      * @param header
      */
-	void send_handshake(const char* websocket_key, errors::error& error);
+	void send_handshake(const char* websocket_key, errors::error_code& error);
 
 	size_t recv_sync(char *data, boost::system::error_code &error);
 
@@ -228,6 +228,8 @@ public:
 
 	Client::s_ptr new_client(boost::asio::io_service &io_service);
 
+	void init();
+
 	bool isAlive();
 
 	/**
@@ -245,14 +247,14 @@ public:
 	 * @param client
 	 * @return
 	 */
-	bool on_handshakerecv(Client *client, http::handshake* handshake, errors::error& e);
+	bool on_handshakerecv(Client *client, http::handshake* handshake, errors::error_code& e);
 	/**
 	 * Appelé lorsqu'un le handshake à été recu et parsé
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @param client
 	 * @return
 	 */
-	bool on_handshakesend(Client *client, http::handshake* handshake, errors::error& e);
+	bool on_handshakesend(Client *client, http::handshake* handshake, errors::error_code& e);
 
 	/**
 	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur
