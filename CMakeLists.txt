@@ -57,6 +57,7 @@ set(HEADER_FILES
   include/ext/modules/pub_sub.h
   include/ext/modules/base_module.h
   include/ext/sessions/sessionmanager.h
+  include/mocks/client_mock.h
   include/mocks/socket_mock.h
   include/protocol/constant.h
   include/protocol/frame.h
@@ -84,10 +85,8 @@ set(SOURCE_FILES
   src/client/manager.cpp
   src/client/statebased_manager.cpp
   src/db/dbhandler.cpp
-  src/ext/modules/client_timer.cpp
-  src/ext/modules/pub_sub.cpp
-  src/ext/modules/base_module.cpp
-  src/ext/sessions/sessionmanager.cpp
+
+
   src/protocol/frame.cpp
   src/protocol/http.cpp
   src/protocol/packet.cpp
@@ -98,10 +97,23 @@ set(SOURCE_FILES
   src/util/date.cpp
   src/util/sha1.cpp
   src/util/timer.cpp
-  src/util/genericvalue.cpp)
+  src/util/genericvalue.cpp
+  src/util/worker.cpp)
 
+set(MODULES_FILES src/ext/modules/client_timer.cpp
+        src/ext/modules/pub_sub.cpp
+        src/ext/modules/base_module.cpp)
 
-set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES} include/mocks/client_mock.h src/util/worker.cpp)
+set(SESSIONS_FILES src/ext/sessions/sessionmanager.cpp)
+
+if (USE_MODULES)
+  list(APPEND SOURCE_FILES ${USE_MODULES})
+endif ()
+if (USE_SESSIONS)
+  list(APPEND SOURCE_FILES ${SESSIONS_FILES})
+endif ()
+
+set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES})
 
 add_library(${PROJECT_NAME} SHARED ${SERVER_FILES})
 
