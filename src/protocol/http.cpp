@@ -82,9 +82,9 @@ namespace http {
 			return;
 		}
 
-		for (unsigned long i = REQUIRED_FIELDS.size() - 1; i > 0; i--) {
-			if (header[REQUIRED_FIELDS[i]].size() == 0) {
-				error = errors::get_error(errors::WS_HEADER_MISSING_REQUIRED_FIELD, "Missing field :%s", REQUIRED_FIELDS[i]);
+		for (auto& i : REQUIRED_FIELDS) {
+			if (!MAP_CONTAINS_KEY(header, i)) {
+				error = errors::get_error(errors::WS_HEADER_MISSING_REQUIRED_FIELD, "Missing field :%s", i);
 				return;
 			}
 		}
@@ -181,8 +181,9 @@ namespace http {
 
 						continue;
 					}
-
-					headers[linedata[0]] = linedata[1];
+					std::string field_key = linedata[0];
+					field_key[0] = toupper(field_key[0]);
+					headers[field_key] = linedata[1];
 				}
 				else{
 					error = errors::get_error(errors::WS_HEADER_INVALID_KV, "Invalid key/value :%s", vec[i]);
