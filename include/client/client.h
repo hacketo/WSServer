@@ -100,6 +100,8 @@ public:
 
 	virtual ~Client();
 
+	typedef std::map<uint32_t , Client*> clients_map;
+
 	typedef boost::shared_ptr<Client> s_ptr;
 
 	static s_ptr create(ClientsManager* manager, u_int32_t client_id, boost::asio::io_service& io_service){

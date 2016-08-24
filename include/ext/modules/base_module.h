@@ -67,6 +67,7 @@ namespace modules {
 		 * @return
 		 */
 		bool unregister(Client *client);
+		bool unregister(uint32_t clientId);
 
 		bool isAlive() const;
 
@@ -74,22 +75,17 @@ namespace modules {
 		client_iterator begin();
 		client_iterator end();
 
+		uint32_t nb_clients_registered();
 	protected:
 		bool alive;
 
-		bool is_client_already_subscribed(Client *client);
-
 		virtual ModuleClientController* getNewClientController();
-
-
 
 		std::map<uint32_t, Client *> clients;
 
 		virtual errors::error_code join();
+
 	private:
-
-
-
 		uint64_t id = 0;
 	};
 
@@ -146,6 +142,7 @@ namespace modules {
 		 * @return
 		 */
 		bool unregister(base_module *module);
+
 
 		bool has(uint64_t moduleId);
 

@@ -14,7 +14,7 @@ namespace protocol {
 	}
 
 	frame::Frame::Frame() :
-			encoded(false), is_data(false), valid(false), fin(false){
+			encoded(false), is_data(false), valid(false), fin(false), m_count(1){
 
 	}
 

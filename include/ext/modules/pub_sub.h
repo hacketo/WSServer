@@ -56,9 +56,8 @@ namespace pubsub {
 		 * @param packet
 		 * @return
 		 */
-#pragma warning disable 0169
 		bool publish(protocol::frame::FrameInterface *frameInterface);
-#pragma warning restore 0169
+
 	protected:
 		OutgoingMessagesWorker::u_ptr worker;
 

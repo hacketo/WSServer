@@ -80,6 +80,8 @@ namespace frame {
 
 		/** @todo:Erreur de frame ? */
 		int flags = 0;
+
+		int32_t m_count;
 	};
 
 	Frame* from_string(std::string& msg);

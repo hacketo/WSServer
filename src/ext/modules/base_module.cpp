@@ -32,7 +32,7 @@ namespace modules {
 	ModuleClientController* base_module::getNewClientController(){}
 
 	bool base_module::reg(Client *client, ModuleClientController **controller) {
-		if (!is_client_already_subscribed(client)) {
+		if (!MAP_CONTAINS_KEY(clients, client->get_id())) {
 			clients[client->get_id()] = client;
 			*controller = getNewClientController();
 			return true;
@@ -41,16 +41,19 @@ namespace modules {
 	}
 
 	bool base_module::unregister(Client *client) {
-		if (is_client_already_subscribed(client)) {
-			clients.erase(client->get_id());
+		return unregister(client->get_id());
+	}
+
+	bool base_module::unregister(uint32_t clientId) {
+		if (MAP_CONTAINS_KEY(clients, clientId)) {
+			clients.erase(clientId);
 			return true;
 		}
 		return false;
 	}
 
-
-	bool base_module::is_client_already_subscribed(Client *client) {
-		return MAP_CONTAINS_KEY(clients, client->get_id());
+	uint32_t base_module::nb_clients_registered(){
+		return clients.size();
 	}
 
 	bool base_module::isAlive() const{

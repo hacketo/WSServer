@@ -21,9 +21,26 @@ namespace pubsub {
 
 		assert(frame->encoded);
 
+		std::vector<uint32_t > listToRemove;
+
+		frame->m_count = pubsub->nb_clients_registered();
+
 		for (base_module::client_iterator it = pubsub->begin(); it != pubsub->end(); ++it) {
 			if (it->second) {
 				it->second->send(frame);
+			}
+			else{
+				listToRemove.push_back(it->first);
+			}
+		}
+
+		if (frame && frame->m_count <= 0){
+			delete frame;
+		}
+
+		if(listToRemove.size()){
+			for(auto& it : listToRemove){
+				pubsub->unregister(it);
 			}
 		}
 	}

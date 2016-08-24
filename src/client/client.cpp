@@ -5,6 +5,9 @@
 #include "debug.h"
 #include "protocol/opcode.h"
 
+#ifdef USE_MODULES
+#include "ext/modules/base_module.h"
+#endif
 
 //<editor-fold desc="Client">
 
@@ -79,17 +82,35 @@ uint32_t Client::get_id() {
 void Client::send(std::string& message) {
 	//@todo check lock block
 	DEBUG_PRINT("outgoing_worker->dispatch");
-	outgoing_worker->dispatch(frame::from_string(message));
+	frame::Frame* frame = frame::from_string(message);
+	if (!outgoing_worker->dispatch(frame)){
+		delete frame;
+	}
 }
+
+/**
+ * Utilisé pour envoyer une frame à 1 seule personne
+ * @param frame
+ */
 void Client::send(frame::FrameInterface *holder) {
 	//@todo check lock block
 	DEBUG_PRINT("outgoing_worker->dispatch");
-	outgoing_worker->dispatch(holder->getFrame());
+	frame::Frame* frame = holder->getFrame();
+	if (!outgoing_worker->dispatch(frame)){
+		delete frame;
+	}
 }
+
+/**
+ * Utilisé pour envoyer une frame à x personnes
+ * @param frame
+ */
 void Client::send(frame::Frame* frame) {
 	//@todo check lock block
 	DEBUG_PRINT("outgoing_worker->dispatch");
-	outgoing_worker->dispatch(frame);
+	if (!outgoing_worker->dispatch(frame)){
+		frame->m_count --;
+	}
 }
 
 
@@ -274,11 +295,16 @@ void OutgoingMessagesWorker::do_job(frame::Frame *frame){
 	boost::system::error_code error;
 	client->send_sync(frame->buffer, frame->bufferSize, error);
 
+	frame->m_count--;
+	if (frame->m_count <= 0){
+		delete frame;
+	}
 	if (error) {
 		DEBUG_PRINT("Send data failed: ", boost::system::system_error(error).what());
 	}
 
-	delete frame;
+
+
 }
 
 //</editor-fold>
