@@ -15,24 +15,23 @@ using namespace protocol::packet;
 namespace ext {
 namespace sessions {
 
-InvalidateSessionsWorker::InvalidateSessionsWorker(SessionManager* manager, size_t size) :
-		Worker<u_int32_t>(size), manager(manager), sessionDB(&manager->sessionDB){
+InvalidateSessionsWorker::InvalidateSessionsWorker(SessionManager* manager) :
+		Worker(), manager(manager), sessionDB(&manager->sessionDB){
 
 
 }
-errors::error_code InvalidateSessionsWorker::init_job_thread(){
-
+errors::error_code InvalidateSessionsWorker::init(){
 	errors::error_code e = sessionDB->open_database();
 
 	if (!e) {
-		worker = boost::thread(&InvalidateSessionsWorker::job, this);
+		m_thread = boost::thread(&InvalidateSessionsWorker::job, this);
 	}
 	return e;
 }
 
 
 void InvalidateSessionsWorker::job(){
-	while(manager->alive) {
+	while(!interrupted && manager->alive) {
 		std::map<std::string, Session::u_ptr> &sessions = manager->sessions;
 		std::vector<std::string> sessionToInvalidate;
 
@@ -68,7 +67,7 @@ const std::string SessionManager::COOKIE_NAME = "ws_sid";
 
 SessionManager::SessionManager() : alive(true){
 	invalidateSessionWorker = InvalidateSessionsWorker::create(this);
-	errors::error_code e = invalidateSessionWorker->init_job_thread();
+	errors::error_code e = invalidateSessionWorker->init();
 
 	if (e){
 		DEBUG_PRINT("Can't start SessionManager error_code : ",e.msg);

@@ -9,8 +9,6 @@
 
 
 #define MOCK_SOCKET
-#define SOCKET_CLASS_H "mocks/socket_mock.h"
-#define SOCKET_CLASS MockSocket
 
 
 #define USE_MODULES

@@ -95,23 +95,20 @@ namespace sessions {
 	};
 
 
-	class InvalidateSessionsWorker : public Worker<u_int32_t> {
+	class InvalidateSessionsWorker : public Worker {
 	public:
 		typedef std::unique_ptr<InvalidateSessionsWorker> u_ptr;
-
-		static u_ptr create(SessionManager *manager, size_t size = 50) {
-			return u_ptr(new InvalidateSessionsWorker(manager, size));
+		static u_ptr create(SessionManager *manager) {
+			return u_ptr(new InvalidateSessionsWorker(manager));
 		}
 
-		InvalidateSessionsWorker(SessionManager *manager, size_t size = 50);
+		InvalidateSessionsWorker(SessionManager *manager);
 
-		errors::error_code init_job_thread();
+		errors::error_code init();
 
 	private:
-
 		SessionDB *sessionDB;
 		SessionManager *manager;
-
 		void job();
 	};
 

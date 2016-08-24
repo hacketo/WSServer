@@ -6,16 +6,9 @@
 #define WSSERVERLIB_SOCKET_MOCK_H
 
 #include <boost/asio/ip/tcp.hpp>
-#include "gtest/gtest.h"
-/*
-#include <gtest/googlemock/include/gmock/gmock.h>
-#include <gtest/googlemock/include/gmock/gmock-generated-function-mockers.h>
-#include <gtest/googlemock/include/gmock/internal/gmock-generated-internal-utils.h>
-#include <gtest/googlemock/include/gmock/gmock-spec-builders.h>
-*/
+#include "gmock/gmock.h"
 
 using namespace boost::asio;
-
 
 class SocketInterface {
 

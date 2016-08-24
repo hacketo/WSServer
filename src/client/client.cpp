@@ -45,15 +45,15 @@ void Client::start() {
 				send_handshake(handshake->wsKey.c_str(), e);
 
 				if (!e) {
-					alive = clientManager->on_ready(this);
-					if (alive) {
-						incoming_worker = IncomingMessagesWorker::create(clientManager, this);
-						outgoing_worker = OutgoingMessagesWorker::create(this);
 
-						incoming_worker->init_job_thread();
-						outgoing_worker->init_job_thread();
-						incoming_worker->start_read_loop();
-					}
+					incoming_worker = IncomingMessagesWorker::create(clientManager, this);
+					outgoing_worker = OutgoingMessagesWorker::create(this);
+
+					clientManager->on_ready(this);
+
+					incoming_worker->init_job_thread();
+					outgoing_worker->init_job_thread();
+					incoming_worker->start_read_loop();
 				}
 			}
 		}
@@ -185,13 +185,11 @@ void Client::joinThreads(){
 //<editor-fold desc="IncomingMessagesWorker">
 
 IncomingMessagesWorker::IncomingMessagesWorker(ClientsManager* manager, Client *client, size_t size) :
-		Worker<frame::FrameBuffer>(size), clientManager(manager), client(client){
-}
+		WorkerDeQue<frame::FrameBuffer>(size), clientManager(manager), client(client),
+		frameSize(0), consumed(0), lastFramebufferID(0){
 
-void IncomingMessagesWorker::init_job_thread(){
-	worker = boost::thread(&IncomingMessagesWorker::job, this);
+	debug_tag = "IncomingMessagesWorker "+std::to_string(client->get_id());
 }
-
 
 void IncomingMessagesWorker::start_read_loop(){
 	read_async_loop();
@@ -213,67 +211,51 @@ void IncomingMessagesWorker::on_read_some(const boost::system::error_code& error
 	}
 }
 
-void IncomingMessagesWorker::job(){
+void IncomingMessagesWorker::do_job(frame::FrameBuffer frameBuffer){
+	DEBUG_PRINT("IncomingMessagesWorker::do_job");
+	assert(lastFramebufferID == frameBuffer._id);
 
-	uint32_t frameSize = 0;
-	uint32_t consumed = 0;
+	lastFramebufferID++;
 
-	uint8_t* buffer;
+	uint32_t& bufferSize = frameBuffer.bufferSize;
 
-	uint16_t lastFramebufferID = 0;
-
-	while (client->alive){
-		if(safeDeQue.is_not_empty()){
-			frame::FrameBuffer frameBuffer;
-			safeDeQue.pop_back(frameBuffer);
-
-			assert(lastFramebufferID == frameBuffer._id);
-
-			lastFramebufferID++;
-
-			uint32_t& bufferSize = frameBuffer.bufferSize;
-
-			if(bufferSize == 0){
-				continue;
-			}
-
-			// Si buffer null on doit le créé en essayant de trouver la taille de la frame
-			if (!buffer){
-				frameSize = std::max<uint32_t>(bufferSize, frame::get_framelen(&frameBuffer));
-				buffer = new uint8_t[frameSize];
-			}
-
-
-
-			memcpy(buffer + consumed, frameBuffer.buffer, bufferSize);
-
-			consumed += bufferSize;
-
-			if (consumed == frameSize) {
-
-				frame::Frame::u_ptr frame = frame::Frame::create();
-
-				frame::decode(frame.get(), buffer, frameSize);
-				if (frame->op_code == opcode::CLOSE) {
-					client->alive = false;
-					clientManager->on_close(client);
-					continue;
-				}
-
-				errors::error_code e;
-				packet::Packet::u_ptr p = packet::Packet::u_ptr(new packet::Packet());
-				packet::parse(p.get(), frame->msg, e);
-
-				clientManager->on_receive(client, p.get());
-
-				consumed = 0;
-				frameSize = 0;
-
-				// Buffer delete by ~Frame()
-			}
-		}
+	if(bufferSize == 0){
+		return;
 	}
-	DEBUG_PRINT("IncomingMessagesWorker ",client->id, " ended");
+
+	// Si buffer null on doit le créé en essayant de trouver la taille de la frame
+	if (!buffer){
+		frameSize = std::max<uint32_t>(bufferSize, frame::get_framelen(&frameBuffer));
+		buffer = new uint8_t[frameSize];
+	}
+
+	memcpy(buffer + consumed, frameBuffer.buffer, bufferSize);
+
+	consumed += bufferSize;
+
+	if (consumed == frameSize) {
+
+		frame::Frame::u_ptr frame = frame::Frame::create();
+
+		frame::decode(frame.get(), buffer, frameSize);
+		if (frame->op_code == opcode::CLOSE) {
+			client->alive = false;
+			clientManager->on_close(client);
+			return;
+		}
+
+		errors::error_code e;
+		packet::Packet::u_ptr p = packet::Packet::u_ptr(new packet::Packet());
+		packet::parse(p.get(), frame->msg, e);
+
+		clientManager->on_receive(client, p.get());
+
+		consumed = 0;
+		frameSize = 0;
+
+		buffer = NULL;
+		// Buffer delete by ~Frame()
+	}
 }
 
 //</editor-fold>
@@ -281,34 +263,22 @@ void IncomingMessagesWorker::job(){
 //<editor-fold desc="OutgoingMessagesWorker">
 
 OutgoingMessagesWorker::OutgoingMessagesWorker(Client *client, size_t size) :
-		Worker<frame::Frame*>(size), client(client){
+		WorkerDeQue<frame::Frame*>(size), client(client){
+	debug_tag = "OutgoingMessagesWorker "+std::to_string(client->get_id());
 }
-void OutgoingMessagesWorker::init_job_thread() {
-	worker = boost::thread(&OutgoingMessagesWorker::job, this);
-}
-void OutgoingMessagesWorker::job(){
-	//@todo check that shit
-	while (!interrupted){
-		safeDeQue.wait_one(m_mutex);
-		if(!interrupted && safeDeQue.is_not_empty()) {
 
-			frame::Frame *frame;
-			safeDeQue.pop_back(frame);
+void OutgoingMessagesWorker::do_job(frame::Frame *frame){
+	DEBUG_PRINT("outgoing_worker->job before encode");
+	frame::encode(frame);
+	DEBUG_PRINT("outgoing_worker->job before send");
+	boost::system::error_code error;
+	client->send_sync(frame->buffer, frame->bufferSize, error);
 
-			DEBUG_PRINT("outgoing_worker->job before encode");
-			frame::encode(frame);
-			DEBUG_PRINT("outgoing_worker->job before send");
-			boost::system::error_code error;
-			client->send_sync(frame->buffer, frame->bufferSize, error);
-
-			if (error) {
-				DEBUG_PRINT("Send data failed: ", boost::system::system_error(error).what());
-			}
-
-			delete frame;
-		}
+	if (error) {
+		DEBUG_PRINT("Send data failed: ", boost::system::system_error(error).what());
 	}
-	DEBUG_PRINT("OutgoingMessagesWorker ",client->id, " ended");
+
+	delete frame;
 }
 
 //</editor-fold>
@@ -317,23 +287,12 @@ void OutgoingMessagesWorker::job(){
 
 
 ClosingClientsWorker::ClosingClientsWorker(ClientsManager* manager, size_t size) :
-		Worker<u_int32_t>(size), manager(manager){
-}
-void ClosingClientsWorker::init_job_thread(){
-	worker = boost::thread(&ClosingClientsWorker::job, this);
+		WorkerDeQue<u_int32_t>(size), manager(manager){
+	debug_tag = "ClosingClientsWorker";
 }
 
-
-void ClosingClientsWorker::job(){
-	while (manager->isAlive()){
-		if(safeDeQue.is_not_empty()){
-
-			u_int32_t clientId;
-			safeDeQue.pop_back(clientId);
-			manager->handleClientClosed(clientId);
-		}
-	}
-	DEBUG_PRINT("Clients_Manager ClosingClientsWorker ended");
+void ClosingClientsWorker::do_job(u_int32_t clientId){
+	manager->handleClientClosed(clientId);
 }
 
 ClientsManager::ClientsManager(Manager* m) :
@@ -385,8 +344,8 @@ bool ClientsManager::on_handshakesend(Client *client, http::handshake* handshake
 	return manager->onHandshakeSend(client, handshake);
 }
 
-bool ClientsManager::on_ready(Client *client) {
-	return manager->onReady(client);
+void ClientsManager::on_ready(Client *client) {
+	manager->onReady(client);
 }
 
 void ClientsManager::on_receive(Client *client, packet::Packet *packet) {
@@ -416,6 +375,7 @@ void ClientsManager::on_close(Client *client) {
 #endif
 
 	//@todo check lock block
+	DEBUG_PRINT("worker_closingclients->dispatch(client->get_id())");
 	worker_closingclients->dispatch(client->get_id());
 }
 

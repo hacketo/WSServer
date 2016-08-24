@@ -14,6 +14,7 @@ int main(int argc, const char *argv[]){
 	server::parse_from_args(argc, argv, d);
 
 	server::init(&d, chat);
-	
+
+
     return 0;
 }

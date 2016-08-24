@@ -14,24 +14,24 @@ TEST(safedeque_test, testinit){
 	std::string c = "cc";
 	std::string d = "dd";
 
-	deque.push_front(a);
+	deque.push(a);
 
 	EXPECT_EQ(1, deque.weight());
 
-	deque.push_front(b);
+	deque.push(b);
 
 	EXPECT_EQ(2, deque.weight());
 
-	deque.push_front(c);
+	deque.push(c);
 
 	EXPECT_EQ(3, deque.weight());
 
-	deque.push_front(d);
+	deque.push(d);
 
 	EXPECT_EQ(4, deque.weight());
 
 	std::string t ;
-	deque.pop_back(t);
+	deque.pop(t);
 
 	EXPECT_EQ(3, deque.weight());
 
@@ -45,13 +45,13 @@ TEST(safedeque_test, testpointer){
 	std::string* a = new std::string("aa");
 	std::string* b = new std::string("bb");
 
-	deque.push_front(a);
-	deque.push_front(b);
+	deque.push(a);
+	deque.push(b);
 
 	EXPECT_EQ(2, deque.weight());
 
 	std::string* t ;
-	deque.pop_back(t);
+	deque.pop(t);
 
 	EXPECT_EQ(a, t);
 

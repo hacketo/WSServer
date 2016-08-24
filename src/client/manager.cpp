@@ -19,9 +19,8 @@ bool Manager::onEnter(Client *client){
 bool Manager::onHandshakeRecv(Client *client, protocol::http::handshake* handshake){ return true;}
 bool Manager::onHandshakeSend(Client *client, protocol::http::handshake* handshake){ return true;}
 
-bool Manager::onReady(Client *client){
+void Manager::onReady(Client *client){
 	DEBUG_PRINT("Start Listening : ",client->get_id(),"-",client->get_ip());
-	return true;
 }
 
 void Manager::onReceive(Client *client, protocol::packet::Packet *packet){}

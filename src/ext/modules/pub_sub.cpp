@@ -13,33 +13,19 @@ namespace pubsub {
 
 
 	OutgoingMessagesWorker::OutgoingMessagesWorker(Pub_sub *pubsub, size_t size) :
-			Worker<Frame*>(size), pubsub(pubsub){
+			WorkerDeQue<Frame*>(size), pubsub(pubsub){
 	}
 
-	void OutgoingMessagesWorker::init_job_thread(){
-		worker = boost::thread(&OutgoingMessagesWorker::job, this);
-	}
+	void OutgoingMessagesWorker::do_job(Frame* frame){
+		frame::encode(frame);
 
-	void OutgoingMessagesWorker::job(){
-		while (!interrupted){
-			if(safeDeQue.is_not_empty()){
-				Frame *frame;
+		assert(frame->encoded);
 
-				DEBUG_PRINT("pubsub::OutgoingMessagesWorker[",pubsub->get_id(),"] Wait frame");
-				safeDeQue.pop_back(frame);
-
-				frame::encode(frame);
-
-				assert(frame->encoded);
-
-				for (base_module::client_iterator it = pubsub->begin(); it != pubsub->end(); ++it) {
-					if (it->second) {
-						it->second->send(frame);
-					}
-				}
+		for (base_module::client_iterator it = pubsub->begin(); it != pubsub->end(); ++it) {
+			if (it->second) {
+				it->second->send(frame);
 			}
 		}
-		DEBUG_PRINT("pubsub::OutgoingMessagesWorker[",pubsub->get_id(),"] ENDED");
 	}
 
 
@@ -54,8 +40,8 @@ namespace pubsub {
 	 * @return
 	 */
 	bool Pub_sub::publish(protocol::frame::FrameInterface *frameInterface) {
-		worker->dispatch(frameInterface->getFrame());
-		return true;
+		DEBUG_PRINT("Pub_sub::worker->dispatch(frameInterface->getFrame())");
+		return worker->dispatch(frameInterface->getFrame());
 	}
 
 	ModuleClientController *Pub_sub::getNewClientController() {
@@ -64,7 +50,7 @@ namespace pubsub {
 
 	errors::error_code Pub_sub::join(){
 		alive = false;
-		worker->join();
+		worker->join(true);
 
 		return errors::error_code();
 	}

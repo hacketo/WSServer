@@ -12,15 +12,13 @@ Chat::Chat() : Manager() {
 	modulesManager->REGISTER(pubsub);
 }
 
-bool Chat::onReady(Client *client) {
+void Chat::onReady(Client *client) {
 	client->registerModule(pubsub);
 
 	std::stringstream msg;
 	msg << "Client " << client->get_id() << " connecté !";
 	packet::Packet::u_ptr p = packet::Packet::u_ptr(new packet::Packet(new StringValue(msg.str())));
 	pubsub->publish(p.get());
-
-	return true;
 }
 
 void Chat::onReceive(Client *client, packet::Packet *packet) {

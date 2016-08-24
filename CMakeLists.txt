@@ -26,15 +26,15 @@ endif ()
 
 
 include(externals)
-
 add_subdirectory(libs/rapidjson)
+
+include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/
+        ${GOOGLETEST_H} ${GOOGLEMOCK_H})
 
 set(server_required_libraries ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3 libgtest libgmock)
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/libs/
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/
-        ${GOOGLETEST_H} ${GOOGLEMOCK_H})
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -93,9 +93,11 @@ set(SOURCE_FILES
   src/util/genericvalue.cpp)
 
 
-set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES} )
+set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES} include/mocks/client_mock.h src/util/worker.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${SERVER_FILES})
+
+
 
 
 if (USE_MODULES)

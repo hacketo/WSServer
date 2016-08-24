@@ -56,7 +56,7 @@ bool StateBasedManager::onEnter(Client *client) {
 	return Manager::onEnter(client);
 }
 
-bool StateBasedManager::onReady(Client *client) {
+void StateBasedManager::onReady(Client *client) {
 	return Manager::onReady(client);
 }
 

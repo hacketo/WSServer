@@ -20,7 +20,7 @@ namespace modules {
 namespace pubsub {
 	class Pub_sub;
 
-	class OutgoingMessagesWorker : public Worker<Frame*> {
+	class OutgoingMessagesWorker : public WorkerDeQue<Frame*> {
 	public:
 		typedef std::unique_ptr<OutgoingMessagesWorker> u_ptr;
 
@@ -30,12 +30,12 @@ namespace pubsub {
 
 		OutgoingMessagesWorker(Pub_sub *pubsub, size_t size = 50);
 
-		void init_job_thread();
+		void do_job(Frame * f) override;
 
 	private:
 		Pub_sub *pubsub;
 
-		void job();
+
 	};
 
 	class Pub_sub : public base_module {

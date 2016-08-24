@@ -21,7 +21,7 @@ public:
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @return
 	 */
-	virtual bool onReady(Client *client) override;
+	virtual void onReady(Client *client) override;
 
 
 	/**

@@ -95,7 +95,7 @@ public:
 
 	virtual bool onEnter(Client *client) override;
 
-	virtual bool onReady(Client *client) override;
+	virtual void onReady(Client *client) override;
 
 	/**
 	 * Récupère une frame, transforme les donnée en packets

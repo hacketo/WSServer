@@ -1,7 +1,5 @@
 project(tests)
 
-include_directories(${GOOGLETEST_H} ${GOOGLEMOCK_H} ../include)
-
 add_executable(runUnitTests
         main_tests.cpp
         stringdata_test.cpp
@@ -14,6 +12,8 @@ add_executable(runUnitTests
         jsonparse_test.cpp
         modules_test.cpp
         time_test.cpp
-        safedeque_test.cpp )
+        safedeque_test.cpp
+        worker_test.cpp)
+        #client_test.cpp)
 
 target_link_libraries(runUnitTests libgtest libgmock WSServerlib)

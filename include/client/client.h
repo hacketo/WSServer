@@ -25,11 +25,12 @@ using namespace ext::sessions;
 
 
 
-#ifndef MOCK_SOCKET
-#define SOCKET_CLASS boost::asio::ip::tcp::socket
-#else
-#include SOCKET_CLASS_H
-#endif
+//#ifndef MOCK_SOCKET
+//#define SOCKET_CLASS boost::asio::ip::tcp::socket
+//#else
+//#include "mocks/socket_mock.h"
+//#define SOCKET_CLASS MockSocket
+//#endif
 
 using namespace protocol;
 
@@ -40,14 +41,16 @@ class ClientsManager;
  * Thread safe worker pour recevoir et traiter les frames recue sur 2 threads différents
  * Décode les frames recues
  */
-class IncomingMessagesWorker : public Worker<frame::FrameBuffer>{
+class IncomingMessagesWorker : public WorkerDeQue<frame::FrameBuffer>{
 public:
 	typedef std::unique_ptr<IncomingMessagesWorker> u_ptr;
 	static u_ptr create(ClientsManager* manager, Client *client, size_t size = 50){
 		return u_ptr(new IncomingMessagesWorker(manager, client, size));
 	}
 	IncomingMessagesWorker(ClientsManager* manager, Client *client, size_t size = 50);
-	void init_job_thread();
+
+	void do_job(frame::FrameBuffer fb) override;
+
 	void start_read_loop();
 private:
 	ClientsManager* clientManager;
@@ -60,7 +63,12 @@ private:
 	uint32_t packetID = 0;
 
 	Client* client;
-	void job();
+
+
+	uint32_t frameSize = 0;
+	uint32_t consumed = 0;
+	uint8_t* buffer;
+	uint16_t lastFramebufferID = 0;
 };
 
 
@@ -68,17 +76,16 @@ private:
  * Thread safe worker pour envoyer les messages au client
  * Recoit une liste de message à encoder et envoyer au client
  */
-class OutgoingMessagesWorker : public Worker<frame::Frame*> {
+class OutgoingMessagesWorker : public WorkerDeQue<frame::Frame*> {
 public:
 	typedef std::unique_ptr<OutgoingMessagesWorker> u_ptr;
 	static u_ptr create(Client *client, size_t size = 50){
 		return u_ptr(new OutgoingMessagesWorker(client, size));
 	}
 	OutgoingMessagesWorker(Client *client, size_t size = 50);
-	void init_job_thread();
+	void do_job(frame::Frame* frame) override;
 private:
 	Client* client;
-	void job();
 };
 
 
@@ -103,7 +110,7 @@ public:
 	 * Référence de la socket tcp
 	 * @return
 	 */
-	SOCKET_CLASS& socket();
+	boost::asio::ip::tcp::socket& socket();
 
 	/**
 	 * Démarre la prise en compte du client,
@@ -151,7 +158,7 @@ public:
 	u_int32_t flag;
 
 
-private:
+protected:
 	void joinThreads();
 	void closeSocket();
 	/**
@@ -174,9 +181,10 @@ private:
 	 */
     bool alive;
 
-	SOCKET_CLASS socket_;
+	boost::asio::ip::tcp::socket socket_;
 
 	Client(ClientsManager* manager, u_int32_t client_id, boost::asio::io_service& io_service);
+
 
 	/**
 	 * Parse le premier header recu pour l'upgrade de la connexion
@@ -205,17 +213,17 @@ private:
 };
 
 
-class ClosingClientsWorker : public Worker<u_int32_t>{
+class ClosingClientsWorker : public WorkerDeQue<u_int32_t>{
 public:
 	typedef std::unique_ptr<ClosingClientsWorker> u_ptr;
 	static u_ptr create(ClientsManager* manager, size_t size = 50){
 		return u_ptr(new ClosingClientsWorker(manager, size));
 	}
 	ClosingClientsWorker(ClientsManager* manager,size_t size = 50);
-	void init_job_thread();
+
+	void do_job(u_int32_t id) override;
 private:
 	ClientsManager* manager;
-	void job();
 };
 
 
@@ -262,7 +270,7 @@ public:
 	 * @param client
 	 * @return
 	 */
-	bool on_ready(Client *client);
+	void on_ready(Client *client);
 
 	/**
 	 * Appelé lorsque l'on recoit un message de la part d'un client

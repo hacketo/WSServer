@@ -52,7 +52,7 @@ public:
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @return
 	 */
-	virtual bool onReady(Client *client);
+	virtual void onReady(Client *client);
 
 	/**
 	 * Appelé lorsque l'on recoit un message de la part d'un client
