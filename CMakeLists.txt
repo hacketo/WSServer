@@ -38,7 +38,7 @@ add_subdirectory(libs/rapidjson)
 
 set(WSServerlib_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/libs/
         ${CMAKE_CURRENT_SOURCE_DIR}/include/
-        ${GOOGLETEST_H} ${GOOGLEMOCK_H})
+        ${GOOGLETEST_H} ${GOOGLEMOCK_H} PARENT_SCOPE)
 
 
 include_directories(${WSServerlib_INCLUDE_PATH})
