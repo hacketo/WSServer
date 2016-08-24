@@ -2,10 +2,18 @@ cmake_minimum_required(VERSION 3.6.1)
 
 project(WSServerlib)
 
-set(USE_MODULES 1)
-set(USE_SESSIONS 1)
-set(WS_DEBUG 1)
-set(PREPROCESS_ONLY 0)
+if(NOT DEFINED USE_MODULES)
+  set(USE_MODULES 1)
+endif()
+if(NOT DEFINED USE_SESSIONS)
+  set(USE_SESSIONS 1)
+endif()
+if(NOT DEFINED WS_DEBUG)
+  set(WS_DEBUG 1)
+endif()
+if(NOT DEFINED PREPROCESS_ONLY)
+  set(PREPROCESS_ONLY 0)
+endif()
 
 
 if (CMAKE_BUILD_TYPE EQUAL "Debug")
