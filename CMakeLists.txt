@@ -36,10 +36,12 @@ endif ()
 include(externals)
 add_subdirectory(libs/rapidjson)
 
-include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/
+set(WSServerlib_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/libs/
         ${CMAKE_CURRENT_SOURCE_DIR}/include/
         ${GOOGLETEST_H} ${GOOGLEMOCK_H})
+
+
+include_directories(${WSServerlib_INCLUDE_PATH})
 
 set(server_required_libraries ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} pthread boost_timer rapidjson sqlite3 libgtest libgmock)
 
