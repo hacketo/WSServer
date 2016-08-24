@@ -107,7 +107,7 @@ set(MODULES_FILES src/ext/modules/client_timer.cpp
 set(SESSIONS_FILES src/ext/sessions/sessionmanager.cpp)
 
 if (USE_MODULES)
-  list(APPEND SOURCE_FILES ${USE_MODULES})
+  list(APPEND SOURCE_FILES ${MODULES_FILES})
 endif ()
 if (USE_SESSIONS)
   list(APPEND SOURCE_FILES ${SESSIONS_FILES})
