@@ -6,14 +6,21 @@ int main(int argc, const char *argv[]){
 	config::DEFAULT_PARSER = protocol::packet::ParserType::NO;
 	Chat* chat = new Chat();
 
-	server::ServerData d;
+	server::ServerInfos d;
+	d.protocols = {std::make_pair(server::TCP, 9876)};
 
-	d.ip = "127.0.0.1";
-	d.port = 9876;
 
-	server::parse_from_args(argc, argv, d);
+	server::Server s(d, chat);
 
-	server::init(&d, chat);
+	errors::error_code ec;
+
+	try {
+		s.start(ec);
+	}
+	catch(auto e){
+
+	}
+	s.close();
 
 
     return 0;

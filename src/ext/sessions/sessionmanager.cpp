@@ -31,7 +31,7 @@ errors::error_code InvalidateSessionsWorker::init(){
 
 
 void InvalidateSessionsWorker::job(){
-	while(!interrupted && manager->alive) {
+	while(!m_interrupted.load() && manager->alive) {
 		std::map<std::string, Session::u_ptr> &sessions = manager->sessions;
 		std::vector<std::string> sessionToInvalidate;
 

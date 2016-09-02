@@ -2,14 +2,23 @@
 // Created by hacketo on 15/08/16.
 //
 
+#include <sstream>
 #include "server/errors.h"
 #include "util/algo.h"
 
 namespace errors {
 
 error_code::error_code() {
-	code = 0;
+	code = OK;
 	msg = "";
+	master = "";
+}
+
+error_code::error_code(std::string m, const boost::system::error_code& ec) {
+	code = ec.value();
+	std::stringstream ss;
+	ss << m << " : " << ec.message();
+	msg = ss.str();
 	master = "";
 };
 

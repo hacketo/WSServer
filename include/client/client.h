@@ -1,8 +1,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include <server/socket.h>
 #include "boost/asio.hpp"
-#include "boost/thread/thread.hpp"
 #include "boost/enable_shared_from_this.hpp"
 #include "util/safedeque.h"
 #include "protocol/http.h"
@@ -26,7 +26,7 @@ using namespace ext::sessions;
 
 
 //#ifndef MOCK_SOCKET
-//#define SOCKET_CLASS boost::asio::ip::tcp::socket
+//#define SOCKET_CLASS boost::asio::ip::tcp::sockets
 //#else
 //#include "mocks/socket_mock.h"
 //#define SOCKET_CLASS MockSocket
@@ -34,91 +34,18 @@ using namespace ext::sessions;
 
 using namespace protocol;
 
-class ClientsManager;
 
-
-/**
- * Thread safe worker pour recevoir et traiter les frames recue sur 2 threads différents
- * Décode les frames recues
- */
-class IncomingMessagesWorker : public WorkerDeQue<frame::FrameBuffer>{
-public:
-	typedef std::unique_ptr<IncomingMessagesWorker> u_ptr;
-	static u_ptr create(ClientsManager* manager, Client *client, size_t size = 50){
-		return u_ptr(new IncomingMessagesWorker(manager, client, size));
-	}
-	IncomingMessagesWorker(ClientsManager* manager, Client *client, size_t size = 50);
-
-	void do_job(frame::FrameBuffer fb) override;
-
-	void start_read_loop();
-private:
-	ClientsManager* clientManager;
-	void read_async_loop();
-	void on_read_some(const boost::system::error_code& error, std::size_t bytes_transferred);
-	/**
-	 * Buffer temporaire pour les nouveau message
-	 */
-	uint8_t temp_buffer[constant::max_buffer_size];
-	uint32_t packetID = 0;
-
-	Client* client;
-
-
-	uint32_t frameSize = 0;
-	uint32_t consumed = 0;
-	uint8_t* buffer;
-	uint16_t lastFramebufferID = 0;
-};
-
-
-/**
- * Thread safe worker pour envoyer les messages au client
- * Recoit une liste de message à encoder et envoyer au client
- */
-class OutgoingMessagesWorker : public WorkerDeQue<frame::Frame*> {
-public:
-	typedef std::unique_ptr<OutgoingMessagesWorker> u_ptr;
-	static u_ptr create(Client *client, size_t size = 50){
-		return u_ptr(new OutgoingMessagesWorker(client, size));
-	}
-	OutgoingMessagesWorker(Client *client, size_t size = 50);
-	void do_job(frame::Frame* frame) override;
-private:
-	Client* client;
-};
+class ClientManager;
 
 
 class Client : public boost::enable_shared_from_this<Client> {
-	friend class IncomingMessagesWorker;
-	friend class OutgoingMessagesWorker;
-	friend class ClientsManager;
+	friend class ClientManager;
 #ifdef USE_SESSIONS
 	friend class ext::sessions::SessionManager;
 #endif
 public:
 
-	virtual ~Client();
-
-	typedef std::map<uint32_t , Client*> clients_map;
-
 	typedef boost::shared_ptr<Client> s_ptr;
-
-	static s_ptr create(ClientsManager* manager, u_int32_t client_id, boost::asio::io_service& io_service){
-		return s_ptr(new Client(manager, client_id, io_service));
-	}
-
-	/**
-	 * Référence de la socket tcp
-	 * @return
-	 */
-	boost::asio::ip::tcp::socket& socket();
-
-	/**
-	 * Démarre la prise en compte du client,
-	 * envoi le handshake ...
-	 */
-	void start();
 
 	/**
 	 * Envoi en message au client, thread safe
@@ -161,49 +88,23 @@ public:
 
 
 protected:
-	void joinThreads();
 	void closeSocket();
-	/**
-	 * Ip du client
-	 */
-	std::string ip;
 
 	/**
 	 * Id du client pour le Clients_Manager
 	 */
 	uint32_t id;
 
-	//@http://www.boost.org/doc/libs/1_58_0/doc/html/thread/thread_management.html#thread.thread_management.tutorial
-	//@http://www.boost.org/doc/libs/1_58_0/doc/html/boost_asio/example/cpp11/echo/blocking_tcp_echo_server.cpp
-	OutgoingMessagesWorker::u_ptr outgoing_worker;
-	IncomingMessagesWorker::u_ptr incoming_worker;
-
 	/**
 	 * Détermine si on doit continuer la connexion avec ce client
 	 */
-    bool alive;
+	std::atomic<bool> alive;
 
-	boost::asio::ip::tcp::socket socket_;
+	Client(ClientManager* manager, u_int32_t client_id, sockets::Socket* socket);
 
-	Client(ClientsManager* manager, u_int32_t client_id, boost::asio::io_service& io_service);
+	ClientManager* clientManager;
 
-
-	/**
-	 * Parse le premier header recu pour l'upgrade de la connexion
-	 */
-	void get_http_header(http::handshake* handshake, errors::error_code& error);
-
-    /**
-     * Envoi le handshake http au client
-     * @param header
-     */
-	void send_handshake(const char* websocket_key, errors::error_code& error);
-
-	size_t recv_sync(char *data, boost::system::error_code &error);
-
-	void send_sync(unsigned char *data, size_t size, boost::system::error_code &error);
-
-	ClientsManager* clientManager;
+	sockets::Socket::u_ptr socket_;
 
 #ifdef USE_MODULES
 	ModulesController::u_ptr modulesController;
@@ -218,25 +119,25 @@ protected:
 class ClosingClientsWorker : public WorkerDeQue<u_int32_t>{
 public:
 	typedef std::unique_ptr<ClosingClientsWorker> u_ptr;
-	static u_ptr create(ClientsManager* manager, size_t size = 50){
+	static u_ptr create(ClientManager* manager, size_t size = 50){
 		return u_ptr(new ClosingClientsWorker(manager, size));
 	}
-	ClosingClientsWorker(ClientsManager* manager,size_t size = 50);
+	ClosingClientsWorker(ClientManager* manager,size_t size = 50);
 
 	void do_job(u_int32_t id) override;
 private:
-	ClientsManager* manager;
+	ClientManager* manager;
 };
 
 
-class ClientsManager{
+class ClientManager{
 
 public:
-	typedef std::unique_ptr<ClientsManager> u_ptr;
+	typedef std::unique_ptr<ClientManager> u_ptr;
 
-	ClientsManager(Manager* m);
+	ClientManager(Manager* m);
 
-	Client::s_ptr new_client(boost::asio::io_service &io_service);
+	void handle_new_socket(sockets::Socket* socket);
 
 	void init();
 
@@ -295,6 +196,8 @@ public:
 
 	void handleClientClosed(uint32_t client);
 
+	void close();
+
 #ifdef USE_MODULES
 	ModulesManager* getModulesManager();
 #endif
@@ -310,7 +213,7 @@ private:
 
 	uint32_t Client_ID;
 	Manager::u_ptr manager;
-	bool alive;
+	std::atomic<bool> alive;
 	ClosingClientsWorker::u_ptr worker_closingclients;
 	std::map<u_int32_t , Client::s_ptr> clients;
 };

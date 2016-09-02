@@ -6,6 +6,7 @@
 #define WS_SERVER_SYNCHRONIZEDPOOL_H
 
 #include <algorithm>
+#include <atomic>
 #include <boost/circular_buffer.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
@@ -24,7 +25,10 @@ public:
 	typedef typename boost::call_traits<value_type>::param_type param_type;
 
 // `param_type` represents the "best" way to pass a parameter of type `value_type` to a method.
-	explicit SafeDeQue(size_type capacity) : m_unread(0), m_container(capacity), interrupted(false) , wait_end(false){}
+	explicit SafeDeQue(size_type capacity) : m_unread(0), m_container(capacity){
+		m_interrupted.store(false);
+		m_wait_end.store(false);
+	}
 
 	/**
 	 * Méthode d'ajout d'un item dans la liste
@@ -35,7 +39,7 @@ public:
 		boost::mutex::scoped_lock lock(m_mutex);
 		m_not_full.wait(lock, boost::bind(&SafeDeQue<value_type>::cond_is_not_full, this));
 
-		if (interrupted) {
+		if (m_interrupted.load()) {
 			return false;
 		}
 
@@ -54,7 +58,7 @@ public:
 	bool pop(value_type &pItem) {
 		boost::mutex::scoped_lock lock(m_mutex);
 		m_not_empty.wait(lock, boost::bind(&SafeDeQue<value_type>::cond_is_not_empty, this));
-		if (interrupted && !(wait_end && is_not_empty())) {
+		if (m_interrupted.load() && !(m_wait_end.load() && is_not_empty())) {
 			return false;
 		}
 		pItem = m_container[--m_unread];
@@ -69,9 +73,9 @@ public:
 
 
 	void interrupt(bool wait_the_end = false){
-		if (!interrupted) {
-			interrupted = true;
-			wait_end = wait_the_end;
+		if (!m_interrupted.load()) {
+			m_interrupted.store(true);
+			m_wait_end.store(wait_the_end);
 			m_not_empty.notify_all();
 			m_not_full.notify_all();
 		}
@@ -83,15 +87,15 @@ public:
 	bool is_not_full() const { return m_unread < m_container.capacity(); }
 
 protected:
-	bool cond_is_not_empty() const { return interrupted || m_unread > 0; }
-	bool cond_is_not_full() const { return interrupted || m_unread < m_container.capacity(); }
+	bool cond_is_not_empty() const { return m_interrupted.load() || m_unread > 0; }
+	bool cond_is_not_full() const { return m_interrupted.load() || m_unread < m_container.capacity(); }
 
 private:
 	SafeDeQue(const SafeDeQue &) {};              // Disabled copy constructor.
 	SafeDeQue &operator=(const SafeDeQue &) {}; // Disabled assign operator.
 
-	bool interrupted;
-	bool wait_end;
+	std::atomic<bool> m_interrupted;
+	std::atomic<bool> m_wait_end;
 
 	size_type m_unread;
 	container_type m_container;

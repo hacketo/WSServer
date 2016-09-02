@@ -17,16 +17,20 @@ endif ()
 
 
 # Search Boost
-find_package(Boost 1.54.0 COMPONENTS program_options thread date_time filesystem system REQUIRED)
-if (Boost_FOUND)
-  message(WARNING "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
-  message(WARNING "Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
-  message(WARNING "Boost_LIBRARIES: ${Boost_LIBRARIES}")
-  message(WARNING "Boost_VERSION: ${Boost_VERSION}")
-else()
+find_package(Boost 1.61.0 COMPONENTS thread date_time filesystem system REQUIRED)
+if (NOT Boost_FOUND)
   #include(externals/boost)
-
+  find_package(Boost 1.61.0 COMPONENTS thread date_time filesystem system REQUIRED)
+  if (Boost_FOUND)
+  endif ()
 endif ()
+
+message(WARNING "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+message(WARNING "Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+message(WARNING "Boost_LIBRARIES: ${Boost_LIBRARIES}")
+message(WARNING "Boost_VERSION: ${Boost_VERSION}")
+
+
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 set(Boost_USE_STATIC_LIBS ON) # only find static libs

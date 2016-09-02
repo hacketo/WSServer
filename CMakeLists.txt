@@ -72,6 +72,7 @@ set(HEADER_FILES
   include/server/config.h
   include/server/errors.h
   include/server/server.h
+        include/server/socket.h
   include/util/algo.h
   include/util/base64.h
   include/util/date.h
@@ -97,12 +98,15 @@ set(SOURCE_FILES
   src/protocol/opcode.cpp
   src/server/config.cpp
   src/server/errors.cpp
+  src/server/socket.cpp
   src/util/base64.cpp
   src/util/date.cpp
   src/util/sha1.cpp
   src/util/timer.cpp
   src/util/genericvalue.cpp
-  src/util/worker.cpp)
+  src/util/worker.cpp
+  src/server/server.cpp
+        )
 
 set(MODULES_FILES src/ext/modules/client_timer.cpp
         src/ext/modules/pub_sub.cpp
@@ -117,7 +121,7 @@ if (USE_SESSIONS)
   list(APPEND SOURCE_FILES ${SESSIONS_FILES})
 endif ()
 
-set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES})
+set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES} )
 
 add_library(${PROJECT_NAME} SHARED ${SERVER_FILES})
 

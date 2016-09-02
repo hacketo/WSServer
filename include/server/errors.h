@@ -15,11 +15,14 @@ namespace errors{
 
 	class error_code{
 	public:
+
+
 		uint16_t code;
 		std::string msg;
 		std::string master;
 
 		error_code();
+		error_code(std::string m, const boost::system::error_code& ec);
 
 		// true if no error_code
 		bool operator!() const BOOST_SYSTEM_NOEXCEPT {
@@ -81,10 +84,7 @@ namespace errors{
 	error_code get_error(const std::string master, uint16_t code, const std::string msg);
 	error_code get_error(const std::string master, uint16_t code, const std::string msg , const std::string tokenValue);
 
-
-
 	void init_handler();
-
 }
 
 #endif //SERVER_ERRORS_H

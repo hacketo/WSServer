@@ -6,6 +6,7 @@
 #define SERVER_WORKER_H
 
 #include <boost/thread/thread.hpp>
+#include <atomic>
 #include "safedeque.h"
 #include "debug.h"
 
@@ -26,8 +27,8 @@ public:
 protected:
 	uint32_t _id;
 	std::string debug_tag;
-	bool joined;
-	bool interrupted;
+	std::atomic<bool> m_joined;
+	std::atomic<bool> m_interrupted;
 	boost::thread m_thread;
 private:
 	static uint32_t ID;
@@ -45,7 +46,7 @@ public:
 	WorkerDeQue(size_t size = 50) : Worker() , safeDeQue(size){}
 
 	~WorkerDeQue(){
-		if (!join(true) || !interrupted){
+		if (!join(true) || !m_interrupted.load()){
 			interrupt();
 		}
 	}
@@ -59,7 +60,7 @@ public:
 	}
 
 	void interrupt(bool wait_end = false) override{
-		if (!interrupted) {
+		if (!m_interrupted.load()) {
 			safeDeQue.interrupt(wait_end);
 		}
 	}
@@ -77,14 +78,14 @@ private:
 	void job(){
 		boost::thread::id tid = boost::this_thread::get_id();
 
-		while (!interrupted){
+		while (!m_interrupted.load()){
 			DEBUG_PRINT(debug_tag,"-", _id, " \\");
 			T s;
 			if(safeDeQue.pop(s)) {
 				do_job(s);
 			}
 			else{
-				interrupted = true;
+				m_interrupted.store(true);
 				DEBUG_PRINT(debug_tag, " Interrupted");
 			}
 			DEBUG_PRINT(debug_tag, " /");
