@@ -1,6 +1,8 @@
 #include "server/server.h"
 #include "Chat.h"
 
+
+
 int main(int argc, const char *argv[]){
 
 	config::DEFAULT_PARSER = protocol::packet::ParserType::NO;
@@ -17,8 +19,8 @@ int main(int argc, const char *argv[]){
 	try {
 		s.start(ec);
 	}
-	catch(auto e){
-
+	catch(std::exception& e){
+		std::cout << "Error occured " << e.what() << std::endl;
 	}
 	s.close();
 

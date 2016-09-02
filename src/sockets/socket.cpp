@@ -3,17 +3,20 @@
 //
 
 #include <boost/asio.hpp>
-#include <boost/asio/read_until.hpp>
+#include "sockets/processor.h"
 #include <boost/lexical_cast.hpp>
-#include "server/socket.h"
+#include "sockets/socket.h"
 #include <client/client.h>
 
 namespace sockets {
 
+	// see :http://stackoverflow.com/questions/22285733/excessive-message-size-with-boost-asio-and-ssl
+
 //<editor-fold desc="sockets">
 
 	Socket::Socket() {
-
+		m_closed.store(false);
+		m_clientBinded.store(false);
 	}
 
 	std::string Socket::get_ip() {
@@ -21,7 +24,20 @@ namespace sockets {
 	}
 
 
-	void Socket::start(errors::error_code& ec) {}
+	void Socket::bind_client(Client* c, errors::error_code& ec) {
+		if (!m_clientBinded.load()){
+			m_client = c;
+			m_clientBinded.store(true);
+		}
+		else{
+			ec = errors::get_error("Socket",errors::SOCKET_ALREADY_BINDED, "Can't bind this socket to a new client");
+		}
+
+	}
+
+	void Socket::start(errors::error_code& ec) {
+		m_client->on_enter();
+	}
 
 	void Socket::send(std::string &message, errors::error_code& ec) {}
 
@@ -37,17 +53,18 @@ namespace sockets {
 
 //<editor-fold desc="tcp_socket">
 
-	TcpSocket::TcpSocket(ip::tcp::socket *s) :
-			Socket(), m_socket(std::unique_ptr<ip::tcp::socket>(s)) {
-		m_processor = std::unique_ptr<tcp_processor>(new tcp_processor(this));
-		m_ip = boost::lexical_cast<std::string>(m_socket->remote_endpoint());
+	TcpSocket::TcpSocket(asio::io_service& io) :
+			Socket(), m_socket(io) {
+		m_processor = std::unique_ptr<processor>(new processor(this));
 	}
 
-	ip::tcp::socket* TcpSocket::sock(){
-		return m_socket.get();
+	asio::ip::tcp::socket& TcpSocket::sock(){
+		return m_socket;
 	}
 
 	void TcpSocket::start(errors::error_code& ec) {
+		Socket::start(ec);
+		m_ip = boost::lexical_cast<std::string>(m_socket.remote_endpoint());
 		read_loop();
 	}
 
@@ -57,32 +74,35 @@ namespace sockets {
 		}
 	}
 
-	void TcpSocket::send(std::string &message, errors::error_code& ec) {
+	void TcpSocket::send(char* buffer, size_t size, errors::error_code& ec) {
 		//todo: tcp send
+		m_processor->send(buffer, size);
+
 	}
 
 	void TcpSocket::close() {
-		m_socket->close();
+		m_socket.close();
 		Socket::close();
+		m_client->on_close();
 	}
 
 //</editor-fold>
 
 //<editor-fold desc="udp_socket">
 
-	UdpSocket::UdpSocket(ip::udp::socket* socket, ip::udp::endpoint ep) : Socket(),
+	UdpSocket::UdpSocket(asio::ip::udp::socket* socket, asio::ip::udp::endpoint ep) : Socket(),
 			m_endpoint(ep), m_socket(socket) {
 		m_ip = boost::lexical_cast<std::string>(ep);
 	}
 
 
 	void UdpSocket::start(errors::error_code& ec) {
-
+		Socket::start(ec);
 
 	}
 
 	void UdpSocket::send(std::string &message, errors::error_code& e) {
-		m_socket->async_send_to(boost::asio::buffer(message.c_str(), message.size()), m_endpoint,
+		m_socket->async_send_to(asio::buffer(message.c_str(), message.size()), m_endpoint,
 			[this](boost::system::error_code ec, std::size_t bytes_sent){
 				if (ec){
 					close();
@@ -114,7 +134,7 @@ namespace sockets {
 		m_closed.store(true);
 	}
 
-	io_service& ServerSocket::io(){
+	asio::io_service& ServerSocket::io(){
 		return m_ios;
 	}
 
@@ -127,7 +147,7 @@ namespace sockets {
 //<editor-fold desc="server_udpsocket">
 
 	Server_UdpSocket::Server_UdpSocket(ClientManager *clientManager, short port) :
-			ServerSocket(clientManager), m_endpoint(ip::address_v4::any(), port),
+			ServerSocket(clientManager), m_endpoint(asio::ip::address_v4::any(), port),
 			m_socket(m_ios, m_endpoint.protocol()) {
 
 	}
@@ -155,9 +175,9 @@ namespace sockets {
 	void Server_UdpSocket::loop() {
 		if (!m_closed.load()) {
 			std::unique_ptr<boost::asio::streambuf> buffer(new boost::asio::streambuf);
-			streambuf::mutable_buffers_type buf = buffer.get()->prepare(400);
+			asio::streambuf::mutable_buffers_type buf = buffer.get()->prepare(400);
 
-			ip::udp::endpoint sender_endpoint;
+			asio::ip::udp::endpoint sender_endpoint;
 
 			m_socket.async_receive_from(buf, sender_endpoint,
 				[this, sender_endpoint](boost::system::error_code ec, std::size_t bytes_recvd) {
@@ -181,7 +201,7 @@ namespace sockets {
 //<editor-fold desc="server_tcpsocket">
 
 	Server_TcpSocket::Server_TcpSocket(ClientManager *clientManager, short port) :
-			ServerSocket(clientManager), m_endpoint(ip::address_v4::any(), port),
+			ServerSocket(clientManager), m_endpoint(asio::ip::address_v4::any(), port),
 			m_acceptor(m_ios, m_endpoint.protocol()) {
 
 	}
@@ -208,10 +228,10 @@ namespace sockets {
 	 */
 	void Server_TcpSocket::loop() {
 		if (!m_closed.load()) {
-			std::shared_ptr<ip::tcp::socket> sock(new ip::tcp::socket(m_ios));
-			m_acceptor.async_accept(*sock.get(),
-			   [this, sock](boost::system::error_code ec) {
-				   on_accept(sock, ec);
+			TcpSocket* tcpSocket = get_new_socket();
+			m_acceptor.async_accept(tcpSocket->sock(),
+			   [this, tcpSocket](boost::system::error_code ec) {
+				   on_accept(tcpSocket, ec);
 			   }
 			);
 		}
@@ -220,22 +240,22 @@ namespace sockets {
 		}
 	}
 
-	void Server_TcpSocket::on_accept(std::shared_ptr<ip::tcp::socket> sock, const boost::system::error_code &ec) {
+	void Server_TcpSocket::on_accept(TcpSocket* sock, const boost::system::error_code &ec) {
 
 		loop();
 
 		if (!ec) {
-			Socket *s = get_new_socket(sock);
-			m_clientManager->handle_new_socket(s);
-
+			m_clientManager->handle_new_socket(sock);
 			errors::error_code e;
-			s->start(e);
+			sock->start(e);
 
 			if (e){
 				DEBUG_PRINT(e);
 			}
 		}
 		else {
+			sock->close();
+			delete sock;
 			std::cout<< "Error occured! Error code = "
 					 << ec.value()
 					 << ". Message: " <<ec.message();
@@ -247,89 +267,12 @@ namespace sockets {
 		ServerSocket::close();
 	}
 
-	Socket* Server_TcpSocket::get_new_socket(std::shared_ptr<ip::tcp::socket> sock){
-		return new TcpSocket(sock.get());
+	TcpSocket* Server_TcpSocket::get_new_socket(){
+		return new TcpSocket(m_ios);
 	}
 
 //</editor-fold>
 
-	processor::processor(){
-		reset_buffer();
-	}
-
-	void processor::reset_buffer(){
-		buffer.reset(new boost::asio::streambuf);
-		size_ = 0;
-	}
-
-	tcp_processor::tcp_processor(sockets::TcpSocket *tcp_sock) : processor(),
-																 tcp_sock(tcp_sock), sock_(tcp_sock->sock()){
-
-	}
-	void tcp_processor::process(){
-
-		streambuf::mutable_buffers_type buf = buffer.get()->prepare(400);
-
-		sock_->async_read_some(buf,
-		    [this](const boost::system::error_code &ec, std::size_t bytes_transferred) {
-			    size_ = bytes_transferred;
-			    if (!ec){
-
-				    DEBUG_PRINT("recv : " );
-
-				    read_loop();
-			    }
-			    else{
-
-			    }
-	    });
-
-	}
-
-	void tcp_processor::read_loop(){
-		tcp_sock->read_loop();
-	}
-
-
-
-	httpprocessor::httpprocessor(sockets::TcpSocket *tcp_sock) : tcp_processor(tcp_sock), state(NONE){}
-
-
-	void httpprocessor::process(){
-
-		reset_buffer();
-
-//		if (state == State::NONE) {
-//			async_read_until(*sock_, *buffer.get(), "\r\n",
-//			    [this](const boost::system::error_code &ec, std::size_t bytes_transferred) {
-//				    size_ = bytes_transferred;
-//				    if (!ec){
-//					    state = READ_REQUEST;
-//					    read_loop();
-//				    }
-//				    else{
-//
-//				    }
-//		    });
-//		}
-//		if (state == State::READ_REQUEST){
-//			async_read_until(*sock_, *buffer.get(), "\r\n\r\n",
-//			    [this](const boost::system::error_code& ec,std::size_t bytes_transferred){
-//				    size_ = bytes_transferred;
-//				    if (!ec){
-//					    state = READ_HEADER;
-//					    read_loop();
-//				    }
-//				    else{
-//				    }
-//		    });
-//		}
-
-		if (state == State::READ_HEADER){
-			state = NONE;
-			read_loop();
-		}
-	}
 }
 
 

@@ -10,7 +10,7 @@
 namespace protocol {
 	enum constant {
 
-		max_buffer_size = 12000,
+		max_buffer_size = 4096,
 
 	};
 }

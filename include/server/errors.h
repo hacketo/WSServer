@@ -42,6 +42,11 @@ namespace errors{
 
 		OK = 0,
 
+		SOCKET_ALREADY_BINDED = 30,
+		SOCKET_BUFFER_INCOMPLETE = 31,
+		SOCKET_EOF = 32,
+		SOCKET_BUFFER_EMPTY = 33,
+
 		/** WS_PROTOCOL */
 
 		WS_NO_HEADER = 1000,	// Header envoyé par le client est vide

@@ -72,7 +72,8 @@ set(HEADER_FILES
   include/server/config.h
   include/server/errors.h
   include/server/server.h
-        include/server/socket.h
+  include/sockets/socket.h
+  include/sockets/processor.h
   include/util/algo.h
   include/util/base64.h
   include/util/date.h
@@ -91,14 +92,14 @@ set(SOURCE_FILES
   src/client/statebased_manager.cpp
   src/db/dbhandler.cpp
 
-
   src/protocol/frame.cpp
   src/protocol/http.cpp
   src/protocol/packet.cpp
   src/protocol/opcode.cpp
   src/server/config.cpp
   src/server/errors.cpp
-  src/server/socket.cpp
+  src/sockets/socket.cpp
+  src/sockets/processor.cpp
   src/util/base64.cpp
   src/util/date.cpp
   src/util/sha1.cpp

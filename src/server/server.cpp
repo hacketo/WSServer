@@ -50,18 +50,24 @@ namespace server {
 
 			boost::thread_group threads;
 
-			for (auto& sockets : m_sockets){
-				sockets->start(ec);
+			try {
+				for (auto &sockets : m_sockets) {
+					sockets->start(ec);
 
-				// Create specified number of threads and
-				// add them to the pool.
-				for (unsigned int i = 0; i < thread_per_serversocket; i++) {
-					threads.create_thread(boost::bind(&boost::asio::io_service::run, &sockets->io()));
+					// Create specified number of threads and
+					// add them to the pool.
+					for (unsigned int i = 0; i < thread_per_serversocket; i++) {
+						threads.create_thread(boost::bind(&boost::asio::io_service::run, &sockets->io()));
+					}
+
 				}
 
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				threads.join_all();
 			}
-
-			threads.join_all();
+			catch(std::exception& e){
+				std::cerr << e.what() << std::endl;
+			}
 		}
 	}
 

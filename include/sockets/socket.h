@@ -9,19 +9,18 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio.hpp>
-#include "errors.h"
+#include "server/errors.h"
 #include "protocol/constant.h"
 
 
 class ClientManager;
 class Client;
 
-using namespace boost::asio;
+using namespace boost;
 
 namespace sockets {
 
 	class processor;
-	class tcp_processor;
 
 	class Socket {
 		friend class processor;
@@ -46,6 +45,8 @@ namespace sockets {
 		 */
 		bool closed();
 
+		void bind_client(Client *c, errors::error_code& ec);
+
 		/**
 		 * Start the socket job , read and write
 		 * @return
@@ -53,18 +54,22 @@ namespace sockets {
 		virtual void start(errors::error_code& ec);
 
 	protected:
+
+		Client* m_client;
+
 		std::string m_ip;
 		std::atomic<bool> m_closed;
+		std::atomic<bool> m_clientBinded;
 	};
 
 	class TcpSocket : public Socket {
 	public:
-		TcpSocket(ip::tcp::socket *s);
+		TcpSocket(asio::io_service& io);
 
 		/**
 		 * Send a packet througt the socket
 		 */
-		virtual void send(std::string &message, errors::error_code& ec);
+		virtual void send(char* buffer, size_t size, errors::error_code& ec);
 
 		/**
 		 * Close the socket
@@ -78,22 +83,22 @@ namespace sockets {
 		 */
 		virtual void start(errors::error_code& ec);
 
-		ip::tcp::socket* sock();
+		asio::ip::tcp::socket& sock();
 
 
 		void read_loop();
 	private:
 
-		std::unique_ptr<ip::tcp::socket> m_socket;
+		asio::ip::tcp::socket m_socket;
 
-		std::unique_ptr<tcp_processor> m_processor;
+		std::unique_ptr<processor> m_processor;
 
 	};
 
 	class UdpSocket : public Socket {
 		friend class udp_processor;
 	public:
-		UdpSocket(ip::udp::socket* socket,ip::udp::endpoint ep);
+		UdpSocket(asio::ip::udp::socket* socket,asio::ip::udp::endpoint ep);
 
 		/**
 		 * Send a packet througt the socket
@@ -114,8 +119,8 @@ namespace sockets {
 		virtual void start(errors::error_code& ec);
 
 	private:
-		ip::udp::endpoint m_endpoint;
-		ip::udp::socket* m_socket;
+		asio::ip::udp::endpoint m_endpoint;
+		asio::ip::udp::socket* m_socket;
 	};
 
 
@@ -140,7 +145,7 @@ namespace sockets {
 
 		bool closed();
 
-		io_service& io();
+		asio::io_service& io();
 
 	protected:
 
@@ -148,7 +153,7 @@ namespace sockets {
 
 		ClientManager *m_clientManager;
 
-		io_service m_ios;
+		asio::io_service m_ios;
 
 		std::atomic<bool> m_closed;
 		std::atomic<bool> m_started;
@@ -178,8 +183,8 @@ namespace sockets {
 		//virtual sockets* get_new_socket(std::shared_ptr<ip::udp::sockets> sock);
 	private:
 
-		ip::udp::endpoint m_endpoint;
-		ip::udp::socket m_socket;
+		asio::ip::udp::endpoint m_endpoint;
+		asio::ip::udp::socket m_socket;
 	};
 
 	class Server_TcpSocket : public ServerSocket {
@@ -204,50 +209,15 @@ namespace sockets {
 
 	protected:
 		virtual void loop();
-		virtual Socket* get_new_socket(std::shared_ptr<ip::tcp::socket> sock);
+		virtual TcpSocket* get_new_socket();
 
 	private:
-		ip::tcp::endpoint m_endpoint;
-		boost::asio::ip::tcp::acceptor m_acceptor;
+		asio::ip::tcp::endpoint m_endpoint;
+		asio::ip::tcp::acceptor m_acceptor;
 
-		void on_accept(std::shared_ptr<ip::tcp::socket> sock, const boost::system::error_code &ec);
+		void on_accept(TcpSocket* sock, const boost::system::error_code &ec);
 	};
 
-
-
-	class processor {
-	public:
-		processor();
-	protected :
-		std::unique_ptr<streambuf> buffer;
-		uint64_t size_;
-		void reset_buffer();
-	};
-
-	class tcp_processor : public processor {
-	public:
-		tcp_processor(TcpSocket *tcp_sock);
-		virtual void process();
-	protected:
-		void read_loop();
-
-		TcpSocket* tcp_sock;
-		ip::tcp::socket* sock_;
-	};
-
-	class httpprocessor : public tcp_processor{
-
-		enum State {
-			NONE, READ_REQUEST, READ_HEADER
-		};
-
-		httpprocessor(TcpSocket *tcp_sock);
-
-		virtual void process();
-
-	private :
-		State state;
-	};
 }
 
 #endif //WSSERVERLIB_SOCKET_H

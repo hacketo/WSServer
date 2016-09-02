@@ -16,6 +16,7 @@ if (OPENSSL_FOUND)
 endif ()
 
 
+set(BOOST_ROOT /usr/local/)
 # Search Boost
 find_package(Boost 1.61.0 COMPONENTS thread date_time filesystem system REQUIRED)
 if (NOT Boost_FOUND)

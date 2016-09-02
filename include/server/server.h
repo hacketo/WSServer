@@ -8,7 +8,7 @@
 #include <boost/asio.hpp>
 #include <thread>
 #include <debug.h>
-#include "server/socket.h"
+#include "sockets/socket.h"
 #include "client/client.h"
 #include <cstdint>
 

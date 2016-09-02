@@ -1,7 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <server/socket.h>
+#include <sockets/socket.h>
 #include "boost/asio.hpp"
 #include "boost/enable_shared_from_this.hpp"
 #include "util/safedeque.h"
@@ -61,6 +61,60 @@ public:
 
 	bool isAlive();
 
+
+
+	/**
+	 * Appelé lorsqu'un client se connecte, avant l'envoi du header
+	 * donc pas possible dans cette méthode d'envoyer un message au client
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 * @return
+	 */
+	bool on_enter();
+
+	/**
+	 * Appelé lorsqu'un le handshake à été recu et parsé
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 * @return
+	 */
+	bool on_handshakerecv(http::handshake* handshake, errors::error_code& e);
+	/**
+	 * Appelé lorsqu'un le handshake à été recu et parsé
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 * @return
+	 */
+	bool on_handshakesend(http::handshake* handshake, errors::error_code& e);
+
+	/**
+	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 * @return
+	 */
+	void on_ready();
+
+	/**
+	 * Appelé lorsque l'on recoit un message de la part d'un client
+	 * Si la méthode retourne False le client sera déconnecté
+	 * @param client
+	 */
+	void on_receive(packet::Packet *packet);
+
+	/**
+	 * Appelé lorsqu'un client est déconnecté
+	 * @param client
+	 */
+	void on_close();
+
+	/**
+	 * Appelé lorqu'une érreur survient pour un client
+	 * @param client
+	 */
+	void on_error();
+
+
 #ifdef USE_MODULES
 	bool registerModule(base_module* module);
 
@@ -104,7 +158,7 @@ protected:
 
 	ClientManager* clientManager;
 
-	sockets::Socket::u_ptr socket_;
+	sockets::Socket::u_ptr m_socket;
 
 #ifdef USE_MODULES
 	ModulesController::u_ptr modulesController;
@@ -137,7 +191,8 @@ public:
 
 	ClientManager(Manager* m);
 
-	void handle_new_socket(sockets::Socket* socket);
+	void handle_new_socket(sockets::UdpSocket* socket);
+	void handle_new_socket(sockets::TcpSocket* socket);
 
 	void init();
 

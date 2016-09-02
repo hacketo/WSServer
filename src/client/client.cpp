@@ -1,7 +1,7 @@
 #include <boost/algorithm/string.hpp>
 #include <util/timer.h>
 #include "client/client.h"
-#include "server/socket.h"
+#include "sockets/socket.h"
 
 #include "debug.h"
 #include "protocol/opcode.h"
@@ -14,18 +14,33 @@
 
 Client::Client(ClientManager* manager, u_int32_t client_id, sockets::Socket* socket) :
 		clientManager(manager){
+
     id =  client_id;
-	socket_ = sockets::Socket::u_ptr(socket);
-    alive.store(false);
+
+	m_socket = sockets::Socket::u_ptr(socket);
+
+	errors::error_code ec;
+	m_socket->bind_client(this, ec);
+
+
+	if (ec){
+		alive.store(false);
+	}
+	else{
+		alive.store(true);
+	}
+
     flag = 0;
 	state_id = 0;
+
 #ifdef USE_MODULES
 	modulesController = ModulesController::create(this, clientManager->getModulesManager());
 #endif
+
 }
 
 std::string Client::get_ip() {
-	return socket_->get_ip();
+	return m_socket->get_ip();
 }
 uint32_t Client::get_id() {
 	return id;
@@ -67,6 +82,8 @@ void Client::send(frame::Frame* frame) {
 }
 
 
+
+
 #ifdef USE_MODULES
 bool Client::registerModule(base_module* module){
 	return modulesController->reg(module);
@@ -88,8 +105,36 @@ bool Client::isAlive(){
 
 void Client::closeSocket(){
 	if (!isAlive()) {
-		socket_->close();
+		m_socket->close();
 	}
+}
+
+bool Client::on_enter() {
+	return clientManager->on_enter(this);
+}
+
+bool Client::on_handshakerecv(http::handshake* handshake, errors::error_code& e) {
+	return clientManager->on_handshakerecv(this, handshake,e);
+}
+
+bool Client::on_handshakesend(http::handshake *handshake, errors::error_code &e) {
+	return clientManager->on_handshakesend(this, handshake,e);
+}
+
+void Client::on_ready() {
+	return clientManager->on_ready(this);
+}
+
+void Client::on_receive(packet::Packet *packet) {
+	return clientManager->on_receive(this, packet);
+}
+
+void Client::on_close() {
+	return clientManager->on_close(this);
+}
+
+void Client::on_error() {
+	return clientManager->on_error(this);
 }
 //</editor-fold>
 
@@ -124,11 +169,16 @@ void ClientManager::init(){
 #endif
 }
 
-
-void ClientManager::handle_new_socket(sockets::Socket* socket){
+void ClientManager::handle_new_socket(sockets::UdpSocket* socket){
 	u_int32_t client_id = Client_ID;
 	Client::s_ptr client = Client::s_ptr(new Client(this, client_id, socket));
 	clients[client_id] = client;
+	Client_ID++;
+}
+
+void ClientManager::handle_new_socket(sockets::TcpSocket* socket){
+	u_int32_t client_id = Client_ID;
+	clients[client_id] = Client::s_ptr(new Client(this, client_id, socket));
 	Client_ID++;
 }
 
