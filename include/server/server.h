@@ -3,14 +3,14 @@
 #ifndef WS_SERVER_H
 #define WS_SERVER_H
 
-#include <string>
-
 #include <boost/asio.hpp>
+#include <string>
 #include <thread>
-#include <debug.h>
-#include "sockets/socket.h"
-#include "client/client.h"
 #include <cstdint>
+
+#include <debug.h>
+#include "sockets/server/socket.h"
+#include "client/clientmanager.h"
 
 namespace server{
 
@@ -32,7 +32,7 @@ namespace server{
 		void close();
 	private:
 
-		std::vector<std::unique_ptr<sockets::ServerSocket>> m_sockets;
+		std::vector<std::unique_ptr<sockets::server::ServerSocket>> m_sockets;
 
 		ClientManager::u_ptr m_clientManager;
 

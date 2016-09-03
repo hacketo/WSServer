@@ -49,18 +49,19 @@ namespace errors{
 
 		/** WS_PROTOCOL */
 
-		WS_NO_HEADER = 1000,	// Header envoyé par le client est vide
-		WS_HEADER_TOO_LONG = 1001,
-		WS_HEADER_INVALID_KV = 1002,
-		WS_HEADER_READ_FAILED = 1003,
+		HTTP_NO_HEADER = 1000,	// Header envoyé par le client est vide
+		HTTP_HEADER_TOO_LONG = 1001,
+		HTTP_HEADER_INVALID_KV = 1002,
+		HTTP_HEADER_READ_FAILED = 1003,
+
 		WS_HEADER_MISSING_REQUIRED_FIELD = 1004,
 		WS_HEADER_WRONG_WS_VERSION = 1005,
 		WS_HEADER_WS_KEY_EMPTY = 1006,
 		WS_HEADER_WRONG_ORIGIN = 1007,
 		WS_HEADER_WRONG_HOST = 1008,
 
-		WS_SEND_ERROR = 1020, // Erreur lors de l'envoi d'un message au client
-		WS_RECV_ERROR = 1021, // Erreur lors de l'envoi d'un message au client
+		SEND_ERROR = 1020, // Erreur lors de l'envoi d'un message au client
+		RECV_ERROR = 1021, // Erreur lors de l'envoi d'un message au client
 
 
 		/** Interne */

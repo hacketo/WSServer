@@ -31,7 +31,7 @@ namespace sessions {
 		typedef boost::shared_ptr<Session> s_ptr;
 		typedef std::unique_ptr<Session> u_ptr;
 
-		Session(SessionManager *manager, Client *client, protocol::http::handshake *handshake);
+		Session(SessionManager *manager, Client *client, protocol::http::header *handshake);
 
 		~Session();
 
@@ -65,14 +65,14 @@ namespace sessions {
 
 		void close();
 
-		void reopen(protocol::http::handshake *handshake);
+		void reopen(protocol::http::header *handshake);
 
 		bool ended;
 		bool updateCookie;
 
 		std::string sessionId;
 		ObjectValue::u_ptr data;
-		protocol::http::handshake *handshake;
+		protocol::http::header *handshake;
 
 		boost::posix_time::ptime start_time;
 		boost::posix_time::ptime end_time;
@@ -124,9 +124,9 @@ namespace sessions {
 
 		SessionManager();
 
-		void start_session(Client *client, protocol::http::handshake *handshake, errors::error_code &error);
+		void start_session(Client *client, protocol::http::header *handshake, errors::error_code &error);
 
-		void update_handshake(Client *client, protocol::http::handshake *handshake, errors::error_code &error);
+		void update_handshake(Client *client, protocol::http::header *handshake, errors::error_code &error);
 
 		bool close_session(Client *client);
 

@@ -38,14 +38,14 @@ public:
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @return
 	 */
-	virtual bool onHandshakeRecv(Client *client, protocol::http::handshake* handshake);
+	virtual bool onHandshakeRecv(Client *client, protocol::http::header* handshake);
 
 	/**
 	 * Appelé lorsque le handshakeRéponse est prêt à etre envoyé
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @return
 	 */
-	virtual bool onHandshakeSend(Client *client, protocol::http::handshake* handshake);
+	virtual bool onHandshakeSend(Client *client, protocol::http::header* handshake);
 
 	/**
 	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur

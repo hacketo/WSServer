@@ -3,6 +3,8 @@
 //
 
 #include "server/server.h"
+#include "sockets/server/tcp.h"
+#include "sockets/server/udp.h"
 
 namespace server {
 
@@ -13,12 +15,12 @@ namespace server {
 
 		for(auto& pro : infos.protocols){
 
-			sockets::ServerSocket* s;
+			sockets::server::ServerSocket* s;
 
 			switch(pro.first){
 
 				case Type::TCP:
-					s = new sockets::Server_TcpSocket(m_clientManager.get(), pro.second);
+					s = new sockets::server::Tcp(m_clientManager.get(), pro.second);
 					break;
 
 				case Type::UDP:
@@ -32,7 +34,7 @@ namespace server {
 			}
 
 			if (s){
-				m_sockets.push_back(std::unique_ptr<sockets::ServerSocket>(s));
+				m_sockets.push_back(std::unique_ptr<sockets::server::ServerSocket>(s));
 			}
 		}
 	}

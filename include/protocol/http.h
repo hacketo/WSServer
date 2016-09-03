@@ -20,7 +20,7 @@ namespace http {
 
 	typedef std::map<std::string, std::string> http_header;
 
-	struct handshake{
+	struct header{
 		std::string baseHeader;
 		std::string headers_raw;
 		http_header headers;
@@ -49,17 +49,17 @@ namespace http {
 	std::string get_ws_location();
 	std::string get_host();
 
-	http::handshake* get_handshake(const char * unencodedkey);
+	http::header* get_handshake(const char * unencodedkey);
 
-	void add_cookie(http::handshake* handshake, const std::string& key, const std::string& value, u_int32_t offset);
-	void parse_header(const std::string& header, http::handshake* handshake, errors::error_code& error);
+	void add_cookie(http::header* handshake, const std::string& key, const std::string& value, u_int32_t offset);
+	void parse_header(const std::string& header, http::header* handshake, errors::error_code& error);
 
 	/**
 	 * Valide le header
 	 * @param header
 	 * @return True sir le header est valide
 	 */
-	void validate_header(http::handshake* handshake, errors::error_code& error);
+	void validate_header(http::header* handshake, errors::error_code& error);
 
 	/**
 	 * Utiliser pour débugger les header
@@ -74,8 +74,8 @@ namespace http {
 
 	bool next_chars_CRLF(const char *header, int i);
 
-	std::string handshake_to_string(handshake *pHandshake);
-	void handshake_to_uint8(http::handshake *pHandshake, uint8_t** buffer, uint64_t& size);
+	std::string handshake_to_string(header *pHandshake);
+	void handshake_to_uint8(http::header *pHandshake, uint8_t** buffer, uint64_t& size);
 }
 }
 #endif //WS_SERVER_HTTP_H

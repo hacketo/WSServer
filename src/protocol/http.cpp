@@ -33,11 +33,11 @@ namespace http {
 		return ss.str();
 	}
 
-	http::handshake* get_handshake(const char* unencodedKey) {
+	http::header* get_handshake(const char* unencodedKey) {
 
 		std::string key = unencodedKey + GUID;
 
-		http::handshake* hd = new http::handshake;
+		http::header* hd = new http::header;
 		hd->wsKey = base64_encode(get_sha1(key.c_str()));
 
 		hd->baseHeader = "HTTP/1.1 101 Web Socket Protocol Handshake";
@@ -51,7 +51,7 @@ namespace http {
 		return hd;
 	};
 
-	std::string handshake_to_string(http::handshake *pHandshake) {
+	std::string handshake_to_string(http::header *pHandshake) {
 		std::stringstream ss;
 
 		ss << pHandshake->baseHeader << "\r\n";
@@ -66,19 +66,19 @@ namespace http {
 		return ss.str();
 	}
 
-	void handshake_to_uint8(http::handshake *pHandshake, uint8_t** buffer, uint64_t& size) {
+	void handshake_to_uint8(http::header *pHandshake, uint8_t** buffer, uint64_t& size) {
 		std::string s = handshake_to_string(pHandshake);
 		size = s.length();
 		*buffer = new uint8_t[size];
 		STRING_TO_UINT8(s,*buffer, size);
 	}
 
-	void validate_header(http::handshake *handshake, errors::error_code& error) {
+	void validate_header(http::header *handshake, errors::error_code& error) {
 
 		http_header &header = handshake->headers;
 
 		if (header.size() == 0) {
-			error = errors::get_error(errors::WS_NO_HEADER, "No Header to validate");
+			error = errors::get_error(errors::HTTP_NO_HEADER, "No Header to validate");
 			return;
 		}
 
@@ -115,7 +115,7 @@ namespace http {
 		}
 	}
 
-	void add_cookie(http::handshake* handshake, const std::string& key, const std::string& value, u_int32_t offset){
+	void add_cookie(http::header* handshake, const std::string& key, const std::string& value, u_int32_t offset){
 		std::stringstream ss;
 		ss << value;
 		if (offset > 0) {
@@ -124,17 +124,17 @@ namespace http {
 		handshake->cookies[key] = ss.str();
 	}
 
-	void parse_header(const std::string &header_str, http::handshake* handshake, errors::error_code& error) {
+	void parse_header(const std::string &header_str, http::header* handshake, errors::error_code& error) {
 
 		http_header &headers = handshake->headers;
 
 		if (header_str.length() == 0){
-			error = errors::get_error(errors::WS_NO_HEADER, "Header vide");
+			error = errors::get_error(errors::HTTP_NO_HEADER, "Header vide");
 			return;
 		}
 
 		if (header_str.length() > 5000){
-			error = errors::get_error(errors::WS_HEADER_TOO_LONG, "Header Trop long");
+			error = errors::get_error(errors::HTTP_HEADER_TOO_LONG, "Header Trop long");
 			return;
 		}
 
@@ -150,7 +150,7 @@ namespace http {
 		size_t len = linedata.size();
 
 		if (len != 3){
-			error = errors::get_error(errors::WS_HEADER_READ_FAILED, "Header missing HTTP definition");
+			error = errors::get_error(errors::HTTP_HEADER_READ_FAILED, "Header missing HTTP definition");
 			return;
 		}
 
@@ -186,7 +186,7 @@ namespace http {
 					headers[field_key] = linedata[1];
 				}
 				else{
-					error = errors::get_error(errors::WS_HEADER_INVALID_KV, "Invalid key/value :%s", vec[i]);
+					error = errors::get_error(errors::HTTP_HEADER_INVALID_KV, "Invalid key/value :%s", vec[i]);
 					return;
 				}
 			}

@@ -89,7 +89,7 @@ namespace frame {
 	FrameBuffer from_uint8_t(uint8_t *buffer, uint16_t size, uint16_t id);
 
 	uint8_t get_opcode(FrameBuffer* buffer);
-	uint32_t get_framelen(FrameBuffer* buffer);
+	uint32_t get_framelen(uint8_t *buffer, size_t buffer_size);
 
 	/**
 	 * Parse le buffer du holder dans une nouvelle Frame

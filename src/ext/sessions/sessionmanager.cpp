@@ -75,7 +75,7 @@ SessionManager::SessionManager() : alive(true){
 	}
 
 }
-void SessionManager::start_session(Client* client, protocol::http::handshake* handshake, errors::error_code& error ){
+void SessionManager::start_session(Client* client, protocol::http::header* handshake, errors::error_code& error ){
 	//Create session / id
 
 	if (handshake->cookies.count(COOKIE_NAME)) {
@@ -102,7 +102,7 @@ void SessionManager::start_session(Client* client, protocol::http::handshake* ha
 	DEBUG_PRINT("Create Session : ",client->get_id()," - ",s->sessionId);
 }
 
-void SessionManager::update_handshake(Client* client, protocol::http::handshake* handshake, errors::error_code& error ) {
+void SessionManager::update_handshake(Client* client, protocol::http::header* handshake, errors::error_code& error ) {
 	if (client->session->updateCookie) {
 		http::add_cookie(handshake, COOKIE_NAME, client->session->sessionId, config::SESSION_TIME/1000);
 
@@ -112,13 +112,15 @@ void SessionManager::update_handshake(Client* client, protocol::http::handshake*
 
 bool SessionManager::close_session(Client* client){
 	// save session
-	DEBUG_PRINT("Close session : ",client->get_id()," - ",client->session->getSessionID());
-	client->session->close();
+	if (client->session) {
+		DEBUG_PRINT("Close session : ", client->get_id(), " - ", client->session->getSessionID());
+		client->session->close();
+	}
 
 }
 
 
-Session::Session(SessionManager* manager, Client* client,protocol::http::handshake* handshake) :
+Session::Session(SessionManager* manager, Client* client,protocol::http::header* handshake) :
 		manager(manager), client(client), ended(false), updateCookie(true), handshake(handshake) {
 	data = ObjectValue::u_ptr(new ObjectValue);
 	start_time = boost::posix_time::microsec_clock::local_time();
@@ -172,7 +174,7 @@ void Session::close() {
 	ended = true;
 }
 
-void Session::reopen(http::handshake* handshake) {
+void Session::reopen(http::header* handshake) {
 	ended = false;
 	start_time = boost::posix_time::microsec_clock::local_time();
 	end_time = boost::posix_time::ptime();

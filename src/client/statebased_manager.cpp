@@ -43,7 +43,7 @@ void StateBasedManager::updateClientState(Client *client, u_int32_t id, bool sen
 
 	if (send){
 		packet::Packet *p = getChangeStatePacket(id);
-		client->send(p);
+		//client->send(p);
 		delete p;
 	}
 }

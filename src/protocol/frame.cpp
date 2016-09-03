@@ -41,14 +41,14 @@ namespace protocol {
 		return buffer->buffer[0] & Mask::OPCODE;
 	}
 
-	uint32_t frame::get_framelen(FrameBuffer *buffer) {
-		assert(buffer->bufferSize > 1);
-		int payload_len = buffer->buffer[1] & Mask::LEN_PAYLOAD;
+	uint32_t frame::get_framelen(uint8_t *buffer, size_t buffer_size) {
+		assert(buffer_size > 1);
+		int payload_len = buffer[1] & Mask::LEN_PAYLOAD;
 		int rlen = payload_len + 2;
 		if (payload_len == 0x7E) { // size 16 bit
-			rlen = (buffer->buffer[2] << 8) + buffer->buffer[3] + 4;
+			rlen = (buffer[2] << 8) + buffer[3] + 4;
 		} else if (payload_len == 0x7F) { // size 64 bit
-			rlen = (buffer->buffer[7] << 16) + (buffer->buffer[8] << 8) + buffer->buffer[9] + 10;
+			rlen = (buffer[7] << 16) + (buffer[8] << 8) + buffer[9] + 10;
 		}
 		return rlen + 4;
 	}
