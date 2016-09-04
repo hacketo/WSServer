@@ -16,7 +16,7 @@ Client::Client(ClientManager* manager, u_int32_t client_id, sockets::Socket* soc
     id =  client_id;
 	m_socket = sockets::Socket::u_ptr(socket);
 
-	errors::error_code ec;
+	error::code ec;
 	m_socket->bind_client(this, ec);
 	if (ec){
 		alive.store(false);
@@ -27,9 +27,6 @@ Client::Client(ClientManager* manager, u_int32_t client_id, sockets::Socket* soc
 
     flag = 0;
 	state_id = 0;
-#ifdef USE_MODULES
-	modulesController = ModulesController::create(this, clientManager->getModulesManager());
-#endif
 
 }
 
@@ -41,7 +38,7 @@ uint32_t Client::get_id() {
 }
 
 
-size_t Client::send(std::string& message, errors::error_code& ec) {
+size_t Client::send(std::string& message, error::code& ec) {
 	//@todo check lock block
 	DEBUG_PRINT("outgoing_worker->dispatch");
 	return m_socket->send(message, ec);
@@ -51,17 +48,17 @@ size_t Client::send(std::string& message, errors::error_code& ec) {
 
 #ifdef USE_MODULES
 bool Client::registerModule(base_module* module){
-	return modulesController->reg(module);
+	return m_modulesController->reg(module);
 }
 bool Client::unregisterModule(base_module* module){
-	return modulesController->unregister(module);
+	return m_modulesController->unregister(module);
 }
 bool Client::hasModuleRegistered(uint64_t moduleId){
-	return modulesController->has(moduleId);
+	return m_modulesController->has(moduleId);
 }
 
 ModuleClientController* Client::getModuleController(uint64_t moduleId){
-	return modulesController->getModuleController(moduleId);
+	return m_modulesController->getModuleController(moduleId);
 }
 #endif
 
@@ -83,12 +80,12 @@ bool Client::on_enter() {
 }
 
 
-bool Client::on_handshakerecv(protocol::http::header* handshake, errors::error_code& e) {
+bool Client::on_handshakerecv(protocol::http::header* handshake, error::code& e) {
 	return clientManager->on_handshakerecv(this, handshake,e);
 }
 
 
-bool Client::on_handshakesend(protocol::http::header *handshake, errors::error_code &e) {
+bool Client::on_handshakesend(protocol::http::header *handshake, error::code &e) {
 	return clientManager->on_handshakesend(this, handshake,e);
 }
 

@@ -30,7 +30,7 @@ public:
 
 	ClientManager(Manager* m);
 
-	void handle_new_socket(sockets::Udp* socket);
+	void handle_new_socket(asio::ip::udp::socket *socket, asio::ip::udp::endpoint endpoint);
 	void handle_new_socket(sockets::Tcp* socket);
 
 	void init();
@@ -52,14 +52,14 @@ public:
 	 * @param client
 	 * @return
 	 */
-	bool on_handshakerecv(Client *client, http::header* handshake, errors::error_code& e);
+	bool on_handshakerecv(Client *client, protocol::http::header* handshake, error::code& e);
 	/**
 	 * Appelé lorsqu'un le handshake à été recu et parsé
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @param client
 	 * @return
 	 */
-	bool on_handshakesend(Client *client, http::header* handshake, errors::error_code& e);
+	bool on_handshakesend(Client *client, protocol::http::header* handshake, error::code& e);
 
 	/**
 	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur
@@ -74,7 +74,7 @@ public:
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @param client
 	 */
-	void on_receive(Client *client, packet::Packet *packet);
+	void on_receive(Client *client, protocol::packet::Packet *packet);
 
 	/**
 	 * Appelé lorsqu'un client est déconnecté
@@ -97,6 +97,8 @@ public:
 #endif
 
 private:
+
+	void create_client(sockets::Socket* socket);
 
 #ifdef USE_SESSIONS
 	SessionManager::u_ptr sessionManager;

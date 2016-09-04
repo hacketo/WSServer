@@ -9,14 +9,16 @@
 #include "protocol/opcode.h"
 #include "protocol/packet.h"
 
+#include "client/client.h"
+
 #include "debug.h"
 
 namespace sockets {
 namespace processor {
 
-	websocket::websocket(Tcp *sock) : http(sock) {}
+	websocket::websocket(Tcp *sock) : http_base(sock) {}
 
-	void websocket::on_receive(errors::error_code& _) {
+	void websocket::on_receive(error::code& _) {
 
 		if (state == State::NONE) {
 			process_http_handshake();
@@ -41,7 +43,7 @@ namespace processor {
 			return;
 		}
 
-		errors::error_code e;
+		error::code e;
 		protocol::packet::Packet::u_ptr p = protocol::packet::Packet::u_ptr(new protocol::packet::Packet());
 		protocol::packet::parse(p.get(), frame->msg, e);
 
@@ -50,7 +52,7 @@ namespace processor {
 		delete buffer;
 	}
 
-	size_t websocket::send(std::string& msg, errors::error_code &ec){
+	size_t websocket::send(std::string& msg, error::code &ec){
 		protocol::frame::Frame* f = protocol::frame::from_string(msg);
 		size_t bytes_sent  = processor::send(f->buffer, f->bufferSize, ec);
 		delete f;
@@ -58,12 +60,12 @@ namespace processor {
 	}
 
 	void websocket::process_http_handshake(){
-		errors::error_code ec;
+		error::code ec;
 
 		// can change the state
-		http::on_receive(ec);
+		http_base::on_receive(ec);
 
-		// Si error lors de réception du header http
+		// Si error lors de réception du header http_base
 		if (ec){
 			DEBUG_PRINT("Erreur lors de la réception du header");
 			m_sock->close();

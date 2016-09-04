@@ -12,7 +12,7 @@
 
 #include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
-#include "server/errors.h"
+#include "error/error.h"
 
 
 namespace protocol{
@@ -52,14 +52,14 @@ namespace http {
 	http::header* get_handshake(const char * unencodedkey);
 
 	void add_cookie(http::header* handshake, const std::string& key, const std::string& value, u_int32_t offset);
-	void parse_header(const std::string& header, http::header* handshake, errors::error_code& error);
+	void parse_header(const std::string& header, http::header* handshake, error::code& error);
 
 	/**
 	 * Valide le header
 	 * @param header
 	 * @return True sir le header est valide
 	 */
-	void validate_header(http::header* handshake, errors::error_code& error);
+	void validate_header(http::header* handshake, error::code& error);
 
 	/**
 	 * Utiliser pour débugger les header

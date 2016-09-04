@@ -4,7 +4,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include "sockets/server/tcp.h"
-#include "client/client.h"
+#include "client/clientmanager.h"
 
 namespace sockets {
 namespace server {
@@ -15,15 +15,16 @@ namespace server {
 
 	}
 
-	void Tcp::start(errors::error_code &ec) {
+	void Tcp::start(error::code &ec) {
 
 		boost::system::error_code e;
 		m_acceptor.bind(m_endpoint, e);
 		m_acceptor.listen(50); // todo: max client
 
 		if (e) {
-			ec = errors::error_code("Failed to bind the acceptor sockets.", e);
-		} else {
+			error::get_code(ec, error::SOCKET_CANT_BIND, "Failed to bind the acceptor sockets.", e);
+		}
+		else {
 			std::string ip = boost::lexical_cast<std::string>(m_endpoint);
 			std::cout << "listening on : " << ip << std::endl;
 			ServerSocket::start(ec);
@@ -38,11 +39,12 @@ namespace server {
 		if (!m_closed.load()) {
 			sockets::Tcp *tcpSocket = get_new_socket();
 			m_acceptor.async_accept(tcpSocket->sock(),
-									[this, tcpSocket](boost::system::error_code ec) {
-										on_accept(tcpSocket, ec);
-									}
+				[this, tcpSocket](boost::system::error_code ec) {
+					on_accept(tcpSocket, ec);
+				}
 			);
-		} else {
+		}
+		else {
 			m_acceptor.close();
 		}
 	}
@@ -53,16 +55,17 @@ namespace server {
 
 		if (!ec) {
 			m_clientManager->handle_new_socket(sock);
-			errors::error_code e;
+			error::code e;
 			sock->start(e);
 
 			if (e) {
 				DEBUG_PRINT(e);
 			}
-		} else {
+		}
+		else {
 			sock->close();
 			delete sock;
-			DEBUG_PRINT("Error occured! Error code = ", ec.value(), ". Message: ", ec.message());
+			DEBUG_PRINT("Error occured! Error value = ", ec.value(), ". Message: ", ec.message());
 		}
 	}
 

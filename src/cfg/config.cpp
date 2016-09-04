@@ -2,14 +2,14 @@
 // Created by hacketo on 12/08/16.
 //
 
-#include "server/config.h"
+#include "cfg/config.h"
 
-
+// Todo: see http://www.boost.org/doc/libs/1_61_0/doc/html/property_tree.html
 namespace config {
 
 	std::string SERVER_NAME = "ServerName";
 
-	std::string HTTP_ORIGIN = "http://red.hacketo.lan";
+	std::string HTTP_ORIGIN = "http_base://red.hacketo.lan";
 
 
 	//std::string WS_LOCATION = "ws://127.0.0.1:9876"; computed

@@ -12,8 +12,9 @@
 #include "sockets/server/socket.h"
 #include "client/clientmanager.h"
 
-namespace server{
+class Server{
 
+public:
 	enum Type {
 		TCP, UDP, WS
 	};
@@ -22,21 +23,17 @@ namespace server{
 		std::vector<std::pair<Type, short>> protocols;
 	};
 
-	class Server{
+	Server(ServerInfos& infos, Manager *m);
 
-	public:
-		Server(ServerInfos& infos, Manager *m);
+	void start(error::code& ec);
 
-		void start(errors::error_code& ec);
+	void close();
+private:
 
-		void close();
-	private:
+	std::vector<std::unique_ptr<sockets::server::ServerSocket>> m_sockets;
 
-		std::vector<std::unique_ptr<sockets::server::ServerSocket>> m_sockets;
+	ClientManager::u_ptr m_clientManager;
 
-		ClientManager::u_ptr m_clientManager;
-
-	};
-}
+};
 
 #endif // WS_SERVER_H

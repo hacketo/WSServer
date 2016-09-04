@@ -11,7 +11,7 @@
 
 namespace sockets{
 
-	class Udp : public Socket<processor::udp> {
+	class Udp : public Socket {
 
 	public:
 		Udp(asio::ip::udp::socket* socket,asio::ip::udp::endpoint ep);
@@ -20,7 +20,7 @@ namespace sockets{
 		 * Start the socket job , read and write
 		 * @return
 		 */
-		virtual void start(errors::error_code& ec);
+		virtual void start(error::code& ec);
 
 		/**
 		 * Close the socket
@@ -34,7 +34,7 @@ namespace sockets{
 		 * @param ec
 		 * @return
 		 */
-		size_t write(const asio::mutable_buffer& buffer, errors::error_code &ec);
+		size_t write(const asio::const_buffers_1& buffer, error::code &ec);
 
 	private:
 		asio::ip::udp::endpoint m_endpoint;

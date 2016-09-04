@@ -12,16 +12,25 @@ namespace sockets {
 
 namespace processor {
 
-	class tcp : public processor<Tcp> {
+	class tcp : public processor {
 	public:
 		tcp(Tcp *tcp_sock);
 
-		void process();
+		void async_read();
+
 
 		/**
 		 * Call tcp_sock -> read_loop()
 		 */
 		void read_loop();
+
+	protected:
+
+		virtual void on_read(const boost::system::error_code &ec, std::size_t bytes_read);
+
+
+		Tcp *m_sock;
+
 	};
 
 }

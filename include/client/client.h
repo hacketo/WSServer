@@ -42,6 +42,7 @@ class ClientManager;
 
 class Client : public boost::enable_shared_from_this<Client> {
 	friend class ClientManager;
+
 #ifdef USE_SESSIONS
 	friend class ext::sessions::SessionManager;
 #endif
@@ -52,7 +53,7 @@ public:
 	/**
 	 * Envoi en message au client, thread safe
 	 */
-	size_t send(std::string& message, errors::error_code& ec);
+	size_t send(std::string& message, error::code& ec);
 
 	bool isAlive();
 
@@ -71,14 +72,14 @@ public:
 	 * @param client
 	 * @return
 	 */
-	bool on_handshakerecv(protocol::http::header* handshake, errors::error_code& e);
+	bool on_handshakerecv(protocol::http::header* handshake, error::code& e);
 	/**
 	 * Appelé lorsqu'un le handshake à été recu et parsé
 	 * Si la méthode retourne False le client sera déconnecté
 	 * @param client
 	 * @return
 	 */
-	bool on_handshakesend(protocol::http::header* handshake, errors::error_code& e);
+	bool on_handshakesend(protocol::http::header* handshake, error::code& e);
 
 	/**
 	 * Appelé lorsqu'un client est prêt à communiquer avec le serveur
@@ -134,7 +135,7 @@ public:
 	u_int32_t flag;
 
 
-protected:
+private:
 	void closeSocket();
 
 	/**
@@ -151,10 +152,11 @@ protected:
 
 	ClientManager* clientManager;
 
+	//todo: udp .reset(new sockets::Udp)
 	sockets::Socket::u_ptr m_socket;
 
 #ifdef USE_MODULES
-	ModulesController::u_ptr modulesController;
+	ModulesController::u_ptr m_modulesController;
 #endif
 
 #ifdef USE_SESSIONS

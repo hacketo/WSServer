@@ -9,9 +9,21 @@ namespace sockets {
 namespace processor {
 
 
-	udp::udp(Udp* sock): processor<Udp>(sock){
+	udp::udp(Udp* sock): processor(sock){
 
 	}
 
+	void udp::on_read(const boost::system::error_code &e, std::size_t bytes_read){
+		processor::on_read(e, bytes_read);
+		if(e){
+			if (e.value() == boost::asio::error::eof) {
+				m_sock->close();
+			}
+			DEBUG_PRINT("Error while recv : ", e.message());
+		}
+		else{
+			read_loop();
+		}
+	}
 }
 }

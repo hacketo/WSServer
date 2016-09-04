@@ -23,7 +23,7 @@ namespace server {
 		 * Start the client listening
 		 * @return
 		 */
-		virtual void start(errors::error_code& ec);
+		virtual void start(error::code& ec);
 
 		/**
 		 * Close the socket

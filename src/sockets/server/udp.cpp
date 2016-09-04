@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 #include "sockets/server/udp.h"
 #include "client/client.h"
+#include "client/clientmanager.h"
 
 namespace sockets {
 namespace server {
@@ -15,12 +16,12 @@ namespace server {
 
 	}
 
-	void Udp::start(errors::error_code& ec) {
+	void Udp::start(error::code& ec) {
 		boost::system::error_code e;
 		m_socket.bind(m_endpoint, e);
 
 		if (e) {
-			ec = errors::error_code("Failed to bind the sockets.", e);
+			error::get_code(ec, error::SOCKET_CANT_BIND, "Failed to bind the sockets.", e);
 		}
 		else {
 			std::string ip = boost::lexical_cast<std::string>(m_endpoint);
@@ -44,14 +45,17 @@ namespace server {
 
 			m_socket.async_receive_from(buf, sender_endpoint,
 				[this, sender_endpoint](boost::system::error_code ec, std::size_t bytes_recvd) {
-					if (!ec && bytes_recvd > 0) {
-
-						sockets::Udp *s = new sockets::Udp(&m_socket, sender_endpoint);
-
-						m_clientManager->handle_new_socket(s);
-					} else {
-						loop();
+					if (!ec) {
+						if (bytes_recvd > 0) {
+							m_clientManager->handle_new_socket(&m_socket, sender_endpoint);
+						}
 					}
+					else {
+						error::code e;
+						error::get_code(e, error::SOCKET_UDP_RECV_ERROR, "Udp::loop Error", ec);
+						DEBUG_PRINT(e);
+					}
+					loop();
 			});
 		}
 		else{

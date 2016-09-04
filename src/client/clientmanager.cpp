@@ -36,16 +36,24 @@ void ClientManager::init(){
 #endif
 }
 
-void ClientManager::handle_new_socket(sockets::Udp* socket){
-	u_int32_t client_id = Client_ID;
-	Client::s_ptr client = Client::s_ptr(new Client<sockets::Udp>(this, client_id, socket));
-	clients[client_id] = client;
-	Client_ID++;
+void ClientManager::handle_new_socket(asio::ip::udp::socket *socket, asio::ip::udp::endpoint endpoint) {
+	sockets::Udp *s = new sockets::Udp(socket, endpoint);
+
 }
 
+
 void ClientManager::handle_new_socket(sockets::Tcp* socket){
+	create_client(socket);
+}
+
+void ClientManager::create_client(sockets::Socket* socket){
 	u_int32_t client_id = Client_ID;
-	clients[client_id] = Client::s_ptr(new Client<sockets::Tcp>(this, client_id, socket));
+	Client::s_ptr client = Client::s_ptr(new Client(this, client_id, socket));
+
+#ifdef USE_MODULES
+	client->m_modulesController = ModulesController::create(client.get(), getModulesManager());
+#endif
+	clients[client_id] = client;
 	Client_ID++;
 }
 
@@ -57,14 +65,14 @@ bool ClientManager::on_enter(Client *client) {
 	return manager->onEnter(client);
 }
 
-bool ClientManager::on_handshakerecv(Client *client, protocol::http::header* handshake, errors::error_code& e){
+bool ClientManager::on_handshakerecv(Client *client, protocol::http::header* handshake, error::code& e){
 #ifdef USE_SESSIONS
 	sessionManager->start_session(client, handshake, e);
 #endif
 	return manager->onHandshakeRecv(client, handshake);
 }
 
-bool ClientManager::on_handshakesend(Client *client, protocol::http::header* handshake, errors::error_code& e){
+bool ClientManager::on_handshakesend(Client *client, protocol::http::header* handshake, error::code& e){
 #ifdef USE_SESSIONS
 	sessionManager->update_handshake(client, handshake, e);
 #endif
@@ -101,7 +109,7 @@ void ClientManager::on_close(Client *client) {
 #endif
 
 #ifdef USE_MODULES
-	client->modulesController->unregisterAll();
+	client->m_modulesController->unregisterAll();
 #endif
 
 	//@todo check lock block

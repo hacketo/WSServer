@@ -11,22 +11,22 @@
 
 namespace sockets {
 namespace processor {
-	class http : public tcp {
+	class http_base : public tcp {
 
 	public:
 		enum State {
 			NONE, READ_HEADER
 		};
 
-		http(Tcp *tcp_sock);
-
+		http_base(Tcp *tcp_sock);
+		~http_base();
 	protected:
 
 		protocol::http::header* headers;
 		/**
 		 * Called when we have data from client
 		 */
-		virtual void on_receive(errors::error_code& ec);
+		virtual void on_receive(error::code& ec);
 
 		char state;
 	};

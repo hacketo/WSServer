@@ -33,7 +33,7 @@ namespace modules {
 		 * @param data
 		 * @return
 		 */
-		virtual void handle(Client *client, std::string& action, GenericValue *data);
+		virtual void handle(Client *client, std::string& action, GenericValue *data) = 0;
 
 		base_module *module;
 	};
@@ -71,19 +71,17 @@ namespace modules {
 
 		bool isAlive() const;
 
-
 		client_iterator begin();
 		client_iterator end();
 
 		uint32_t nb_clients_registered();
 	protected:
+
+		virtual ModuleClientController* getNewClientController() = 0;
+		virtual void join(error::code& ec) = 0;
+
 		bool alive;
-
-		virtual ModuleClientController* getNewClientController();
-
 		std::map<uint32_t, Client *> clients;
-
-		virtual errors::error_code join();
 
 	private:
 		uint64_t id = 0;

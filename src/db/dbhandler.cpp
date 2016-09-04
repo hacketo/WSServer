@@ -25,10 +25,10 @@ bool DbHandler::is_error() {
 	return error;
 }
 
-errors::error_code DbHandler::open_database(const char* filename) {
+error::code DbHandler::open_database(const char* filename) {
 
 	int  rc;
-	errors::error_code e;
+	error::code e;
 	/* Open database */
 	this->filename = filename;
 
@@ -37,12 +37,12 @@ errors::error_code DbHandler::open_database(const char* filename) {
 	path += filename;
 
 	if(!boost::filesystem::exists(path)) {
-		e = errors::get_error(errors::DB_NEED_CREATE_TABLE);
+		error::get_code(e, error::DB_NEED_CREATE_TABLE);
 	}
 
 	rc = sqlite3_open(path.c_str(), &database);
 	if (rc) {
-		e = errors::get_error("DbHandler", errors::DB_CANT_OPEN, "Can't open database: %s\n", get_dberror());
+		error::get_code(e, "DbHandler", error::DB_CANT_OPEN, "Can't open database: %s\n", get_dberror());
 	}
 
 	return e;
@@ -59,9 +59,9 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName){
 
 
 
-errors::error_code DbHandler::exec(const char* sql){
+error::code DbHandler::exec(const char* sql){
 	char *zErrMsg = 0;
-	errors::error_code e;
+	error::code e;
 
 
 	/* Create SQL statement
@@ -75,14 +75,14 @@ errors::error_code DbHandler::exec(const char* sql){
 	/* Execute SQL statement */
 	int  rc = sqlite3_exec(database, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		e = errors::get_error("DbHandler", errors::SQL_ERROR, "SQL error_code: %s\n", zErrMsg);
+		error::get_code(e, "DbHandler", error::SQL_ERROR, "SQL value: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
 	return e;
 }
 
-errors::error_code DbHandler::close(){
-	errors::error_code e;
+error::code DbHandler::close(){
+	error::code e;
 
 	sqlite3_close(database);
 

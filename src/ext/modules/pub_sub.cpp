@@ -13,11 +13,11 @@ namespace pubsub {
 
 
 	OutgoingMessagesWorker::OutgoingMessagesWorker(Pub_sub *pubsub, size_t size) :
-			WorkerDeQue<Frame*>(size), pubsub(pubsub){
+			WorkerDeQue<protocol::frame::Frame*>(size), pubsub(pubsub){
 	}
 
-	void OutgoingMessagesWorker::do_job(Frame* frame){
-		frame::encode(frame);
+	void OutgoingMessagesWorker::do_job(protocol::frame::Frame* frame){
+		protocol::frame::encode(frame);
 
 		assert(frame->encoded);
 
@@ -65,11 +65,9 @@ namespace pubsub {
 		return new Pub_subClientController(this);
 	}
 
-	errors::error_code Pub_sub::join(){
+	void Pub_sub::join(error::code& ec){
 		alive = false;
 		worker->join(true);
-
-		return errors::error_code();
 	}
 
 

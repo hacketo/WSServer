@@ -5,7 +5,7 @@
 #include "protocol/http.h"
 #include "util/base64.h"
 #include "util/sha1.h"
-#include "server/config.h"
+#include "cfg/config.h"
 #include "util/date.h"
 
 
@@ -73,36 +73,36 @@ namespace http {
 		STRING_TO_UINT8(s,*buffer, size);
 	}
 
-	void validate_header(http::header *handshake, errors::error_code& error) {
+	void validate_header(http::header *handshake, error::code& error) {
 
 		http_header &header = handshake->headers;
 
 		if (header.size() == 0) {
-			error = errors::get_error(errors::HTTP_NO_HEADER, "No Header to validate");
+			error::get_code(error, error::HTTP_NO_HEADER, "No Header to validate");
 			return;
 		}
 
 		for (auto& i : REQUIRED_FIELDS) {
 			if (!MAP_CONTAINS_KEY(header, i)) {
-				error = errors::get_error(errors::WS_HEADER_MISSING_REQUIRED_FIELD, "Missing field :%s", i);
+				error::get_code(error, error::WS_HEADER_MISSING_REQUIRED_FIELD, "Missing field :%s", i);
 				return;
 			}
 		}
 
 		if (header[FIELD_WS_VERSION].compare(std::to_string(config::WS_VERSION)) != 0){
-			error = errors::get_error(errors::WS_HEADER_WRONG_WS_VERSION, "Wrong ws version :%s", header[FIELD_WS_VERSION]);
+			error::get_code(error, error::WS_HEADER_WRONG_WS_VERSION, "Wrong ws version :%s", header[FIELD_WS_VERSION]);
 			return;
 		}
 		if (header[FIELD_ORIGIN].compare(config::HTTP_ORIGIN) != 0){
-			error = errors::get_error(errors::WS_HEADER_WRONG_ORIGIN, "Wrong origin :%s", header[FIELD_ORIGIN]);
+			error::get_code(error, error::WS_HEADER_WRONG_ORIGIN, "Wrong origin :%s", header[FIELD_ORIGIN]);
 			return;
 		}
 		if (header[FIELD_HOST].compare(get_host()) != 0){
-			error = errors::get_error(errors::WS_HEADER_WRONG_HOST, "Wrong host :%s", header[FIELD_HOST]);
+			error::get_code(error, error::WS_HEADER_WRONG_HOST, "Wrong host :%s", header[FIELD_HOST]);
 			return;
 		}
 		if (header[FIELD_WS_KEY].size() == 0){
-			error = errors::get_error(errors::WS_HEADER_WS_KEY_EMPTY, "Ws key empty");
+			error::get_code(error, error::WS_HEADER_WS_KEY_EMPTY, "Ws key empty");
 			return;
 		}
 
@@ -124,17 +124,17 @@ namespace http {
 		handshake->cookies[key] = ss.str();
 	}
 
-	void parse_header(const std::string &header_str, http::header* handshake, errors::error_code& error) {
+	void parse_header(const std::string &header_str, http::header* handshake, error::code& error) {
 
 		http_header &headers = handshake->headers;
 
 		if (header_str.length() == 0){
-			error = errors::get_error(errors::HTTP_NO_HEADER, "Header vide");
+			error::get_code(error, error::HTTP_NO_HEADER, "Header vide");
 			return;
 		}
 
 		if (header_str.length() > 5000){
-			error = errors::get_error(errors::HTTP_HEADER_TOO_LONG, "Header Trop long");
+			error::get_code(error, error::HTTP_HEADER_TOO_LONG, "Header Trop long");
 			return;
 		}
 
@@ -150,7 +150,7 @@ namespace http {
 		size_t len = linedata.size();
 
 		if (len != 3){
-			error = errors::get_error(errors::HTTP_HEADER_READ_FAILED, "Header missing HTTP definition");
+			error::get_code(error, error::HTTP_HEADER_READ_FAILED, "Header missing HTTP definition");
 			return;
 		}
 
@@ -186,7 +186,7 @@ namespace http {
 					headers[field_key] = linedata[1];
 				}
 				else{
-					error = errors::get_error(errors::HTTP_HEADER_INVALID_KV, "Invalid key/value :%s", vec[i]);
+					error::get_code(error, error::HTTP_HEADER_INVALID_KV, "Invalid key/value :%s", vec[i]);
 					return;
 				}
 			}

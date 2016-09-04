@@ -7,12 +7,12 @@
 
 #include <string>
 #include <vector>
-#include "server/config.h"
+#include "cfg/config.h"
 #include "rapidjson/document.h"
 #include "rapidjson/allocators.h"
 #include "frame.h"
 #include "util/genericvalue.h"
-#include "server/errors.h"
+#include "error/error.h"
 
 namespace protocol {
 namespace packet{
@@ -125,9 +125,9 @@ namespace packet{
 	 * @param json
 	 * @return
 	 */
-	void parse(Packet* packet, std::string& valueToParse, errors::error_code& error);
-	void parseFromJSON(Packet* packet, rapidjson::Value* object, errors::error_code& error);
-	void parseFromJSON(Packet* packet, std::string& json, errors::error_code& error);
+	void parse(Packet* packet, std::string& valueToParse, error::code& error);
+	void parseFromJSON(Packet* packet, rapidjson::Value* object, error::code& error);
+	void parseFromJSON(Packet* packet, std::string& json, error::code& error);
 
 }
 }

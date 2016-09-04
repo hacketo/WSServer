@@ -6,7 +6,7 @@
 #define WSSERVERLIB_SERVER_SOCKET_H
 
 
-#include <server/errors.h>
+#include <error/error.h>
 #include <boost/asio.hpp>
 #include <atomic>
 
@@ -26,7 +26,7 @@ namespace server {
 		 * Start the possibility of this socket to receive messages
 		 * @return
 		 */
-		virtual void start(errors::error_code &ec);
+		virtual void start(error::code &ec);
 
 		ServerSocket(ClientManager *clientManager);
 

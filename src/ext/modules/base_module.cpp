@@ -2,7 +2,7 @@
 // Created by hacketo on 14/08/16.
 //
 
-#include "server/config.h"
+#include "cfg/config.h"
 
 #include "ext/modules/base_module.h"
 
@@ -13,9 +13,10 @@ namespace ext {
 namespace modules {
 //<editor-fold desc="ModuleClientController">
 
-	ModuleClientController::ModuleClientController(base_module *module) : module(module) {}
+	ModuleClientController::ModuleClientController(base_module *module) : module(module) {
 
-	void ModuleClientController::handle(Client *client, std::string& action, GenericValue *data) {}
+	}
+
 
 //</editor-fold>
 
@@ -67,7 +68,6 @@ namespace modules {
 		return clients.end();
 	}
 
-	errors::error_code base_module::join(){}
 
 //</editor-fold>
 

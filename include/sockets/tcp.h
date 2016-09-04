@@ -11,7 +11,7 @@
 
 namespace sockets{
 
-	class Tcp : public Socket<processor::tcp> {
+	class Tcp : public Socket {
 	public:
 		Tcp(asio::io_service& io);
 
@@ -19,7 +19,7 @@ namespace sockets{
 		 * Start the socket job , read and write
 		 * @return
 		 */
-		void start(errors::error_code& ec);
+		void start(error::code& ec);
 
 		/**
 		 * Close the socket
@@ -28,9 +28,9 @@ namespace sockets{
 		void close();
 
 
-		size_t send(std::string &message, errors::error_code& ec);
+		size_t send(std::string &message, error::code& ec);
 		template <typename BufferSequence>
-		size_t send(BufferSequence& buffer, size_t size, errors::error_code &ec);
+		size_t send(BufferSequence& buffer, size_t size, error::code &ec);
 
 
 		/**
@@ -39,7 +39,7 @@ namespace sockets{
 		 * @param ec
 		 * @return
 		 */
-		size_t write(const asio::mutable_buffer& buffer, errors::error_code &ec);
+		size_t write(const asio::const_buffers_1& buffer, error::code &ec);
 
 		void read_loop();
 
@@ -47,7 +47,6 @@ namespace sockets{
 
 	private:
 		asio::ip::tcp::socket m_socket;
-		processor::processor<Tcp> m_processor;
 
 	};
 

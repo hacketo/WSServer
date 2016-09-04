@@ -13,7 +13,7 @@ namespace sockets {
 
 namespace processor {
 
-	class udp : public processor<Udp>{
+	class udp : public processor{
 	public:
 		udp(Udp *tcp_sock);
 	};

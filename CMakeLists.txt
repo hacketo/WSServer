@@ -2,23 +2,23 @@ cmake_minimum_required(VERSION 3.6.1)
 
 project(WSServerlib)
 
-if(NOT DEFINED USE_MODULES)
+if (NOT DEFINED USE_MODULES)
   set(USE_MODULES 1)
-endif()
-if(NOT DEFINED USE_SESSIONS)
+endif ()
+if (NOT DEFINED USE_SESSIONS)
   set(USE_SESSIONS 1)
-endif()
-if(NOT DEFINED WS_DEBUG)
+endif ()
+if (NOT DEFINED WS_DEBUG)
   set(WS_DEBUG 1)
-endif()
-if(NOT DEFINED PREPROCESS_ONLY)
+endif ()
+if (NOT DEFINED PREPROCESS_ONLY)
   set(PREPROCESS_ONLY 0)
-endif()
+endif ()
 
 
 if (CMAKE_BUILD_TYPE EQUAL "Debug")
   set(ERROR_HANDLER 1)
-endif()
+endif ()
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -52,96 +52,98 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 
 set(HEADER_FILES
-  include/debug.h
+        include/debug.h
+        include/server.h
 
-  include/client/client.h
-  include/client/clientmanager.h
-  include/client/manager.h
-  include/client/statebased_manager.h
+        include/cfg/config.h
 
-  include/db/dbhandler.h
+        include/client/events.h
+        include/client/client.h
+        include/client/clientmanager.h
+        include/client/manager.h
+        include/client/statebased_manager.h
 
-  include/ext/modules/client_timer.h
-  include/ext/modules/pub_sub.h
-  include/ext/modules/base_module.h
-  include/ext/sessions/sessionmanager.h
+        include/db/dbhandler.h
 
-  include/mocks/client_mock.h
-  include/mocks/socket_mock.h
+        include/error/error.h
 
-  include/protocol/constant.h
-  include/protocol/frame.h
-  include/protocol/http.h
-  include/protocol/packet.h
-  include/protocol/opcode.h
-  include/protocol/statuscode.h
+        include/ext/modules/client_timer.h
+        include/ext/modules/pub_sub.h
+        include/ext/modules/base_module.h
+        include/ext/sessions/sessionmanager.h
 
-  include/server/config.h
-  include/server/errors.h
-  include/server/server.h
+        include/mocks/client_mock.h
+        include/mocks/socket_mock.h
 
-  include/sockets/socket.h
-  include/sockets/tcp.h
-  include/sockets/udp.h
-  include/sockets/processor/processor.h
-  include/sockets/processor/http.h
-  include/sockets/processor/tcp.h
-  include/sockets/processor/udp.h
-  include/sockets/processor/websocket.h
-  include/sockets/server/socket.h
-  include/sockets/server/tcp.h
-  include/sockets/server/udp.h
+        include/protocol/constant.h
+        include/protocol/frame.h
+        include/protocol/http.h
+        include/protocol/packet.h
+        include/protocol/opcode.h
+        include/protocol/statuscode.h
 
-  include/util/algo.h
-  include/util/base64.h
-  include/util/date.h
-  include/util/exception.h
-  include/util/genericvalue.h
-  include/util/sha1.h
-  include/util/safedeque.h
-  include/util/timer.h
-  include/util/worker.h)
+        include/sockets/socket.h
+        include/sockets/tcp.h
+        include/sockets/udp.h
+        include/sockets/processor/processor.h
+        include/sockets/processor/http_base.h
+        include/sockets/processor/tcp.h
+        include/sockets/processor/udp.h
+        include/sockets/processor/websocket.h
+        include/sockets/server/socket.h
+        include/sockets/server/tcp.h
+        include/sockets/server/udp.h
+
+        include/util/algo.h
+        include/util/base64.h
+        include/util/date.h
+        include/util/exception.h
+        include/util/genericvalue.h
+        include/util/sha1.h
+        include/util/safedeque.h
+        include/util/timer.h
+        include/util/worker.h)
 
 
 set(SOURCE_FILES
-  src/debug.cpp
+        src/debug.cpp
+        src/server.cpp
 
-  src/client/client.cpp
-  src/client/clientmanager.cpp
-  src/client/manager.cpp
-  src/client/statebased_manager.cpp
+        src/cfg/config.cpp
 
-  src/db/dbhandler.cpp
+        src/client/events.cpp
+        src/client/client.cpp
+        src/client/clientmanager.cpp
+        src/client/manager.cpp
+        src/client/statebased_manager.cpp
 
-  src/protocol/frame.cpp
-  src/protocol/http.cpp
-  src/protocol/packet.cpp
-  src/protocol/opcode.cpp
+        src/db/dbhandler.cpp
 
-  src/server/config.cpp
-  src/server/errors.cpp
-  src/server/server.cpp
+        src/error/error.cpp
 
-  src/sockets/socket.cpp
-  src/sockets/tcp.cpp
-  src/sockets/udp.cpp
-  src/sockets/processor/processor.cpp
-  src/sockets/processor/http.cpp
-  src/sockets/processor/tcp.cpp
-  src/sockets/processor/udp.cpp
-  src/sockets/processor/websocket.cpp
-  src/sockets/server/socket.cpp
-  src/sockets/server/tcp.cpp
-  src/sockets/server/udp.cpp
+        src/protocol/frame.cpp
+        src/protocol/http.cpp
+        src/protocol/packet.cpp
+        src/protocol/opcode.cpp
 
-  src/util/base64.cpp
-  src/util/date.cpp
-  src/util/sha1.cpp
-  src/util/timer.cpp
-  src/util/genericvalue.cpp
-  src/util/worker.cpp
+        src/sockets/socket.cpp
+        src/sockets/tcp.cpp
+        src/sockets/udp.cpp
+        src/sockets/processor/processor.cpp
+        src/sockets/processor/http_base.cpp
+        src/sockets/processor/tcp.cpp
+        src/sockets/processor/udp.cpp
+        src/sockets/processor/websocket.cpp
+        src/sockets/server/socket.cpp
+        src/sockets/server/tcp.cpp
+        src/sockets/server/udp.cpp
 
-  )
+        src/util/base64.cpp
+        src/util/date.cpp
+        src/util/sha1.cpp
+        src/util/timer.cpp
+        src/util/genericvalue.cpp
+        src/util/worker.cpp)
 
 set(MODULES_FILES src/ext/modules/client_timer.cpp
         src/ext/modules/pub_sub.cpp
@@ -159,8 +161,6 @@ endif ()
 set(SERVER_FILES ${SOURCE_FILES} ${HEADER_FILES})
 
 add_library(${PROJECT_NAME} SHARED ${SERVER_FILES})
-
-
 
 
 if (USE_MODULES)

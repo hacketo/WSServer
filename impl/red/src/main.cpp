@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
-#include "server/server.h"
+#include "server.h"
 #include "client/statebased_manager.h"
 #include "RED.h"
 

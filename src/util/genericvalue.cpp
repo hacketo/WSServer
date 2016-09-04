@@ -6,6 +6,7 @@
 #include <debug.h>
 #include "util/genericvalue.h"
 
+// Todo: see http://www.boost.org/doc/libs/1_61_0/doc/html/property_tree.html
 
 GenericValue::GenericValue() : initialized(false){}
 
@@ -44,27 +45,34 @@ GenericValue* GenericValue::parse(rapidjson::Value *value) {
 	if (value->IsString()) {
 		std::string v = value->GetString();
 		packetValue = new StringValue(v);
-	} else if (value->IsNull()) {
+	}
+	else if (value->IsNull()) {
 		packetValue = new NullValue();
-	} else if (value->IsInt()) {
+	}
+	else if (value->IsInt()) {
 		packetValue = new IntValue(value->GetInt());
-	} else if (value->IsFloat()) {
+	}
+	else if (value->IsFloat()) {
 		packetValue = new FloatValue(value->GetFloat());
-	} else if (value->IsBool()) {
+	}
+	else if (value->IsBool()) {
 		packetValue = new BoolValue(value->GetBool());
-	} else if (value->IsObject()) {
+	}
+	else if (value->IsObject()) {
 		packetValue = new ObjectValue();
 		for (rapidjson::Value::MemberIterator itr = value->MemberBegin();
 			 itr != value->MemberEnd(); ++itr) {
 			std::string v = itr->name.GetString();
 			packetValue->set(v, parse(&itr->value));
 		}
-	} else if (value->IsArray()) {
+	}
+	else if (value->IsArray()) {
 		packetValue = new ArrayValue();
 		for (rapidjson::Value::ValueIterator itr = value->Begin(); itr != value->End(); ++itr) {
 			packetValue->add(parse(itr));
 		}
-	} else {
+	}
+	else {
 		packetValue = new GenericValue();
 	}
 

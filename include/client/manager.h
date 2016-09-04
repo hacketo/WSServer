@@ -5,7 +5,7 @@
 #ifndef SERVER_MANAGER_H
 #define SERVER_MANAGER_H
 
-#include "server/config.h"
+#include "cfg/config.h"
 #include "protocol/frame.h"
 #include "protocol/packet.h"
 #include "protocol/http.h"

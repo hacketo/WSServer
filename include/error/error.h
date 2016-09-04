@@ -11,36 +11,38 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-namespace errors{
+namespace error{
 
-	class error_code{
+	class code{
 	public:
 
-
-		uint16_t code;
+		uint16_t value;
 		std::string msg;
 		std::string master;
 
-		error_code();
-		error_code(std::string m, const boost::system::error_code& ec);
+		code();
 
-		// true if no error_code
+		// true if no value
 		bool operator!() const BOOST_SYSTEM_NOEXCEPT {
-			return code == 0;
+			return value == 0;
 		}
-		// true if no error_code
+		// true if no value
 		operator bool () const BOOST_SYSTEM_NOEXCEPT {
-			return code != 0;
+			return value != 0;
 		}
 	};
 
-	std::ostream & operator<<(std::ostream& str, const error_code& v);
+	std::ostream & operator<<(std::ostream& str, const code& v);
 
 	extern bool handler_init;
 
-	enum code: uint16_t{
+	enum _: uint16_t{
 
 		OK = 0,
+
+		SOCKET_CANT_BIND = 10,
+		SOCKET_TCP_ACCEPT_ERROR = 11,
+		SOCKET_UDP_RECV_ERROR = 12,
 
 		SOCKET_ALREADY_BINDED = 30,
 		SOCKET_BUFFER_INCOMPLETE = 31,
@@ -84,11 +86,14 @@ namespace errors{
 
 	};
 
-	error_code get_error(uint16_t code);
-	error_code get_error(uint16_t code, std::string msg);
-	error_code get_error(uint16_t code, std::string msg, std::string tokenValue);
-	error_code get_error(const std::string master, uint16_t code, const std::string msg);
-	error_code get_error(const std::string master, uint16_t code, const std::string msg , const std::string tokenValue);
+	void get_code(code &c, uint16_t v);
+	void get_code(code &c, uint16_t v, const std::string msg);
+	void get_code(code &c, uint16_t v, const std::string msg, const boost::system::error_code &ec);
+	void get_code(code &c, uint16_t v, const std::string msg, std::string tokenValue);
+
+	void get_code(code &c, const std::string master, uint16_t v, const std::string msg);
+	void get_code(code &c, const std::string master, uint16_t v, const std::string msg, const boost::system::error_code &ec);
+	void get_code(code &c, const std::string master, uint16_t v, const std::string msg, const std::string tokenValue);
 
 	void init_handler();
 }

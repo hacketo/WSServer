@@ -12,7 +12,7 @@ namespace server {
 			m_clientManager(clientManager) {
 	}
 
-	void ServerSocket::start(errors::error_code &ec) {
+	void ServerSocket::start(error::code &ec) {
 		m_started.store(true);
 		loop();
 	}

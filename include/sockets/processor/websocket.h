@@ -6,12 +6,12 @@
 #define WSSERVERLIB_PROCESSOR_WS_H
 
 
-#include "http.h"
+#include "http_base.h"
 
 namespace sockets {
 namespace processor {
 
-	class websocket : public http {
+	class websocket : public http_base {
 
 	public:
 		websocket(Tcp *tcp_sock);
@@ -20,7 +20,7 @@ namespace processor {
 		/**
 		 * Called when we have data from client
 		 */
-		virtual void on_receive(errors::error_code& ec);
+		virtual void on_receive(error::code& ec);
 
 
 		/**
@@ -28,7 +28,7 @@ namespace processor {
 		 * @param ec
 		 * @return
 		 */
-		virtual size_t send(std::string& msg, errors::error_code &ec);
+		virtual size_t send(std::string& msg, error::code &ec);
 
 	private:
 		void process_http_handshake();

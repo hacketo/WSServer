@@ -15,6 +15,7 @@ namespace sockets {
 	Socket::Socket() {
 		m_closed.store(false);
 		m_clientBinded.store(false);
+		m_procBinded.store(false);
 	}
 
 
@@ -22,13 +23,23 @@ namespace sockets {
 		return m_ip;
 	}
 
-	void Socket::bind_client(Client* c, errors::error_code& ec) {
+	void Socket::bind_client(Client* c, error::code& ec) {
 		if (!m_clientBinded.load()){
 			m_client = c;
 			m_clientBinded.store(true);
 		}
 		else{
-			ec = errors::get_error("Socket",errors::SOCKET_ALREADY_BINDED, "Can't bind this socket to a new client");
+			error::get_code(ec, "Socket", error::SOCKET_ALREADY_BINDED, "Can't bind this socket to a new client");
+		}
+	}
+
+	void Socket::bind_processor(processor::processor *p, error::code& ec){
+		if (!m_procBinded.load()){
+			m_processor = p;
+			m_procBinded.store(true);
+		}
+		else{
+			error::get_code(ec, "Socket", error::SOCKET_ALREADY_BINDED, "Can't bind this socket to a new client");
 		}
 	}
 
@@ -38,7 +49,7 @@ namespace sockets {
 	}
 
 
-	void Socket::start(errors::error_code& ec) {
+	void Socket::start(error::code& ec) {
 		m_client->on_enter();
 	}
 

@@ -6,7 +6,7 @@
 #define SERVER_DATABASEHANDLER_H
 
 #include <string>
-#include "server/errors.h"
+#include "error/error.h"
 #include <sqlite3.h> 
 
 class DbHandler {
@@ -15,11 +15,11 @@ public:
 	DbHandler();
 	~DbHandler();
 
-	errors::error_code open_database(const char* filename);
-	errors::error_code exec(const char* sql);
+	error::code open_database(const char* filename);
+	error::code exec(const char* sql);
 	const char * get_dberror();
 
-	virtual errors::error_code close();
+	virtual error::code close();
 
 	sqlite3_stmt* make_statement( const char * sql );
 

@@ -8,7 +8,7 @@
 #include <boost/asio.hpp>
 
 
-#include "server/errors.h"
+#include "error/error.h"
 #include "protocol/constant.h"
 #include "processor/processor.h"
 
@@ -18,22 +18,24 @@ using namespace boost;
 
 namespace sockets {
 
+	/**
+	 * Abstract Class that represent a Client Socket
+	 * @see sockets::processor
+	 */
 	class Socket {
-
+		friend class processor::processor;
 	public:
 
 		typedef std::unique_ptr<Socket> u_ptr;
 
 		Socket();
 
-
 		std::string get_ip();
 
-
-		virtual size_t send(std::string &message, errors::error_code& ec) = 0;
+		virtual size_t send(std::string &message, error::code& ec) = 0;
 
 		template <typename BufferSequence>
-		size_t send(BufferSequence& buffer, size_t size, errors::error_code &ec){}
+		size_t send(BufferSequence& buffer, size_t size, error::code &ec){}
 
 		/**
 		 * Close the socket
@@ -52,22 +54,21 @@ namespace sockets {
 		 * @param c
 		 * @param ec
 		 */
-		void bind_client(Client *c, errors::error_code& ec);
+		void bind_client(Client *c, error::code& ec);
+
+		/**
+		 * Attach a processor to that socket
+		 * ec can be equals to errors::SOCKET_ALREADY_BINDED
+		 * @param c
+		 * @param ec
+		 */
+		void bind_processor(processor::processor *p, error::code& ec);
 
 		/**
 		 * Start the socket job , read and write
 		 * @return
 		 */
-		virtual void start(errors::error_code& ec);
-
-		/**
-		 * Write data to the socket, should only be called by processor::send
-		 * @param buffer
-		 * @param ec
-		 * @return
-		 */
-		virtual size_t write(const asio::mutable_buffer& buffers, errors::error_code &ec) = 0;
-
+		virtual void start(error::code& ec);
 
 		/**
 		 * Get the client pointer
@@ -76,11 +77,25 @@ namespace sockets {
 		Client* client();
 
 	protected:
+		/**
+		 * Write data to the socket, should only be called by processor::send
+		 * @param buffer
+		 * @param ec
+		 * @return
+		 */
+		virtual size_t write(const asio::const_buffers_1& buffers, error::code &ec) = 0;
+
+
 		Client* m_client;
 
 		std::string m_ip;
+
 		std::atomic<bool> m_closed;
+
 		std::atomic<bool> m_clientBinded;
+		std::atomic<bool> m_procBinded;
+
+		processor::processor* m_processor;
 	};
 
 }

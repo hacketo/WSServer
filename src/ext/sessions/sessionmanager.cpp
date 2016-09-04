@@ -1,7 +1,7 @@
 //
 // Created by hacketo on 19/08/16.
 //
-#include "server/config.h"
+#include "cfg/config.h"
 
 #include "ext/sessions/sessionmanager.h"
 #include <boost/lexical_cast.hpp>
@@ -20,8 +20,8 @@ InvalidateSessionsWorker::InvalidateSessionsWorker(SessionManager* manager) :
 
 
 }
-errors::error_code InvalidateSessionsWorker::init(){
-	errors::error_code e = sessionDB->open_database();
+error::code InvalidateSessionsWorker::init(){
+	error::code e = sessionDB->open_database();
 
 	if (!e) {
 		m_thread = boost::thread(&InvalidateSessionsWorker::job, this);
@@ -29,7 +29,7 @@ errors::error_code InvalidateSessionsWorker::init(){
 	return e;
 }
 
-
+//todo: transform en async_call(invalidate_session, config::SESSION_TIME)
 void InvalidateSessionsWorker::job(){
 	while(!m_interrupted.load() && manager->alive) {
 		std::map<std::string, Session::u_ptr> &sessions = manager->sessions;
@@ -67,15 +67,15 @@ const std::string SessionManager::COOKIE_NAME = "ws_sid";
 
 SessionManager::SessionManager() : alive(true){
 	invalidateSessionWorker = InvalidateSessionsWorker::create(this);
-	errors::error_code e = invalidateSessionWorker->init();
+	error::code e = invalidateSessionWorker->init();
 
 	if (e){
-		DEBUG_PRINT("Can't start SessionManager error_code : ",e.msg);
+		DEBUG_PRINT("Can't start SessionManager value : ",e.msg);
 		alive = false;
 	}
 
 }
-void SessionManager::start_session(Client* client, protocol::http::header* handshake, errors::error_code& error ){
+void SessionManager::start_session(Client* client, protocol::http::header* handshake, error::code& error ){
 	//Create session / id
 
 	if (handshake->cookies.count(COOKIE_NAME)) {
@@ -102,9 +102,9 @@ void SessionManager::start_session(Client* client, protocol::http::header* hands
 	DEBUG_PRINT("Create Session : ",client->get_id()," - ",s->sessionId);
 }
 
-void SessionManager::update_handshake(Client* client, protocol::http::header* handshake, errors::error_code& error ) {
+void SessionManager::update_handshake(Client* client, protocol::http::header* handshake, error::code& error ) {
 	if (client->session->updateCookie) {
-		http::add_cookie(handshake, COOKIE_NAME, client->session->sessionId, config::SESSION_TIME/1000);
+		protocol::http::add_cookie(handshake, COOKIE_NAME, client->session->sessionId, config::SESSION_TIME/1000);
 
 		client->session->updateCookie = false;
 	}
@@ -174,7 +174,7 @@ void Session::close() {
 	ended = true;
 }
 
-void Session::reopen(http::header* handshake) {
+void Session::reopen(protocol::http::header* handshake) {
 	ended = false;
 	start_time = boost::posix_time::microsec_clock::local_time();
 	end_time = boost::posix_time::ptime();
@@ -202,14 +202,14 @@ std::string Session::getJSONData(){
 SessionDB::SessionDB() : DbHandler() {};
 
 
-errors::error_code SessionDB::open_database() {
+error::code SessionDB::open_database() {
 
 
-	errors::error_code e = DbHandler::open_database("sessions");
+	error::code e = DbHandler::open_database("sessions");
 
 	bool get_id_fromdb = true;
 
-	if (e.code == errors::DB_NEED_CREATE_TABLE) {
+	if (e.value == error::DB_NEED_CREATE_TABLE) {
 
 		const char *sql = "CREATE TABLE SESSIONS("  \
                 "ID Int64 PRIMARY KEY     NOT NULL," \
@@ -255,8 +255,8 @@ errors::error_code SessionDB::open_database() {
 	return e;
 }
 
-errors::error_code SessionDB::saveSession(Session *session, bool ended) {
-	errors::error_code e;
+error::code SessionDB::saveSession(Session *session, bool ended) {
+	error::code e;
 
 	const char *header = session->getHeader();
 	const char *sessionId = session->getSessionID();
@@ -278,7 +278,7 @@ errors::error_code SessionDB::saveSession(Session *session, bool ended) {
 
 	int r = sqlite3_step(stmtSaveClient);
 	if (r != SQLITE_DONE) {
-		e = errors::get_error("DbHandler", errors::SQL_ERROR, "Can't insert session : %s\n", get_dberror());
+		error::get_code(e, "DbHandler", error::SQL_ERROR, "Can't insert session : %s\n", get_dberror());
 	} else {
 		indexSessionSave += 1;
 	}
@@ -287,8 +287,8 @@ errors::error_code SessionDB::saveSession(Session *session, bool ended) {
 	return e;
 }
 
-errors::error_code SessionDB::close() {
-	errors::error_code e;
+error::code SessionDB::close() {
+	error::code e;
 
 	sqlite3_finalize(stmtLastId);
 	sqlite3_finalize(stmtSaveClient);

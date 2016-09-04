@@ -11,7 +11,6 @@
 #include <memory>
 #include <util/worker.h>
 
-using protocol::frame::Frame;
 
 class Client;
 
@@ -20,7 +19,7 @@ namespace modules {
 namespace pubsub {
 	class Pub_sub;
 
-	class OutgoingMessagesWorker : public WorkerDeQue<Frame*> {
+	class OutgoingMessagesWorker : public WorkerDeQue<protocol::frame::Frame*> {
 	public:
 		typedef std::unique_ptr<OutgoingMessagesWorker> u_ptr;
 
@@ -30,7 +29,7 @@ namespace pubsub {
 
 		OutgoingMessagesWorker(Pub_sub *pubsub, size_t size = 50);
 
-		void do_job(Frame * f) override;
+		void do_job(protocol::frame::Frame * f) override;
 
 	private:
 		Pub_sub *pubsub;
@@ -61,7 +60,7 @@ namespace pubsub {
 	protected:
 		OutgoingMessagesWorker::u_ptr worker;
 
-		virtual errors::error_code join() override;
+		virtual void join(error::code& ec) override;
 		virtual ModuleClientController *getNewClientController() override;
 
 	};

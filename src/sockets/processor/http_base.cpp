@@ -2,7 +2,7 @@
 // Created by hacketo on 03/09/16.
 //
 
-#include "sockets/processor/http.h"
+#include "sockets/processor/http_base.h"
 #include "sockets/tcp.h"
 
 #include "debug.h"
@@ -10,9 +10,13 @@
 namespace sockets {
 namespace processor {
 
-	http::http(sockets::Tcp *tcp_sock) : tcp(tcp_sock), state(NONE) {}
+	http_base::http_base(Tcp *tcp_sock) : tcp(tcp_sock), state(NONE) {}
 
-	void http::on_receive(errors::error_code& ec) {
+	http_base::~http_base(){
+		delete headers;
+	}
+
+	void http_base::on_receive(error::code& ec) {
 
 		if (state == State::NONE) {
 

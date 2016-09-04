@@ -13,16 +13,16 @@ namespace sockets {
 	}
 
 
-	void Udp::start(errors::error_code& ec) {
+	void Udp::start(error::code& ec) {
 		Socket::start(ec);
 	}
 
-	size_t Udp::write(const asio::mutable_buffer& buffer, errors::error_code &ec){
+	size_t Udp::write(const asio::const_buffers_1& buffer, error::code &ec){
 		boost::system::error_code e;
 		size_t bytes_written = m_socket->send_to(buffer, m_endpoint, 0, e);
 		if (e){
-			//DEBUG_PRINT("Error occured! Error code = ", e.value(),". Message: " ,e.message());
-			ec = errors::get_error("Udp::write", errors::SEND_ERROR, e.message());
+			//DEBUG_PRINT("Error occured! Error value = ", e.value(),". Message: " ,e.message());
+			error::get_code(ec, "Udp::write", error::SEND_ERROR, e.message());
 		}
 		return bytes_written;
 	}
